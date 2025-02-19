@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class UserController extends ApiController
+class RoleController extends ApiController
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $users=User::all();
-        return $this->showAll($users);
+        $roles = Role::all();
+        return $this->showAll($roles);
     }
 
     /**
@@ -31,29 +31,26 @@ class UserController extends ApiController
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string',
-            'email' => 'required|string|email|unique:users',
-            'password' => 'required|string|min:6',
+            'name' => 'required|unique:roles,name',
         ]);
         $validator->validate();
 
-        $user = new User();
-        $user = $user->create([
+        $role = new Role();
+        $role = $role->create([
             'name' => request()->name,
-            'email' => request()->email,
-            'password' => bcrypt(request()->password),
+            'guard_name' => 'api'
         ]);
-        $user->save();
+        $role->save();
 
-        return $this->showOne($user);
+        return $this->showOne($role);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(User $user)
+    public function show(Role $role)
     {
-        return $this->showOne($user);
+        return $this->showOne($role);
     }
 
     /**
@@ -67,30 +64,26 @@ class UserController extends ApiController
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, Role $role)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
-            'email' => 'required|string|email',
-            'password' => 'required|string|min:6',
         ]);
         $validator->validate();
 
-        $user->update([
+        $role->update([
             'name' => request()->name,
-            'email' => request()->email,
-            'password' => bcrypt($request->password),
         ]);
 
-        return $this->showOne($user);
+        return $this->showOne($role);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user)
+    public function destroy(Role $role)
     {
-        $user->delete();
-        return $this->showOne($user);
+        $role->delete();
+        return $this->showOne($role);
     }
 }
