@@ -11,6 +11,7 @@ use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Traits\ApiResponser;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -46,6 +47,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $exceptions->render(function (AuthenticationException $e, Request $request) {
             return response()->json(['error' => 'No autenticado', 'code' => 401], 401);
+        });
+
+        $exceptions->render(function (ThrottleRequestsException $e, Request $request) {
+            return response()->json(['error' => 'Se ha revasado el numero de solicitudes', 'code' => 429], 429);
         });
 
         $exceptions->render(function (\Throwable $e, Request $request) {

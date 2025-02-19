@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\LogActivityController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 // })->middleware('auth:sanctum');
 
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth','throttle:global'])->group(function () {
     Route::post('register', [AuthController::class,'register'])->withoutMiddleware(['auth']);
     Route::post('login', [AuthController::class,'login'])->withoutMiddleware(['auth']);
     Route::get('me', [AuthController::class,'me']);
@@ -24,5 +25,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('user', UserController::class);
     Route::resource('permission', PermissionController::class);
     Route::resource('role', RoleController::class);
+
+    Route::get('activity', [LogActivityController::class,'index']);
 });
 

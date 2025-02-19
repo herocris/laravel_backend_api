@@ -40,7 +40,7 @@ class AuthController extends ApiController
             'password' => bcrypt(request()->password),
         ]);
         $user->save();
-        $token=Auth::tokenById($user->id);
+        $token = Auth::tokenById($user->id);
         return $this->respondWithToken($token);
     }
 
@@ -50,6 +50,7 @@ class AuthController extends ApiController
         if (! $token = Auth::attempt($credentials)) {
             return response()->json(['error' => 'Credenciales incorrectas'], 401);
         }
+        $this->logAndLoginEvent(Auth::user(), 'iniciado');
 
         return $this->respondWithToken($token);
     }
@@ -62,7 +63,6 @@ class AuthController extends ApiController
     public function me()
     {
         return response()->json(Auth::user());
-
     }
 
     /**
@@ -72,9 +72,9 @@ class AuthController extends ApiController
      */
     public function logout()
     {
+        $this->logAndLoginEvent(Auth::user(), 'cerrado');
         Auth::logout(true);
         return response()->json(['message' => 'Successfully logged out']);
-        //return $this->errorResponse(['message' => 'Successfully logged out'], 200);
     }
 
     /**
@@ -101,5 +101,14 @@ class AuthController extends ApiController
             'token_type' => 'bearer',
             'expires_in' => Auth::factory()->getTTL() * 60
         ]);
+    }
+
+    private function logAndLoginEvent(User $user, String $activity)
+    {
+        activity($user->name)
+            ->causedBy($user)
+            ->event($activity == 'iniciado' ? 'login' : 'logout')
+            ->withProperties(['name' => $user->name, 'email' => $user->email])
+            ->log("El usuario {$user->name} ha {$activity} secion ");
     }
 }

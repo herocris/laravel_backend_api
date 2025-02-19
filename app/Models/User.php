@@ -7,12 +7,15 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Traits\HasRoles;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class User extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable, HasRoles, LogsActivity;
 
 
     /**
@@ -62,5 +65,38 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['name', 'email'])
+            ->logOnlyDirty()
+            ->setDescriptionForEvent(fn(string $eventName) => "Se ha " . eventName($eventName) . " el usuario")
+            ->useLogName(Auth::user()->name);
+        // Chain fluent methods for configuration options
+    }
+
+    private function nombre_evento($evento)
+    {
+        $even = "";
+        switch ($evento) {
+            case 'created':
+                $even = "creado";
+                break;
+            case 'updated':
+                $even = "actualizado";
+                break;
+            case 'deleted':
+                $even = "borrado";
+                break;
+            case 'restored':
+                $even = "restaurado";
+                break;
+            default:
+                # code...
+                break;
+        }
+        return $even;
     }
 }
