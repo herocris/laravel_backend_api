@@ -3,6 +3,11 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Http\Resources\UserCollection;
+use App\Observers\UserObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use App\Http\Resources\UserResource;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -12,12 +17,13 @@ use Spatie\Permission\Traits\HasRoles;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
+#[ObservedBy([UserObserver::class])]
 class User extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasRoles, LogsActivity;
 
-
+    public $resource = UserResource::class;
     /**
      * The attributes that are mass assignable.
      *
@@ -77,26 +83,4 @@ class User extends Authenticatable implements JWTSubject
         // Chain fluent methods for configuration options
     }
 
-    private function nombre_evento($evento)
-    {
-        $even = "";
-        switch ($evento) {
-            case 'created':
-                $even = "creado";
-                break;
-            case 'updated':
-                $even = "actualizado";
-                break;
-            case 'deleted':
-                $even = "borrado";
-                break;
-            case 'restored':
-                $even = "restaurado";
-                break;
-            default:
-                # code...
-                break;
-        }
-        return $even;
-    }
 }

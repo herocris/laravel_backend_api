@@ -2,18 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\User\StorePostRequest;
+use App\Http\Requests\User\UpdatePutRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class UserController extends ApiController
+class UserController extends ApiController implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware("transformInput:" . UserResource::class . "", only: ['store', 'update']),
+        ];
+    }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $users=User::all();
+        $users = User::all();
         return $this->showAll($users);
     }
 
@@ -28,23 +38,10 @@ class UserController extends ApiController
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StorePostRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string',
-            'email' => 'required|string|email|unique:users',
-            'password' => 'required|string|min:6',
-        ]);
-        $validator->validate();
-
-        $user = new User();
-        $user = $user->create([
-            'name' => request()->name,
-            'email' => request()->email,
-            'password' => bcrypt(request()->password),
-        ]);
-        $user->save();
-
+        $validated = $request->validated();
+        $user = User::create($validated);
         return $this->showOne($user);
     }
 
@@ -67,21 +64,10 @@ class UserController extends ApiController
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(UpdatePutRequest $request, User $user)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string',
-            'email' => 'required|string|email',
-            'password' => 'required|string|min:6',
-        ]);
-        $validator->validate();
-
-        $user->update([
-            'name' => request()->name,
-            'email' => request()->email,
-            'password' => bcrypt($request->password),
-        ]);
-
+        $validated=$request->validated();
+        $user->update($validated);
         return $this->showOne($user);
     }
 

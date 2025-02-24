@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::middleware(['auth','throttle:global'])->group(function () {
-    Route::post('register', [AuthController::class,'register'])->withoutMiddleware(['auth']);
     Route::post('login', [AuthController::class,'login'])->withoutMiddleware(['auth']);
     Route::get('me', [AuthController::class,'me']);
     Route::post('logout', [AuthController::class,'logout']);
@@ -26,6 +25,6 @@ Route::middleware(['auth','throttle:global'])->group(function () {
     Route::resource('permission', PermissionController::class);
     Route::resource('role', RoleController::class);
 
-    Route::get('activity', [LogActivityController::class,'index']);
+    Route::get('activity', LogActivityController::class);
 });
 

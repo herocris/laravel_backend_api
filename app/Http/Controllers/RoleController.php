@@ -2,12 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Role\StorePostRequest;
+use App\Http\Requests\Role\UpdatePutRequest;
+use App\Http\Resources\RoleResource;
 use App\Models\Role;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class RoleController extends ApiController
+class RoleController extends ApiController implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware("transformInput:".RoleResource::class."", only: ['store','update']),
+        ];
+    }
     /**
      * Display a listing of the resource.
      */
@@ -28,20 +38,11 @@ class RoleController extends ApiController
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StorePostRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|unique:roles,name',
-        ]);
-        $validator->validate();
-
-        $role = new Role();
-        $role = $role->create([
-            'name' => request()->name,
-            'guard_name' => 'api'
-        ]);
-        $role->save();
-
+        $validated=$request->validated();
+        $role = Role::create($validated);
+        $role->syncPermissions(request()->permissions ?? []);
         return $this->showOne($role);
     }
 
@@ -64,17 +65,11 @@ class RoleController extends ApiController
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Role $role)
+    public function update(UpdatePutRequest $request, Role $role)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string',
-        ]);
-        $validator->validate();
-
-        $role->update([
-            'name' => request()->name,
-        ]);
-
+        $validated=$request->validated();
+        $role->update($validated);
+        $role->syncPermissions(request()->permissions ?? []);
         return $this->showOne($role);
     }
 

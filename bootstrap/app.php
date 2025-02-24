@@ -1,6 +1,6 @@
 <?php
 
-
+use App\Http\Middleware\TransformInput;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
@@ -21,7 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->alias([
+            'transformInput' => TransformInput::class
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
 

@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Activitylog;
 use Illuminate\Http\Request;
-use Spatie\Activitylog\Models\Activity;
+
 
 class LogActivityController extends ApiController
 {
-    public function index()
+    /**
+     * Handle the incoming request.
+     */
+    public function __invoke()
     {
-        $activities=Activity::all();
+        $activities = Activitylog::all();
         return $this->showAll($activities);
     }
 }

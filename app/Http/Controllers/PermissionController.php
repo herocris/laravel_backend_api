@@ -2,12 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Permission\StorePostRequest;
+use App\Http\Requests\Permission\UpdatePutRequest;
+use App\Http\Resources\PermissionResource;
 use Illuminate\Http\Request;
 use App\Models\Permission;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class PermissionController extends ApiController
+class PermissionController extends ApiController implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware("transformInput:".PermissionResource::class."", only: ['store','update']),
+        ];
+    }
     /**
      * Display a listing of the resource.
      */
@@ -28,20 +39,10 @@ class PermissionController extends ApiController
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StorePostRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name'=> 'required|unique:permissions,name',
-        ]);
-        $validator->validate();
-
-        $permission = new Permission();
-        $permission = $permission->create([
-            'name' => request()->name,
-            'guard_name' => 'api'
-        ]);
-        $permission->save();
-
+        $validated = $request->validated();
+        $permission = Permission::create($validated);
         return $this->showOne($permission);
     }
 
@@ -64,17 +65,10 @@ class PermissionController extends ApiController
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Permission $permission)
+    public function update(UpdatePutRequest $request, Permission $permission)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string',
-        ]);
-        $validator->validate();
-
-        $permission->update([
-            'name' => request()->name,
-        ]);
-
+        $validated=$request->validated();
+        $permission->update($validated);
         return $this->showOne($permission);
     }
 

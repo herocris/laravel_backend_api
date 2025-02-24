@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Resources\PermissionResource;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Permission\Models\Permission as SpatiePermission;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,6 +13,8 @@ use Illuminate\Support\Facades\Auth;
 class Permission extends SpatiePermission
 {
     use HasFactory, LogsActivity;
+
+    public $resource = PermissionResource::class;
 
     public function getActivitylogOptions(): LogOptions
     {

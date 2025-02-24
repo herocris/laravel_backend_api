@@ -21,28 +21,6 @@ class AuthController extends ApiController
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function register()
-    {
-        $validator = Validator::make(request()->all(), [
-            'name' => 'required|string',
-            'email' => 'required|string|email|unique:users',
-            'password' => 'required|string|min:6',
-        ]);
-        $validator->validate();
-        // if ($validator->fails()){
-        //     return response()->json($validator->errors()->toJson(), 400);
-        // }
-
-        $user = new User();
-        $user = $user->create([
-            'name' => request()->name,
-            'email' => request()->email,
-            'password' => bcrypt(request()->password),
-        ]);
-        $user->save();
-        $token = Auth::tokenById($user->id);
-        return $this->respondWithToken($token);
-    }
 
     public function login()
     {
