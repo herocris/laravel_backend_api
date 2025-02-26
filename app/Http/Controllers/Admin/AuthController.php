@@ -78,7 +78,9 @@ class AuthController extends ApiController
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => Auth::factory()->getTTL() * 60
+            'expires_in' => Auth::factory()->getTTL() * 60,
+            'roles' => Auth::user()->getRoleNames(),
+            'permissions' => Auth::user()->getAllPermissions()->pluck('name'),
         ]);
     }
 

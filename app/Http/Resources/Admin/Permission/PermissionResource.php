@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Admin\Permission;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class RoleResource extends JsonResource
+class PermissionResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -17,7 +17,6 @@ class RoleResource extends JsonResource
         return [
             'identificador' => $this->id,
             'nombre' => $this->name,
-            'permisos' => $this->getPermissionNames(),
         ];
     }
 
@@ -26,7 +25,6 @@ class RoleResource extends JsonResource
         $attributes = [
             'identificador' => 'id',
             'nombre' => 'name',
-            'permisos' => 'permissions',
         ];
 
         return isset($attributes[$index]) ? $attributes[$index] : null;

@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\ApiController;
-use App\Http\Requests\Permission\StorePostRequest;
-use App\Http\Requests\Permission\UpdatePutRequest;
-use App\Http\Resources\PermissionResource;
+use App\Http\Requests\Admin\Permission\StorePostRequest;
+use App\Http\Requests\Admin\Permission\UpdatePutRequest;
+use App\Http\Resources\Admin\Permission\PermissionResource;
 use Illuminate\Http\Request;
 use App\Models\Permission;
 use Illuminate\Support\Facades\Validator;
@@ -30,14 +30,6 @@ class PermissionController extends ApiController implements HasMiddleware
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(StorePostRequest $request)
@@ -56,14 +48,6 @@ class PermissionController extends ApiController implements HasMiddleware
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      */
     public function update(UpdatePutRequest $request, Permission $permission)
@@ -79,6 +63,22 @@ class PermissionController extends ApiController implements HasMiddleware
     public function destroy(Permission $permission)
     {
         $permission->delete();
+        return $this->showOne($permission);
+    }
+    /**
+     * Display a listing of the deleted resources.
+     */
+    public function indexDeleted()
+    {
+        $permissions= Permission::onlyTrashed()->get();
+        return $this->showAll($permissions);
+    }
+    /**
+     * Restore the specified resource from storage.
+     */
+    public function restore(Permission $permission)
+    {
+        $permission->restore();
         return $this->showOne($permission);
     }
 }

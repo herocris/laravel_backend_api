@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Permission;
+namespace App\Http\Requests\Admin\User;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -23,6 +23,8 @@ class UpdatePutRequest extends FormRequest
     {
         return [
             'name' => 'required|string',
+            'email' => 'required|string|email',
+            'password' => 'required|string|min:6',
         ];
     }
 }

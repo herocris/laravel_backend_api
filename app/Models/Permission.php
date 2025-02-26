@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
-use App\Http\Resources\PermissionResource;
+use App\Http\Resources\Admin\Permission\PermissionResource;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Permission\Models\Permission as SpatiePermission;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Permission extends SpatiePermission
 {
-    use HasFactory, LogsActivity;
+    use HasFactory, LogsActivity, SoftDeletes;
 
     public $resource = PermissionResource::class;
 

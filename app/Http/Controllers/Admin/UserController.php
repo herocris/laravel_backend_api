@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\ApiController;
-use App\Http\Requests\User\StorePostRequest;
-use App\Http\Requests\User\UpdatePutRequest;
-use App\Http\Resources\UserResource;
+use App\Http\Requests\Admin\User\StorePostRequest;
+use App\Http\Requests\Admin\User\UpdatePutRequest;
+use App\Http\Resources\Admin\User\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -28,13 +28,6 @@ class UserController extends ApiController implements HasMiddleware
         return $this->showAll($users);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -54,13 +47,6 @@ class UserController extends ApiController implements HasMiddleware
         return $this->showOne($user);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
@@ -78,6 +64,22 @@ class UserController extends ApiController implements HasMiddleware
     public function destroy(User $user)
     {
         $user->delete();
+        return $this->showOne($user);
+    }
+    /**
+     * Display a listing of the deleted resources.
+     */
+    public function indexDeleted()
+    {
+        $users= User::onlyTrashed()->get();
+        return $this->showAll($users);
+    }
+    /**
+     * Restore the specified resource from storage.
+     */
+    public function restore(User $user)
+    {
+        $user->restore();
         return $this->showOne($user);
     }
 }

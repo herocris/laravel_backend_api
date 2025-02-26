@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
-use App\Http\Resources\RoleResource;
+use App\Http\Resources\Admin\Role\RoleResource;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Permission\Models\Role as SpatieRole;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Role extends SpatieRole
 {
-    use HasFactory, LogsActivity;
+    use HasFactory, LogsActivity, SoftDeletes;
 
     public $resource = RoleResource::class;
 
