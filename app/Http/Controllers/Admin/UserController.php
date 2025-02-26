@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\ApiController;
 use App\Http\Requests\User\StorePostRequest;
 use App\Http\Requests\User\UpdatePutRequest;
 use App\Http\Resources\UserResource;

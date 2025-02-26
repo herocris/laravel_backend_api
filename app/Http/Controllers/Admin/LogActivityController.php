@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\ApiController;
 use App\Models\Activitylog;
 use Illuminate\Http\Request;
 
