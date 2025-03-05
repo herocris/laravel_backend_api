@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 
-class AuthController extends ApiController
+class AuthController extends Controller
 {
     /**
      * Create a new AuthController instance.

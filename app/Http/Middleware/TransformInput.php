@@ -16,6 +16,7 @@ class TransformInput
      */
     public function handle(Request $request, Closure $next, $resource): Response
     {
+
         // Transformar la entrada usando colecciones
         $transformedInput = collect($request->all())
             ->mapWithKeys(fn ($value, $key) => [
@@ -24,10 +25,9 @@ class TransformInput
             ->toArray();
 
         $request->replace($transformedInput);
-
+        //dd($request->all());
         // Procesar la solicitud y capturar la respuesta
         $response = $next($request);
-
         // Validar si existe una excepción de validación
         if ($response->exception instanceof ValidationException) {
             $data = $response->getData();

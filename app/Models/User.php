@@ -13,15 +13,17 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Traits\HasRoles;
-use Spatie\Activitylog\Traits\LogsActivity;
+//use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\SoftDeletes;
+/** Trait para invocar la funcion getActivitylogOptions */
+use App\Traits\Activitylog;
 
 #[ObservedBy([UserObserver::class])]
 class User extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles, LogsActivity, SoftDeletes;
+    use HasFactory, Notifiable, HasRoles, SoftDeletes, Activitylog;
 
     public $resource = UserResource::class;
     /**
@@ -75,12 +77,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function getActivitylogOptions(): LogOptions
     {
-        return LogOptions::defaults()
-            ->logOnly(['name', 'email'])
-            ->logOnlyDirty()
-            ->setDescriptionForEvent(fn(string $eventName) => "Se ha " . eventName($eventName) . " el usuario")
-            ->useLogName(Auth::user()->name);
-        // Chain fluent methods for configuration options
+        return $this->RecordLog(['name', 'email'],'user');
     }
 
 }
