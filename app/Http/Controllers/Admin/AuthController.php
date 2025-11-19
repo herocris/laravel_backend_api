@@ -6,6 +6,7 @@ use App\Http\Controllers\ApiController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Http\Requests\Admin\User\StorePostRequest;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
@@ -23,6 +24,13 @@ class AuthController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
 
+    public function register(StorePostRequest $request)
+    {
+        $validated = $request->validated();
+        $user = User::create($validated);
+        $token = auth()->login($user);
+        return $this->respondWithToken($token);
+    }
     public function login()
     {
         $credentials = request(['email', 'password']);
@@ -53,7 +61,10 @@ class AuthController extends Controller
     {
         $this->logAndLoginEvent(Auth::user(), 'cerrado');
         Auth::logout(true);
-        return response()->json(['message' => 'Successfully logged out']);
+        //
+        //return response()->json(['message' => 'Successfully logged out']);
+        return response()->json(['message' => 'Logout successful'])
+            ->withCookie(cookie()->forget('token'));
     }
 
     /**
@@ -63,7 +74,7 @@ class AuthController extends Controller
      */
     public function refresh()
     {
-        return $this->respondWithToken(Auth::refresh());
+        return $this->respondWithToken(Auth::refresh(true, true));
     }
 
     /**
@@ -75,13 +86,22 @@ class AuthController extends Controller
      */
     protected function respondWithToken($token)
     {
+        // return response()->json([
+        //     'access_token' => $token,
+        //     'token_type' => 'bearer',
+        //     'expires_in' => Auth::factory()->getTTL() * 60,
+        //     'roles' => Auth::user()->getRoleNames(),
+        //     'permissions' => Auth::user()->getAllPermissions()->pluck('name'),
+        // ]);
+
+        $cookie = cookie('token', $token, 60, '/', null, true, true, false, 'Strict');
         return response()->json([
-            'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => Auth::factory()->getTTL() * 60,
+            'user' => Auth::user()->only(['name', 'email']),
             'roles' => Auth::user()->getRoleNames(),
             'permissions' => Auth::user()->getAllPermissions()->pluck('name'),
-        ]);
+        ])->cookie($cookie);
     }
 
     private function logAndLoginEvent(User $user, String $activity)
