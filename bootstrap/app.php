@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AuthenticateJWT;
 use App\Http\Middleware\TransformInput;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
@@ -10,7 +11,9 @@ use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use Spatie\Permission\Exceptions\RoleDoesNotExist;
 
@@ -23,7 +26,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'transformInput' => TransformInput::class
+            'transformInput' => TransformInput::class,
+            'jwt.auth' => AuthenticateJWT::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
@@ -63,6 +67,18 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (PermissionDoesNotExist $e, Request $request) {
             return response()->json(['error' => 'No existe el o los permisos que esta intentando asignar', 'code' => 422], 429);
         });
+
+        // $exceptions->render(function (QueryException $e, Request $request) { //exepcion de entrada duplicada en base de datos
+
+        //     $ex = $e->getPrevious();
+        //     //dd($ex->errorInfo);
+        //     if ($ex->getCode() === '23000') {
+        //         return response()->json([
+        //             'message' => 'El correo ya está registrado.',
+        //             'code' => 409
+        //         ], 409);
+        //     }
+        // });
 
         $exceptions->render(function (\Throwable $e, Request $request) {
             if (config('app.debug')) {
