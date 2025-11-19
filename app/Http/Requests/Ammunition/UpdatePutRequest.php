@@ -25,7 +25,7 @@ class UpdatePutRequest extends FormRequest
         return [
             'description' => 'required|string',
             'logo' => [
-                //'required',
+                'sometimes',
                 'image',
                 'max:2048',
                 File::types(['png'])

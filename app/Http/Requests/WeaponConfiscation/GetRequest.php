@@ -3,9 +3,8 @@
 namespace App\Http\Requests\WeaponConfiscation;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\File;
 
-class StorePostRequest extends FormRequest
+class GetRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,15 +22,12 @@ class StorePostRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'amount' => 'required|integer',
-            'confiscation_id' => 'required|exists:confiscations,id',
-            'weapon_id' => 'required|exists:weapons,id',
-            'photo' => [
-                'required',
-                'image',
-                'max:2048',
-                File::types(['png'])
-            ],
+            'period' => ['required', 'string', 'in:day,month,quarter,semester,year,total'],
+            'start_date' => ['required', 'date_format:Y-m-d'],
+            'end_date' => ['required', 'date_format:Y-m-d'],
+            'weapons' => ['required'],
+            'weapons.*' => ['integer', 'exists:weapons,id'],
+            'typeGraph'=>['required', 'string', 'in:bar,line,pie']
         ];
     }
 }

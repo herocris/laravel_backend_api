@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Admin\User;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\Rule;
 
 class UpdatePutRequest extends FormRequest
 {
@@ -23,7 +25,17 @@ class UpdatePutRequest extends FormRequest
     {
         return [
             'name' => 'required|string',
-            'email' => 'required|string|email',
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('users')->ignore($this->route('user')->id), // para validar si se esta actualizando el correo con uno ya existente
+            ],
+            // 'password' => ['required',
+            // Password::min(8)
+            // ->letters()
+            // ->mixedCase()
+            // ->numbers()
+            // ->symbols()],
             'password' => 'required|string|min:6',
         ];
     }

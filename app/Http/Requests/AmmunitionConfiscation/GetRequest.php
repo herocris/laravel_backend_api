@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\DrugConfiscation;
+namespace App\Http\Requests\AmmunitionConfiscation;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -25,8 +25,8 @@ class GetRequest extends FormRequest
             'period' => ['required', 'string', 'in:day,month,quarter,semester,year,total'],
             'start_date' => ['required', 'date_format:Y-m-d'],
             'end_date' => ['required', 'date_format:Y-m-d'],
-            'drugs' => ['required'],
-            'drugs.*' => ['integer', 'exists:drugs,id'],
+            'ammunitions' => ['required'],
+            'ammunitions.*' => ['integer', 'exists:ammunitions,id'],
             'typeGraph'=>['required', 'string', 'in:bar,line,pie']
         ];
     }
