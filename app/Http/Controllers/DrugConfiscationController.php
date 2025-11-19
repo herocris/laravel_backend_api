@@ -10,7 +10,10 @@ use App\Http\Requests\DrugConfiscation\UpdatePutRequest;
 use App\Http\Resources\DrugConfiscation\DrugConfiscationResource;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+
+use function Psy\debug;
 
 class DrugConfiscationController extends ApiController implements HasMiddleware
 {
@@ -28,6 +31,11 @@ class DrugConfiscationController extends ApiController implements HasMiddleware
 
         $drugConfiscations = DrugConfiscation::all();
         return $this->showAll($drugConfiscations);
+    }
+    public function indexByConfiscation($idConfiscation)
+    {
+        $drugConfiscations = DrugConfiscation::where('confiscation_id', $idConfiscation);
+        return $this->showAll($drugConfiscations->get());
     }
 
     /**
@@ -53,7 +61,7 @@ class DrugConfiscationController extends ApiController implements HasMiddleware
      */
     public function update(UpdatePutRequest $request, DrugConfiscation $drugConfiscation)
     {
-        $validated=$request->validated();
+        $validated = $request->validated();
         $drugConfiscation->update($validated);
         return $this->showOne($drugConfiscation);
     }
@@ -69,7 +77,7 @@ class DrugConfiscationController extends ApiController implements HasMiddleware
 
     public function indexDeleted()
     {
-        $drugConfiscations= DrugConfiscation::onlyTrashed()->get();
+        $drugConfiscations = DrugConfiscation::onlyTrashed()->get();
         return $this->showAll($drugConfiscations);
     }
     /**
@@ -87,22 +95,34 @@ class DrugConfiscationController extends ApiController implements HasMiddleware
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
         $drugs = json_decode($request->input('drugs') ?? '[]');
-        $presentations =json_decode($request->input('presentations') ?? '[]');
-
-        $queryp=$this->queryPeriod($period);
+        $queryp = $this->queryPeriod($period);
 
         // Construir la consulta con el período seleccionado
         $query = DB::table('data_graph_drug_confiscation')
-            ->selectRaw("{$queryp} AS period, drug_id, drug_presentation_id, SUM(total_amount) AS total_amount, SUM(total_weight) AS total_weight")
-            ->whereBetween('full_date', [$startDate, $endDate])
             ->whereIn('drug_id', $drugs)
-            ->whereIn('drug_presentation_id', $presentations)
-            ->groupBy('period', 'drug_id', 'drug_presentation_id')
-            ->orderBy('period')
-            ->get();
+            ->whereBetween('full_date', [$startDate, $endDate]);
 
-        $query = $this->queryFormater($query,$request);
+        $queryBarLine = $query->clone()->select( //clonando query para poder utilizar la misma en otra consulta
+            DB::raw("{$queryp} as period"),
+            'drug_description',
+            DB::raw('SUM(total_amount) as total_amount'),
+            DB::raw('SUM(total_weight) as total_weight')
+        )
+            ->groupBy('period', 'drug_id')
+            ->orderBy('period', 'asc')->get();
 
-        return response()->json($query);
+        $queryPie = $query->clone()->select(
+            'drug_description',
+            DB::raw('SUM(total_amount) as total_amount'),
+            DB::raw('SUM(total_weight) as total_weight')
+        )
+            ->groupBy('drug_description')
+            ->orderBy('drug_description', 'asc')->get();
+
+        $linedata = $this->FormatCollectionBarLine($queryBarLine, "drugs");
+        $pieData = $this->FormatCollectionPie($queryPie, "drugs");
+
+
+        return response()->json(['lineBarData' => $linedata, 'pieData' => $pieData]);
     }
 }
