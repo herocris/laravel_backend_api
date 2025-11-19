@@ -52,15 +52,15 @@ class DatabaseSeeder extends Seeder
 
         Permission::factory(25)->create();
         Role::factory(4)->givePermissionsToRole()->create();
-        User::factory(5)->giveRolesToUser()->create();
+        User::factory(30)->giveRolesToUser()->create();
         Ammunition::factory(5)->create();
-        Confiscation::factory(1000)->create();
+        Confiscation::factory(5000)->create();
         DrugPresentation::factory(5)->create();
         Drug::factory(5)->create();
         Weapon::factory(5)->create();
-        AmmunitionConfiscation::factory(200)->create();
-        DrugConfiscation::factory(200)->create();
-        WeaponConfiscation::factory(200)->create();
+        AmmunitionConfiscation::factory(1000)->create();
+        DrugConfiscation::factory(1000)->create();
+        WeaponConfiscation::factory(1000)->create();
 
     }
 }
