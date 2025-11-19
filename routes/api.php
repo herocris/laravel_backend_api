@@ -18,16 +18,13 @@ use Illuminate\Support\Facades\Route;
 
 
 
-// Route::get('/user', function (Request $request) {
-//     return $request->user();
-// })->middleware('auth:sanctum');
-
-
 Route::middleware(['auth','throttle:global'])->group(function () {
     Route::post('login', [AuthController::class,'login'])->withoutMiddleware(['auth']);
+    Route::post('register', [AuthController::class,'register'])->withoutMiddleware(['auth']);
     Route::get('me', [AuthController::class,'me']);
     Route::post('logout', [AuthController::class,'logout']);
     Route::post('refresh', [AuthController::class,'refresh']);
+
 
     Route::get('/user/deleted', [UserController::class, 'indexDeleted']);
     Route::post('/user/restore/{user}', [UserController::class, 'restore'])->withTrashed();
@@ -50,6 +47,7 @@ Route::middleware(['auth','throttle:global'])->group(function () {
     Route::apiResource('ammunition', AmmunitionController::class);
 
     Route::get('/confiscation/deleted', [ConfiscationController::class, 'indexDeleted']);
+    Route::get('/confiscation/map', [ConfiscationController::class, 'mapConfiscations']);
     Route::post('/confiscation/restore/{confiscation}', [ConfiscationController::class, 'restore'])->withTrashed();
     Route::apiResource('confiscation', ConfiscationController::class);
 
@@ -65,16 +63,21 @@ Route::middleware(['auth','throttle:global'])->group(function () {
     Route::post('/weapon/restore/{weapon}', [WeaponController::class, 'restore'])->withTrashed();
     Route::apiResource('weapon', WeaponController::class);
 
+    Route::get('/ammunitionGraphIndex', [AmmunitionConfiscationController::class, 'graphIndex']);
+    Route::get('/ammunitionConfiscation/{idConfiscation}/confiscation', [AmmunitionConfiscationController::class, 'indexByConfiscation']);
     Route::get('/ammunitionConfiscation/deleted', [AmmunitionConfiscationController::class, 'indexDeleted']);
     Route::post('/ammunitionConfiscation/restore/{ammunitionConfiscation}', [AmmunitionConfiscationController::class, 'restore'])->withTrashed();
     Route::apiResource('ammunitionConfiscation', AmmunitionConfiscationController::class);
 
-    Route::get('/graphIndex', [DrugConfiscationController::class, 'graphIndex']);
+    Route::get('/drugGraphIndex', [DrugConfiscationController::class, 'graphIndex']);
+    Route::get('/drugConfiscation/{idConfiscation}/confiscation', [DrugConfiscationController::class, 'indexByConfiscation']);
     Route::get('/drugConfiscation/deleted', [DrugConfiscationController::class, 'indexDeleted']);
     Route::post('/drugConfiscation/restore/{drugConfiscation}', [DrugConfiscationController::class, 'restore'])->withTrashed();
     Route::apiResource('drugConfiscation', DrugConfiscationController::class);
 
-    Route::get('/weaponConfiscation/deleted', [WeaponConfiscationController::class, 'indexDeleted']);
+    Route::get('/weaponGraphIndex', [WeaponConfiscationController::class, 'graphIndex']);
+    Route::get('/weaponConfiscation/{idConfiscation}/confiscation', [WeaponConfiscationController::class, 'indexByConfiscation']);
+    Route::get('/weaponConfiscation/deleted', [WeaponConfiscationController::class, 'indexByConfiscation']);
     Route::post('/weaponConfiscation/restore/{weaponConfiscation}', [WeaponConfiscationController::class, 'restore'])->withTrashed();
     Route::apiResource('weaponConfiscation', WeaponConfiscationController::class);
 });
