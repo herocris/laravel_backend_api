@@ -19,6 +19,11 @@ class Weapon extends Model
     use HasFactory, SoftDeletes, Activitylog;
     public $resource = WeaponResource::class;
 
+    protected $fillable = [
+        'description',
+        'logo',
+    ];
+
     public function getActivitylogOptions(): LogOptions
     {
         return $this->RecordLog(['description','logo'],'weapon');
