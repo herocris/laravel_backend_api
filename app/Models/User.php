@@ -16,8 +16,11 @@ use Spatie\Permission\Traits\HasRoles;
 //use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\SoftDeletes;
+
 /** Trait para invocar la funcion getActivitylogOptions */
+
 use App\Traits\Activitylog;
+use OpenApi\Attributes as OA;
 
 #[ObservedBy([UserObserver::class])]
 class User extends Authenticatable implements JWTSubject
@@ -77,7 +80,6 @@ class User extends Authenticatable implements JWTSubject
 
     public function getActivitylogOptions(): LogOptions
     {
-        return $this->RecordLog(['name', 'email'],'user');
+        return $this->RecordLog(['name', 'email'], 'user');
     }
-
 }

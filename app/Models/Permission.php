@@ -9,6 +9,7 @@ use Spatie\Permission\Models\Permission as SpatiePermission;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use OpenApi\Attributes as OA;
 
 class Permission extends SpatiePermission
 {

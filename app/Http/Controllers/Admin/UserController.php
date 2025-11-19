@@ -11,17 +11,17 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
+
 class UserController extends ApiController implements HasMiddleware
 {
+    
     public static function middleware(): array
     {
         return [
             new Middleware("transformInput:" . UserResource::class . "", only: ['store', 'update']),
         ];
     }
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
         $users = User::all();
@@ -29,9 +29,6 @@ class UserController extends ApiController implements HasMiddleware
     }
 
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StorePostRequest $request)
     {
         $validated = $request->validated();
@@ -39,18 +36,12 @@ class UserController extends ApiController implements HasMiddleware
         return $this->showOne($user);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(User $user)
     {
         return $this->showOne($user);
     }
 
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdatePutRequest $request, User $user)
     {
         $validated=$request->validated();
@@ -58,25 +49,18 @@ class UserController extends ApiController implements HasMiddleware
         return $this->showOne($user);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(User $user)
     {
         $user->delete();
         return $this->showOne($user);
     }
-    /**
-     * Display a listing of the deleted resources.
-     */
+
     public function indexDeleted()
     {
         $users= User::onlyTrashed()->get();
         return $this->showAll($users);
     }
-    /**
-     * Restore the specified resource from storage.
-     */
+
     public function restore(User $user)
     {
         $user->restore();

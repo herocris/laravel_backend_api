@@ -1,0 +1,2218 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Fusion Center Documentation",
+        "description": "Fusion Center Documentation",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1",
+            "description": "local server"
+        },
+        {
+            "url": "http://staging.example.com",
+            "description": "staging server"
+        },
+        {
+            "url": "http://example.com",
+            "description": "production server"
+        }
+    ],
+    "paths": {
+        "/api/activity": {
+            "get": {
+                "tags": [
+                    "Logs de Actividad"
+                ],
+                "summary": "Mostrar logs de actividad",
+                "operationId": "55a4eed111ba6ee2177bc52689b1279b",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Activitylog"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Autenticación"
+                ],
+                "summary": "Registrar nuevo usuario",
+                "operationId": "a703812bf0a6b902522fda0409cc2c39",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserCreateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Usuario registrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Autenticación"
+                ],
+                "summary": "Iniciar sesión",
+                "operationId": "b6c2a9df96f8a843e7c9d77df8880e10",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login exitoso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Credenciales incorrectas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/me": {
+            "get": {
+                "tags": [
+                    "Autenticación"
+                ],
+                "summary": "Obtener usuario autenticado",
+                "operationId": "2ee8339dcba98c65e41cb2f82e31d4cc",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Autenticación"
+                ],
+                "summary": "Cerrar sesión",
+                "operationId": "42a4ffdcdae4615ac1baa572e1cdc023",
+                "responses": {
+                    "200": {
+                        "description": "Logout exitoso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logout successful"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/refresh": {
+            "post": {
+                "tags": [
+                    "Autenticación"
+                ],
+                "summary": "Refrescar token",
+                "operationId": "d54fbd7a8f7dfc018837cf165c7034b1",
+                "responses": {
+                    "200": {
+                        "description": "Token refrescado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/permission": {
+            "get": {
+                "tags": [
+                    "Permisos"
+                ],
+                "summary": "Mostrar permisos",
+                "operationId": "9b2492ccd3b8addb30817859b0b4b28a",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Permission"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Permisos"
+                ],
+                "summary": "Crear permiso",
+                "operationId": "fdae4d11186ad815e5d8f8e3fac86571",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PermissionCreateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Permission"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/permission/{permission}": {
+            "get": {
+                "tags": [
+                    "Permisos"
+                ],
+                "summary": "Mostrar permiso",
+                "operationId": "046db2e5e13ca33019fd10984c191f25",
+                "parameters": [
+                    {
+                        "name": "permission",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Permission"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Permisos"
+                ],
+                "summary": "Actualizar permiso",
+                "operationId": "b268efca9c960b83ed01e37f73143ba0",
+                "parameters": [
+                    {
+                        "name": "permission",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PermissionUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Permission"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Permisos"
+                ],
+                "summary": "Eliminar permiso",
+                "operationId": "cea5e447e3b42f3ab16a144174de6857",
+                "parameters": [
+                    {
+                        "name": "permission",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Permission"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/role": {
+            "get": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Mostrar roles",
+                "operationId": "dd98018518f30487296fe64771fcee29",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Role"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Crear rol",
+                "operationId": "d722f826107f70fc4faa3e1f634c8318",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RoleCreateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Role"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/role/{role}": {
+            "get": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Mostrar rol",
+                "operationId": "66fbda8ffc1bef2750910b8b473238b3",
+                "parameters": [
+                    {
+                        "name": "role",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Role"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Actualizar rol",
+                "operationId": "1d3aa98f94e45008e41e08e1a203b97b",
+                "parameters": [
+                    {
+                        "name": "role",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RoleUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Role"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Eliminar rol",
+                "operationId": "f194b9b5e5fd996f1fe5debf41736ee1",
+                "parameters": [
+                    {
+                        "name": "role",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Role"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/user": {
+            "get": {
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Mostrar usuarios",
+                "operationId": "49f476fbcd979aaef62dc8082e295e1b",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/User"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Crear usuario",
+                "operationId": "f0b637777247c7cee3273d9efdb460f2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserCreateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/user/{user}": {
+            "get": {
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Mostrar usuario",
+                "operationId": "9bf3c76aedfcfb4117995b803660886c",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Actualizar usuario",
+                "operationId": "aaaaaad989b014f9aab5e860df439943",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Eliminar usuario",
+                "operationId": "4517603dea781141c5ee82d59067d587",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Activitylog": {
+                "properties": {
+                    "identificador": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "tipo_de_evento": {
+                        "type": "string",
+                        "example": "created"
+                    },
+                    "descripcion": {
+                        "type": "string",
+                        "example": "user"
+                    },
+                    "id_usuario": {
+                        "type": "integer",
+                        "example": 5,
+                        "nullable": true
+                    },
+                    "usuario": {
+                        "type": "string",
+                        "example": "user"
+                    },
+                    "cambios": {
+                        "type": "object",
+                        "example": {
+                            "name": "Juan",
+                            "email": "juan@example.com"
+                        }
+                    },
+                    "fecha": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "LoginRequest": {
+                "required": [
+                    "email",
+                    "password"
+                ],
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "juan@example.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "example": "Secret123"
+                    }
+                },
+                "type": "object"
+            },
+            "AuthResponse": {
+                "properties": {
+                    "token_type": {
+                        "type": "string",
+                        "example": "bearer"
+                    },
+                    "expires_in": {
+                        "type": "integer",
+                        "example": 3600
+                    },
+                    "user": {
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "example": "Juan Pérez"
+                            },
+                            "email": {
+                                "type": "string",
+                                "example": "juan@example.com"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "roles": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "admin",
+                            "editor"
+                        ]
+                    },
+                    "permissions": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "create-users",
+                            "edit-users"
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "NotFoundResponse": {
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "example": "Url no encontrada"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "example": 404
+                    }
+                },
+                "type": "object"
+            },
+            "UnauthorizedResponse": {
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "example": "No autenticado"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "example": 401
+                    }
+                },
+                "type": "object"
+            },
+            "MethodNotAllowedResponse": {
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "example": "Metodo no permitido"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "example": 405
+                    }
+                },
+                "type": "object"
+            },
+            "TooManyRequestsResponse": {
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "example": "Se ha revasado el numero de solicitudes"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "example": 429
+                    }
+                },
+                "type": "object"
+            },
+            "ValidationResponse": {
+                "properties": {
+                    "error": {
+                        "type": "object",
+                        "example": {
+                            "email": [
+                                "The email has already been taken."
+                            ]
+                        }
+                    },
+                    "code": {
+                        "type": "integer",
+                        "example": 422
+                    }
+                },
+                "type": "object"
+            },
+            "ServerErrorResponse": {
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "example": "Error interno del servidor"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "example": 500
+                    }
+                },
+                "type": "object"
+            },
+            "Permission": {
+                "properties": {
+                    "identificador": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "edit-users"
+                    }
+                },
+                "type": "object"
+            },
+            "PermissionCreateRequest": {
+                "required": [
+                    "nombre"
+                ],
+                "properties": {
+                    "nombre": {
+                        "type": "string",
+                        "example": "edit-users"
+                    }
+                },
+                "type": "object"
+            },
+            "PermissionUpdateRequest": {
+                "required": [
+                    "nombre"
+                ],
+                "properties": {
+                    "nombre": {
+                        "type": "string",
+                        "example": "edit-users"
+                    }
+                },
+                "type": "object"
+            },
+            "Role": {
+                "properties": {
+                    "identificador": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "admin"
+                    },
+                    "permisos": {
+                        "description": "IDs de permisos asignados",
+                        "type": "array",
+                        "items": {
+                            "type": "integer",
+                            "example": 1
+                        },
+                        "readOnly": true,
+                        "example": [
+                            1,
+                            2,
+                            3
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "RoleCreateRequest": {
+                "required": [
+                    "nombre"
+                ],
+                "properties": {
+                    "nombre": {
+                        "type": "string",
+                        "example": "editor"
+                    },
+                    "permisos": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "example": [
+                            1,
+                            2,
+                            3
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "RoleUpdateRequest": {
+                "required": [
+                    "nombre"
+                ],
+                "properties": {
+                    "nombre": {
+                        "type": "string",
+                        "example": "editor"
+                    },
+                    "permisos": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "example": [
+                            1,
+                            2,
+                            3
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "User": {
+                "properties": {
+                    "identificador": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "Juan Pérez"
+                    },
+                    "correo": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "juan@example.com"
+                    },
+                    "roles": {
+                        "description": "IDs de roles asignados",
+                        "type": "array",
+                        "items": {
+                            "type": "integer",
+                            "example": 1
+                        },
+                        "readOnly": true,
+                        "example": [
+                            1,
+                            2
+                        ]
+                    },
+                    "permisos": {
+                        "description": "IDs de permisos asignados",
+                        "type": "array",
+                        "items": {
+                            "type": "integer",
+                            "example": 1
+                        },
+                        "readOnly": true,
+                        "example": [
+                            1,
+                            2,
+                            3
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "UserCreateRequest": {
+                "required": [
+                    "nombre",
+                    "correo",
+                    "password"
+                ],
+                "properties": {
+                    "nombre": {
+                        "type": "string",
+                        "example": "Juan Pérez"
+                    },
+                    "correo": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "juan@example.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "minLength": 6,
+                        "example": "Secret123"
+                    }
+                },
+                "type": "object"
+            },
+            "UserUpdateRequest": {
+                "required": [
+                    "nombre",
+                    "correo",
+                    "password"
+                ],
+                "properties": {
+                    "nombre": {
+                        "type": "string",
+                        "example": "Juan Pérez"
+                    },
+                    "correo": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "juan@example.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "minLength": 6,
+                        "example": "Secret123"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "description": "Enviar 'Authorization: Bearer <token>'",
+                "name": "Authorization",
+                "in": "header",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            },
+            "authCookie": {
+                "type": "apiKey",
+                "description": "Cookie HttpOnly 'access_token' con el JWT. El explorador ya la envía automáticamente en cada request.",
+                "name": "access_token",
+                "in": "cookie"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Logs de Actividad",
+            "description": "Logs de Actividad"
+        },
+        {
+            "name": "Autenticación",
+            "description": "Autenticación"
+        },
+        {
+            "name": "Permisos",
+            "description": "Permisos"
+        },
+        {
+            "name": "Roles",
+            "description": "Roles"
+        },
+        {
+            "name": "Usuarios",
+            "description": "Usuarios"
+        }
+    ]
+}
