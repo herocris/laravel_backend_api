@@ -2,7 +2,9 @@
 
 namespace App\Traits;
 
-use App\Http\Requests\DrugConfiscation\GetRequest;
+use App\Http\Requests\DrugConfiscation\GetRequest as DrugRequest;
+use App\Http\Requests\WeaponConfiscation\GetRequest as WeaponRequest;
+use App\Http\Requests\AmmunitionConfiscation\GetRequest as AmmunitionRequest;
 use App\Models\Drug;
 use App\Models\DrugPresentation;
 use Illuminate\Support\Collection;
@@ -27,112 +29,165 @@ trait ApiResponser
 
     protected function queryPeriod($period)
     {
-        $validPeriods = [
-            'day' => "DATE(full_date)",
+        return match ($period) {
+            //'day' => "DATE(full_date)",
             'month' => "DATE_FORMAT(full_date, '%Y-%m')",
-            'quarter' => "CONCAT(YEAR(full_date), '-Q', QUARTER(full_date))",
-            'semester' => "CONCAT(YEAR(full_date), '-S', IF(MONTH(full_date) <= 6, 1, 2))",
+            // 'quarter' => "CONCAT(YEAR(full_date), '-Q', QUARTER(full_date))",
+            // 'semester' => "CONCAT(YEAR(full_date), '-S', IF(MONTH(full_date) <= 6, 1, 2))",
             'year' => "YEAR(full_date)",
-            'total' => "DATE(full_date)",
-        ];
-
-        return $validPeriods[$period];
+            default => "DATE(full_date)", // Periodo total
+        };
     }
 
-    protected function queryFormater(Collection $queryResult, GetRequest $request)
+    protected function generatePeriods($startDate, $endDate, $periodType)
     {
-        $drugs = json_decode($request->input('drugs') ?? '[]');
-        $presentations =json_decode($request->input('presentations') ?? '[]');
-        $periodType = request()->input('period');
-        $criteria=request()->input('criteria');
-        $magnitude=request()->input('magnitude');
-        // 🟢 Generar los períodos de tiempo dinámicamente
         $periodos = collect();
-        $currentDate = Carbon::parse($request->input('start_date'));
-        $endDate = Carbon::parse($request->input('end_date'));
+        $currentDate = Carbon::parse($startDate);
+        $endDate = Carbon::parse($endDate);
 
-        // Ajuste inicial según el tipo de periodo
-
-        if ($periodType !== 'total') {
-            switch ($periodType) {
-                case 'day':
-                    $format = 'Y-m-d';
-                    break;
-                case 'month':
-                    $format = 'Y-m';
-                    $currentDate->startOfMonth();
-                    $endDate->endOfMonth();
-                    break;
-                case 'quarter':
-                    $format = 'Y-\QQ';
-                    $currentDate->startOfQuarter();
-                    $endDate->endOfQuarter();
-                    break;
-                case 'semester':
-                    $format = 'Y-\SS';  // Output: 2023-S1, 2023-S2
-                    $currentDate->startOfQuarter(); // Laravel no tiene startOfSemester
-                    $endDate->endOfQuarter();
-                    break;
-                case 'year':
-                    $format = 'Y';
-                    $currentDate->startOfYear();
-                    $endDate->endOfYear();
-                    break;
-            }
-
-            while ($currentDate <= $endDate) {
-                $periodos->push($currentDate->format($format));
-                match ($periodType) {
-                    'day' => $currentDate->addDay(),
-                    'month' => $currentDate->addMonth(),
-                    'quarter' => $currentDate->addMonths(3),  // Trimestres avanzan 3 meses
-                    'semester' => $currentDate->addMonths(6), // Semestres avanzan 6 meses
-                    'year' => $currentDate->addYear(),
-                };
-            }
-        } else {
-            // Si el periodo es "total", agregamos un solo valor en "periodos"
-            $periodos->push("$currentDate a $endDate");
+        if ($periodType === 'total') {
+            return collect(["$startDate a $endDate"]);
         }
 
-        $criterias = $criteria == 'drugs' ? $drugs : $presentations;
-        // 🟢 Agrupar por drug_id o por drug_presentation_id segun $criteria y asegurar que solo estén los `drug_id` o `drug_presentation_id` pasados en la consulta
+        while ($currentDate <= $endDate) {
+            switch ($periodType) {
+                case 'day':
+                    $formattedPeriod = $currentDate->format('Y-m-d');
+                    $currentDate->addDay();
+                    break;
 
-        $grouped = collect($criterias)->mapWithKeys(function ($criteria_id) use ($queryResult, $periodos, $periodType,$criteria,$magnitude) {
-            $filtered = $queryResult->where($criteria == 'drugs' ? 'drug_id' : 'drug_presentation_id', $criteria_id);
+                case 'month':
+                    $formattedPeriod = $currentDate->format('Y-m');
+                    $currentDate->addMonth();
+                    break;
 
-            if ($periodType === 'total') {
-                // Si el periodo es "total", sumamos todas las cantidades o pesos
-                $totalValue = $magnitude == 'amount'
-                    ? $filtered->sum('total_amount')
-                    : $filtered->sum('total_weight');
+                case 'quarter':
+                    $formattedPeriod = $currentDate->year . '-Q' . ceil($currentDate->month / 3);
+                    $currentDate->addMonths(3);
+                    break;
 
-                $data = [$totalValue]; // Solo un valor
-            } else {
-                // Si es otro periodo, asignar los valores normales
-                $data = $magnitude == 'amount'
-                    ? $periodos->map(fn($period) => optional($filtered->firstWhere('period', $period))->total_amount ?? 0)->toArray()
-                    : $periodos->map(fn($period) => optional($filtered->firstWhere('period', $period))->total_weight ?? 0)->toArray();
+                case 'semester':
+                    $formattedPeriod = $currentDate->year . '-S' . ($currentDate->month <= 6 ? '1' : '2');
+                    $currentDate->addMonths(6);
+                    break;
+
+                case 'year':
+                    $formattedPeriod = $currentDate->format('Y');
+                    $currentDate->addYear();
+                    break;
+
+                default:
+                    $formattedPeriod = $currentDate->format('Y-m-d');
+                    $currentDate->addDay();
             }
 
-            $criteriaName = request()->input('criteria') == 'drugs' ? Drug::find($criteria_id)->description : DrugPresentation::find($criteria_id)->description;
+            $periodos->push($formattedPeriod);
+        }
 
-            return [$criteria_id => [
+        return $periodos;
+    }
+
+    protected function ConfiscationId($criteria)
+    {
+        return match ($criteria) {
+            'drugs' => "drug_id",
+            'presentations' => "drug_presentation_id",
+            'weapons' => "weapon_id",
+            'ammunitions' => "ammunition_id",
+        };
+    }
+
+    protected function ConfiscationName($nameConfiscations, $idConfiscation, $typeConfiscation)
+    {
+        $name = $nameConfiscations->firstWhere($this->ConfiscationId($typeConfiscation), $idConfiscation);
+        return $name[$this->ConfiscationDescription($typeConfiscation)];
+    }
+
+    protected function FormatCollectionBarLine(Collection $queryResult, $criteria)
+    {
+        $linedata = collect($queryResult) //formateando data para grafica de linea
+            ->groupBy('period')
+            ->map(function ($group, $period) use ($criteria) {
+                $entry = ['name' => $period];
+                foreach ($group as $item) {
+                    $entry[$item->{$this->ConfiscationDescription($criteria)}] = $item->total_amount; //accediendo de manera dinamica a las propiedades de un item
+                }
+                return $entry;
+            })
+            ->values(); // para tener índices numéricos (array plano)
+        return $linedata;
+    }
+    protected function FormatCollectionPie(Collection $queryResult, $criteria)
+    {
+        $pieData = collect($queryResult) //formateando data para grafica de pastel
+            ->groupBy($this->ConfiscationDescription($criteria))
+            ->map(function ($group, $name) {
+                return [
+                    'name' => $name,
+                    'value' => $group->sum('total_amount')
+                ];
+            })
+            ->values(); // para tener índices numéricos (array plano)
+        return $pieData;
+    }
+
+    protected function ConfiscationDescription($typeConfiscation)
+    {
+        return match ($typeConfiscation) {
+            'drugs' => "drug_description",
+            'presentations' => "drug_presentation_description",
+            'weapons' => "weapon_description",
+            'ammunitions' => "ammunition_description",
+        };
+    }
+
+
+
+
+    protected function queryFormater(Collection $queryResult, AmmunitionRequest|DrugRequest|WeaponRequest $request)
+    {
+        $periodType = $request->input('period');
+        $typeConfiscation = $request->input('typeConfiscation');
+        $magnitude = $request->input('magnitude');
+
+        $typeConfiscationsIds = json_decode($request->input($typeConfiscation) ?? '[]');
+        $periodos = $this->generatePeriods($request->input('start_date'), $request->input('end_date'), $periodType);
+
+        $namesConfiscations = $queryResult
+            ->unique($this->ConfiscationId($typeConfiscation))
+            ->select($this->ConfiscationDescription($typeConfiscation), $this->ConfiscationId($typeConfiscation));
+        // Agrupar los resultados por período
+        $groupedResults = $queryResult->groupBy('period');
+
+        $grouped = collect($typeConfiscationsIds)->mapWithKeys(function ($typeConfiscation_id) use ($groupedResults, $periodos, $periodType, $typeConfiscation, $magnitude, $namesConfiscations) {
+            $filtered = $groupedResults->map(
+                fn($items) =>
+                $items->where($this->ConfiscationId($typeConfiscation), $typeConfiscation_id)
+            );
+            $data = ($periodType === 'total')
+                ? [$filtered->flatten()->sum($magnitude == 'amount' ? 'total_amount' : 'total_weight')]
+                : $periodos->map(
+                    fn($period) =>
+                    optional($filtered->get($period))->sum($magnitude == 'amount' ? 'total_amount' : 'total_weight') ?? 0
+                )->toArray();
+
+            $typeConfiscationName = ($typeConfiscation == 'drugs')
+                ? Drug::find($typeConfiscation_id)->description
+                : DrugPresentation::find($typeConfiscation_id)->description;
+
+            return [$typeConfiscation_id => [
                 "atributo cualquiera 1" => "contenido de atributo1",
-                "label" => $criteriaName,
+                "label" => $this->ConfiscationName($namesConfiscations, $typeConfiscation_id, $typeConfiscation),
                 "data" => $data
             ]];
         });
 
-        // 🟢 Formatear la respuesta final
-        $response = [
-            "datasets" => $grouped->values()->toArray(), // Convertir a array y asegurar que solo están los drug_id pasados
+        return [
+            "datasets" => $grouped->values()->toArray(),
             "periodos" => $periodos->toArray()
         ];
-
-        // 🟢 Devolver JSON
-        return $response;
     }
+
 
     protected function showOne(Model $instance, $code = 200)
     {
@@ -207,7 +262,7 @@ trait ApiResponser
     protected function sortData(Collection $collection)
     {
         if (request()->has('sort_by')) {
-            if (request()->order == 'asc') {
+            if (request()->type == 'asc') {
                 $collection = $collection->sortBy(request()->sort_by);
             } else {
                 $collection = $collection->sortByDesc(request()->sort_by);
@@ -239,7 +294,7 @@ trait ApiResponser
     protected function paginate(Collection $collection)
     {
         $rules = [
-            'per_page' => 'integer|min:2|max:50'
+            'per_page' => 'integer|min:2|max:100'
         ];
 
         Validator::validate(request()->all(), $rules);
