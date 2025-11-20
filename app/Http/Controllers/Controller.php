@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 use OpenApi\Attributes as OA;
 
 #[
-    OA\Info(version: "1.0.0", description: "Fusion Center Documentation", title: "Fusion Center Documentation"),
+    OA\Info(version: "1.0.0", description: "Documentacion la API graphMapApp", title: "GraphMapApp API"),
     OA\Server(url: 'http://127.0.0.1', description: "local server"),
     OA\Server(url: 'http://staging.example.com', description: "staging server"),
     OA\Server(url: 'http://example.com', description: "production server"),

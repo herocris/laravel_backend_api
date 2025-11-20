@@ -1,8 +1,8 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "Fusion Center Documentation",
-        "description": "Fusion Center Documentation",
+        "title": "GraphMapApp API",
+        "description": "Documentacion la API graphMapApp",
         "version": "1.0.0"
     },
     "servers": [
@@ -87,6 +87,1080 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/ammunitionConfiscation": {
+            "get": {
+                "tags": [
+                    "Decomisos Municiones"
+                ],
+                "summary": "Listar decomisos de municiones",
+                "operationId": "773fb9c5e89cd6058286f9bd89660a81",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/AmmunitionConfiscation"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Decomisos Municiones"
+                ],
+                "summary": "Crear decomiso de munición",
+                "operationId": "693f4dc29c441f1c10092f67235c3c7a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AmmunitionConfiscationCreateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AmmunitionConfiscation"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/ammunitionConfiscation/{idConfiscation}/confiscation": {
+            "get": {
+                "tags": [
+                    "Decomisos Municiones"
+                ],
+                "summary": "Listar decomisos de municiones por decomiso",
+                "operationId": "5f0635da16518b5a4b6acb30f172bf70",
+                "parameters": [
+                    {
+                        "name": "idConfiscation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/AmmunitionConfiscation"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/ammunitionConfiscation/{ammunitionConfiscation}": {
+            "get": {
+                "tags": [
+                    "Decomisos Municiones"
+                ],
+                "summary": "Mostrar decomiso de munición",
+                "operationId": "bebd694239288ce143518a3cdcb9a39e",
+                "parameters": [
+                    {
+                        "name": "ammunitionConfiscation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AmmunitionConfiscation"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Decomisos Municiones"
+                ],
+                "summary": "Actualizar decomiso de munición",
+                "operationId": "87ba2bcf565d153edf2536091d57435a",
+                "parameters": [
+                    {
+                        "name": "ammunitionConfiscation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AmmunitionConfiscationUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AmmunitionConfiscation"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Decomisos Municiones"
+                ],
+                "summary": "Eliminar decomiso de munición",
+                "operationId": "ce84a30b9f1465b6a62d0df422c8741b",
+                "parameters": [
+                    {
+                        "name": "ammunitionConfiscation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AmmunitionConfiscation"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/ammunitionConfiscation/deleted": {
+            "get": {
+                "tags": [
+                    "Decomisos Municiones"
+                ],
+                "summary": "Listar decomisos de municiones eliminados",
+                "operationId": "e701414a5190a1cd34e4ab130d758f8a",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/AmmunitionConfiscation"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/ammunitionConfiscation/restore/{ammunitionConfiscation}": {
+            "post": {
+                "tags": [
+                    "Decomisos Municiones"
+                ],
+                "summary": "Restaurar decomiso de munición",
+                "operationId": "c55901bd3e46d031fdde2b9474e9948b",
+                "parameters": [
+                    {
+                        "name": "ammunitionConfiscation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Restaurado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AmmunitionConfiscation"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/ammunitionGraphIndex": {
+            "get": {
+                "tags": [
+                    "Decomisos Municiones"
+                ],
+                "summary": "Datos gráficos decomisos de municiones",
+                "operationId": "b5ddf6a3770466c6839cb30039c11f68",
+                "parameters": [
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "day"
+                        }
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-01-01"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-01-31"
+                        }
+                    },
+                    {
+                        "name": "ammunitions",
+                        "in": "query",
+                        "description": "JSON array de IDs de municiones",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "[1,2]"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "lineBarData": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "pieData": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/ammunition": {
+            "get": {
+                "tags": [
+                    "Municiones"
+                ],
+                "summary": "Listar municiones",
+                "operationId": "95db61ce6c8fbe64d1a7e7d866c0428c",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Ammunition"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Municiones"
+                ],
+                "summary": "Crear munición",
+                "operationId": "000740b0e4ccd2a9db5b87a07c074f52",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AmmunitionCreateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Ammunition"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/ammunition/deleted": {
+            "get": {
+                "tags": [
+                    "Municiones"
+                ],
+                "summary": "Listar municiones eliminadas",
+                "operationId": "86fda784fcda1660d109af04a167a1e1",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Ammunition"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/ammunition/restore/{ammunition}": {
+            "post": {
+                "tags": [
+                    "Municiones"
+                ],
+                "summary": "Restaurar munición",
+                "operationId": "dac86b0b3ead4df8878e85a63b54f954",
+                "parameters": [
+                    {
+                        "name": "ammunition",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Restaurado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Ammunition"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/ammunition/{ammunition}": {
+            "get": {
+                "tags": [
+                    "Municiones"
+                ],
+                "summary": "Mostrar munición",
+                "operationId": "fe64f174db7ea0cc9f12802d7370098e",
+                "parameters": [
+                    {
+                        "name": "ammunition",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Ammunition"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Municiones"
+                ],
+                "summary": "Actualizar munición",
+                "operationId": "103fbd3d827baecf34eb65c5d4a033e6",
+                "parameters": [
+                    {
+                        "name": "ammunition",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AmmunitionUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Ammunition"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Municiones"
+                ],
+                "summary": "Eliminar munición",
+                "operationId": "b059a39c929bb71ee4aa369d10c3f563",
+                "parameters": [
+                    {
+                        "name": "ammunition",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Ammunition"
                                 }
                             }
                         }
@@ -433,6 +1507,1765 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/confiscation": {
+            "get": {
+                "tags": [
+                    "Decomisos"
+                ],
+                "summary": "Listar decomisos",
+                "operationId": "19b0366de8c62d5b1cac8169009f73e8",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Confiscation"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Decomisos"
+                ],
+                "summary": "Crear decomiso",
+                "operationId": "92e86bfd997a19507c85e38608bb53ab",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ConfiscationCreateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Confiscation"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/confiscation/deleted": {
+            "get": {
+                "tags": [
+                    "Decomisos"
+                ],
+                "summary": "Listar decomisos eliminados",
+                "operationId": "d081894c08d3bcbc7597d26ca66fd0c5",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Confiscation"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/confiscation/map": {
+            "get": {
+                "tags": [
+                    "Decomisos"
+                ],
+                "summary": "Mapa de decomisos filtrado",
+                "operationId": "0eb21e85a93b8ad4b8ddde5e6de05029",
+                "parameters": [
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "drugs",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "description": "JSON array de IDs de drogas",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "weapons",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "description": "JSON array de IDs de armas",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ammunitions",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "description": "JSON array de IDs de municiones",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MapConfiscationResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/confiscation/restore/{confiscation}": {
+            "post": {
+                "tags": [
+                    "Decomisos"
+                ],
+                "summary": "Restaurar decomiso",
+                "operationId": "899c313a9cee0f530ea063e4c8461504",
+                "parameters": [
+                    {
+                        "name": "confiscation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Restaurado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Confiscation"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/confiscation/{confiscation}": {
+            "get": {
+                "tags": [
+                    "Decomisos"
+                ],
+                "summary": "Mostrar decomiso",
+                "operationId": "ac8de9ce3605eab88c09a8f44d2794f9",
+                "parameters": [
+                    {
+                        "name": "confiscation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Confiscation"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Decomisos"
+                ],
+                "summary": "Actualizar decomiso",
+                "operationId": "567a505f9d9fde923e140578aed1033d",
+                "parameters": [
+                    {
+                        "name": "confiscation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ConfiscationUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Confiscation"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Decomisos"
+                ],
+                "summary": "Eliminar decomiso",
+                "operationId": "26d79c02870cb4da3d063580dc368445",
+                "parameters": [
+                    {
+                        "name": "confiscation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Confiscation"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/drugConfiscation": {
+            "get": {
+                "tags": [
+                    "Decomisos Drogas"
+                ],
+                "summary": "Listar decomisos de drogas",
+                "operationId": "aa83f2832c05a2622b9cca5290e39966",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/DrugConfiscation"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Decomisos Drogas"
+                ],
+                "summary": "Crear decomiso de droga",
+                "operationId": "956d5c7a906a5e223417b2048e6cb352",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DrugConfiscationCreateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DrugConfiscation"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/drugConfiscation/{idConfiscation}/confiscation": {
+            "get": {
+                "tags": [
+                    "Decomisos Drogas"
+                ],
+                "summary": "Listar decomisos de drogas por decomiso",
+                "operationId": "e9e27f07a8ac24205a145d8c4493875f",
+                "parameters": [
+                    {
+                        "name": "idConfiscation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/DrugConfiscation"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/drugConfiscation/{drugConfiscation}": {
+            "get": {
+                "tags": [
+                    "Decomisos Drogas"
+                ],
+                "summary": "Mostrar decomiso de droga",
+                "operationId": "7194488af43056a5d7089878d6a36ed6",
+                "parameters": [
+                    {
+                        "name": "drugConfiscation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DrugConfiscation"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Decomisos Drogas"
+                ],
+                "summary": "Actualizar decomiso de droga",
+                "operationId": "8febae070d8c50f1a2176c69289e14d8",
+                "parameters": [
+                    {
+                        "name": "drugConfiscation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DrugConfiscationUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DrugConfiscation"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Decomisos Drogas"
+                ],
+                "summary": "Eliminar decomiso de droga",
+                "operationId": "fe66f15eda24a860b7125fd42e9136f9",
+                "parameters": [
+                    {
+                        "name": "drugConfiscation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DrugConfiscation"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/drugConfiscation/deleted": {
+            "get": {
+                "tags": [
+                    "Decomisos Drogas"
+                ],
+                "summary": "Listar decomisos de drogas eliminados",
+                "operationId": "461a0adb51e097917693950889bade72",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/DrugConfiscation"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/drugConfiscation/restore/{drugConfiscation}": {
+            "post": {
+                "tags": [
+                    "Decomisos Drogas"
+                ],
+                "summary": "Restaurar decomiso de droga",
+                "operationId": "0f57d5038e4ee2167db64c4172d58a66",
+                "parameters": [
+                    {
+                        "name": "drugConfiscation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Restaurado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DrugConfiscation"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/drugGraphIndex": {
+            "get": {
+                "tags": [
+                    "Decomisos Drogas"
+                ],
+                "summary": "Datos gráficos decomisos de drogas",
+                "operationId": "a5e714f983747577fa3a66b5ab6274ac",
+                "parameters": [
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "day"
+                        }
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-01-01"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-01-31"
+                        }
+                    },
+                    {
+                        "name": "drugs",
+                        "in": "query",
+                        "description": "JSON array de IDs de drogas",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "[1,2]"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "lineBarData": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "pieData": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/drug": {
+            "get": {
+                "tags": [
+                    "Drogas"
+                ],
+                "summary": "Listar drogas",
+                "operationId": "c3fc91a002bd4b1b70b73d32aa99cec5",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Drug"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Drogas"
+                ],
+                "summary": "Crear droga",
+                "operationId": "6fbb7d342bcbec1b071bf0314646d8c9",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DrugCreateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Drug"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/drug/deleted": {
+            "get": {
+                "tags": [
+                    "Drogas"
+                ],
+                "summary": "Listar drogas eliminadas (soft delete)",
+                "operationId": "beff149dea167110a28a017df31c6c0e",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Drug"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/drug/restore/{drug}": {
+            "post": {
+                "tags": [
+                    "Drogas"
+                ],
+                "summary": "Restaurar droga",
+                "operationId": "0bee80effa8facd2ec3245c15f486e65",
+                "parameters": [
+                    {
+                        "name": "drug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Restaurado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Drug"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/drug/{drug}": {
+            "get": {
+                "tags": [
+                    "Drogas"
+                ],
+                "summary": "Mostrar droga",
+                "operationId": "96ed1e80a6a4440079215dae1df0e076",
+                "parameters": [
+                    {
+                        "name": "drug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Drug"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Drogas"
+                ],
+                "summary": "Actualizar droga",
+                "operationId": "20326289046c6f5c626d67c7e1bc37ef",
+                "parameters": [
+                    {
+                        "name": "drug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DrugUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Drug"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Drogas"
+                ],
+                "summary": "Eliminar droga",
+                "operationId": "f428787f570a8614faf5491b6c1fe5c4",
+                "parameters": [
+                    {
+                        "name": "drug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Drug"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/drugPresentation": {
+            "get": {
+                "tags": [
+                    "Presentaciones Drogas"
+                ],
+                "summary": "Listar presentaciones de droga",
+                "operationId": "1cfcd913854c0214a31a84693f5130f0",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/DrugPresentation"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Presentaciones Drogas"
+                ],
+                "summary": "Crear presentación de droga",
+                "operationId": "ccc0724f5f61dff9b1d749e78be4a5b0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DrugPresentationCreateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DrugPresentation"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/drugPresentation/deleted": {
+            "get": {
+                "tags": [
+                    "Presentaciones Drogas"
+                ],
+                "summary": "Listar presentaciones eliminadas",
+                "operationId": "b98a64c240b960c95f8df67d89bbe6f8",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/DrugPresentation"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/drugPresentation/restore/{drugPresentation}": {
+            "post": {
+                "tags": [
+                    "Presentaciones Drogas"
+                ],
+                "summary": "Restaurar presentación",
+                "operationId": "b9e9d638027991da9871cc3c61bea384",
+                "parameters": [
+                    {
+                        "name": "drugPresentation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Restaurado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DrugPresentation"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/drugPresentation/{drugPresentation}": {
+            "get": {
+                "tags": [
+                    "Presentaciones Drogas"
+                ],
+                "summary": "Mostrar presentación",
+                "operationId": "f1266bf5d666dd5e7d244c248cf8faca",
+                "parameters": [
+                    {
+                        "name": "drugPresentation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DrugPresentation"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Presentaciones Drogas"
+                ],
+                "summary": "Actualizar presentación",
+                "operationId": "407f8e3bf8df2966f805f9e8419762cb",
+                "parameters": [
+                    {
+                        "name": "drugPresentation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DrugPresentationUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DrugPresentation"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Presentaciones Drogas"
+                ],
+                "summary": "Eliminar presentación",
+                "operationId": "b49c27656c599a35e104d49b50d7c6db",
+                "parameters": [
+                    {
+                        "name": "drugPresentation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DrugPresentation"
                                 }
                             }
                         }
@@ -1785,6 +4618,1080 @@
                     }
                 ]
             }
+        },
+        "/api/weaponConfiscation": {
+            "get": {
+                "tags": [
+                    "Decomisos Armas"
+                ],
+                "summary": "Listar decomisos de armas",
+                "operationId": "40b9bfb06176373f09e16ea6a8e30702",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/WeaponConfiscation"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Decomisos Armas"
+                ],
+                "summary": "Crear decomiso de arma",
+                "operationId": "a3ff38ee8c61a295bde2f4bdc1d1fd94",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WeaponConfiscationCreateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WeaponConfiscation"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/weaponConfiscation/{idConfiscation}/confiscation": {
+            "get": {
+                "tags": [
+                    "Decomisos Armas"
+                ],
+                "summary": "Listar decomisos de armas por decomiso",
+                "operationId": "29235905900c5bfa82c70f239781a619",
+                "parameters": [
+                    {
+                        "name": "idConfiscation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/WeaponConfiscation"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/weaponConfiscation/{weaponConfiscation}": {
+            "get": {
+                "tags": [
+                    "Decomisos Armas"
+                ],
+                "summary": "Mostrar decomiso de arma",
+                "operationId": "f6e39bba0b7552ecb177bd6f19e52e5c",
+                "parameters": [
+                    {
+                        "name": "weaponConfiscation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WeaponConfiscation"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Decomisos Armas"
+                ],
+                "summary": "Actualizar decomiso de arma",
+                "operationId": "191781da27180d87a4fca66aee53bdef",
+                "parameters": [
+                    {
+                        "name": "weaponConfiscation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WeaponConfiscationUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WeaponConfiscation"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Decomisos Armas"
+                ],
+                "summary": "Eliminar decomiso de arma",
+                "operationId": "0e02a047e03ca085100fce256d221fe1",
+                "parameters": [
+                    {
+                        "name": "weaponConfiscation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WeaponConfiscation"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/weaponConfiscation/deleted": {
+            "get": {
+                "tags": [
+                    "Decomisos Armas"
+                ],
+                "summary": "Listar decomisos de armas eliminados",
+                "operationId": "d494345add99d3a63b6139a608799025",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/WeaponConfiscation"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/weaponConfiscation/restore/{weaponConfiscation}": {
+            "post": {
+                "tags": [
+                    "Decomisos Armas"
+                ],
+                "summary": "Restaurar decomiso de arma",
+                "operationId": "2e55a71616d75e2d3090457a5230ca05",
+                "parameters": [
+                    {
+                        "name": "weaponConfiscation",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Restaurado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WeaponConfiscation"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/weaponGraphIndex": {
+            "get": {
+                "tags": [
+                    "Decomisos Armas"
+                ],
+                "summary": "Datos gráficos decomisos de armas",
+                "operationId": "1df52af77f3309ee269abffa9d020d34",
+                "parameters": [
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "day"
+                        }
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-01-01"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-02-01"
+                        }
+                    },
+                    {
+                        "name": "weapons",
+                        "in": "query",
+                        "description": "JSON array de IDs de armas",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "[1,2]"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "lineBarData": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "pieData": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Método no permitido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MethodNotAllowedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TooManyRequestsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/weapon": {
+            "get": {
+                "tags": [
+                    "Armas"
+                ],
+                "summary": "Listar armas",
+                "operationId": "3d88930733ac1768425e089fb1f34ed0",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Weapon"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Armas"
+                ],
+                "summary": "Crear arma",
+                "operationId": "c5c7d746205379a6b8ae6d2e2104fc75",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WeaponCreateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Weapon"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/weapon/deleted": {
+            "get": {
+                "tags": [
+                    "Armas"
+                ],
+                "summary": "Listar armas eliminadas",
+                "operationId": "a5594f069dae4b4cbf4582ac54386877",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Weapon"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/weapon/restore/{weapon}": {
+            "post": {
+                "tags": [
+                    "Armas"
+                ],
+                "summary": "Restaurar arma",
+                "operationId": "a3f34669b88d3947560cc440b08a29f7",
+                "parameters": [
+                    {
+                        "name": "weapon",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Restaurado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Weapon"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/weapon/{weapon}": {
+            "get": {
+                "tags": [
+                    "Armas"
+                ],
+                "summary": "Mostrar arma",
+                "operationId": "a2eb66535d9ef97063b2ce26e63c9d82",
+                "parameters": [
+                    {
+                        "name": "weapon",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Weapon"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Armas"
+                ],
+                "summary": "Actualizar arma",
+                "operationId": "95355680cd0643ea0334928e215b9e35",
+                "parameters": [
+                    {
+                        "name": "weapon",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WeaponUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Weapon"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Armas"
+                ],
+                "summary": "Eliminar arma",
+                "operationId": "c6216136927aeeb62e5eaa4822165547",
+                "parameters": [
+                    {
+                        "name": "weapon",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Weapon"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -1822,6 +5729,157 @@
                     "fecha": {
                         "type": "string",
                         "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "AmmunitionConfiscation": {
+                "properties": {
+                    "identificador": {
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "cantidad": {
+                        "type": "integer",
+                        "example": 100
+                    },
+                    "foto": {
+                        "type": "string",
+                        "example": "municion.png",
+                        "nullable": true
+                    },
+                    "decomiso": {
+                        "properties": {
+                            "identificador": {
+                                "type": "integer",
+                                "example": 3
+                            },
+                            "observacion": {
+                                "type": "string",
+                                "example": "Hallazgo en vehículo"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "municion": {
+                        "properties": {
+                            "identificador": {
+                                "type": "integer",
+                                "example": 9
+                            },
+                            "descripcion": {
+                                "type": "string",
+                                "example": "Calibre 9mm"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "AmmunitionConfiscationCreateRequest": {
+                "required": [
+                    "cantidad",
+                    "foto",
+                    "decomiso",
+                    "municion"
+                ],
+                "properties": {
+                    "cantidad": {
+                        "type": "integer",
+                        "example": 100
+                    },
+                    "foto": {
+                        "type": "string",
+                        "format": "binary"
+                    },
+                    "decomiso": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "municion": {
+                        "type": "integer",
+                        "example": 9
+                    }
+                },
+                "type": "object"
+            },
+            "AmmunitionConfiscationUpdateRequest": {
+                "required": [
+                    "cantidad",
+                    "decomiso",
+                    "municion"
+                ],
+                "properties": {
+                    "cantidad": {
+                        "type": "integer",
+                        "example": 110
+                    },
+                    "foto": {
+                        "type": "string",
+                        "format": "binary",
+                        "nullable": true
+                    },
+                    "decomiso": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "municion": {
+                        "type": "integer",
+                        "example": 9
+                    }
+                },
+                "type": "object"
+            },
+            "Ammunition": {
+                "properties": {
+                    "identificador": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "descripcion": {
+                        "type": "string",
+                        "example": "Cartucho 5.56mm"
+                    },
+                    "logo": {
+                        "type": "string",
+                        "example": "ammo3.png"
+                    }
+                },
+                "type": "object"
+            },
+            "AmmunitionCreateRequest": {
+                "required": [
+                    "descripcion",
+                    "logo"
+                ],
+                "properties": {
+                    "descripcion": {
+                        "type": "string",
+                        "example": "Cartucho 5.56mm"
+                    },
+                    "logo": {
+                        "type": "string",
+                        "format": "binary",
+                        "example": "ammo.png"
+                    }
+                },
+                "type": "object"
+            },
+            "AmmunitionUpdateRequest": {
+                "required": [
+                    "descripcion"
+                ],
+                "properties": {
+                    "descripcion": {
+                        "type": "string",
+                        "example": "Cartucho 5.56mm verde"
+                    },
+                    "logo": {
+                        "type": "string",
+                        "format": "binary",
+                        "example": "ammo.png",
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -1968,6 +6026,517 @@
                     "code": {
                         "type": "integer",
                         "example": 500
+                    }
+                },
+                "type": "object"
+            },
+            "Confiscation": {
+                "properties": {
+                    "identificador": {
+                        "type": "integer",
+                        "example": 100
+                    },
+                    "fecha": {
+                        "type": "string",
+                        "example": "2024-01-15"
+                    },
+                    "observacion": {
+                        "type": "string",
+                        "example": "Operativo nocturno"
+                    },
+                    "direccion": {
+                        "type": "string",
+                        "example": "Av. Central 123"
+                    },
+                    "departamento": {
+                        "type": "string",
+                        "example": "Departamento X"
+                    },
+                    "municipalidad": {
+                        "type": "string",
+                        "example": "Municipio Y"
+                    },
+                    "latitud": {
+                        "type": "number",
+                        "example": 14.12345
+                    },
+                    "longitud": {
+                        "type": "number",
+                        "example": -87.12345
+                    }
+                },
+                "type": "object"
+            },
+            "ConfiscationCreateRequest": {
+                "required": [
+                    "fecha",
+                    "observacion",
+                    "direccion",
+                    "departamento",
+                    "municipalidad",
+                    "latitud",
+                    "longitud"
+                ],
+                "properties": {
+                    "fecha": {
+                        "type": "string",
+                        "example": "2024-01-15"
+                    },
+                    "observacion": {
+                        "type": "string",
+                        "example": "Operativo nocturno"
+                    },
+                    "direccion": {
+                        "type": "string",
+                        "example": "Av. Central 123"
+                    },
+                    "departamento": {
+                        "type": "string",
+                        "example": "Departamento X"
+                    },
+                    "municipalidad": {
+                        "type": "string",
+                        "example": "Municipio Y"
+                    },
+                    "latitud": {
+                        "type": "number",
+                        "example": 14.12345
+                    },
+                    "longitud": {
+                        "type": "number",
+                        "example": -87.12345
+                    }
+                },
+                "type": "object"
+            },
+            "ConfiscationUpdateRequest": {
+                "required": [
+                    "fecha",
+                    "observacion",
+                    "direccion",
+                    "departamento",
+                    "municipalidad",
+                    "latitud",
+                    "longitud"
+                ],
+                "properties": {
+                    "fecha": {
+                        "type": "string",
+                        "example": "2024-02-01"
+                    },
+                    "observacion": {
+                        "type": "string",
+                        "example": "Operativo diurno"
+                    },
+                    "direccion": {
+                        "type": "string",
+                        "example": "Av. Central 456"
+                    },
+                    "departamento": {
+                        "type": "string",
+                        "example": "Departamento X"
+                    },
+                    "municipalidad": {
+                        "type": "string",
+                        "example": "Municipio Y"
+                    },
+                    "latitud": {
+                        "type": "number",
+                        "example": 14.54321
+                    },
+                    "longitud": {
+                        "type": "number",
+                        "example": -87.54321
+                    }
+                },
+                "type": "object"
+            },
+            "MapDrugConfiscation": {
+                "properties": {
+                    "identificador": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "decomiso": {
+                        "type": "integer",
+                        "example": 100
+                    },
+                    "foto": {
+                        "type": "string",
+                        "example": "foto1.png"
+                    },
+                    "cantidad": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "peso": {
+                        "type": "number",
+                        "example": 2.5
+                    },
+                    "droga": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "droga_nombre": {
+                        "type": "string",
+                        "example": "Cocaína"
+                    }
+                },
+                "type": "object"
+            },
+            "MapWeaponConfiscation": {
+                "properties": {
+                    "identificador": {
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "decomiso": {
+                        "type": "integer",
+                        "example": 100
+                    },
+                    "foto": {
+                        "type": "string",
+                        "example": "foto2.png"
+                    },
+                    "cantidad": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "arma": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "arma_nombre": {
+                        "type": "string",
+                        "example": "Pistola 9mm"
+                    }
+                },
+                "type": "object"
+            },
+            "MapAmmunitionConfiscation": {
+                "properties": {
+                    "identificador": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "decomiso": {
+                        "type": "integer",
+                        "example": 100
+                    },
+                    "foto": {
+                        "type": "string",
+                        "example": "foto3.png"
+                    },
+                    "cantidad": {
+                        "type": "integer",
+                        "example": 100
+                    },
+                    "municion": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "municion_nombre": {
+                        "type": "string",
+                        "example": "Cartucho 5.56mm"
+                    }
+                },
+                "type": "object"
+            },
+            "MapConfiscationItem": {
+                "properties": {
+                    "identificador": {
+                        "type": "integer"
+                    },
+                    "fecha": {
+                        "type": "string"
+                    },
+                    "observacion": {
+                        "type": "string"
+                    },
+                    "latitud": {
+                        "type": "number"
+                    },
+                    "longitud": {
+                        "type": "number"
+                    },
+                    "drugConfiscations": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MapDrugConfiscation"
+                        }
+                    },
+                    "weaponConfiscations": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MapWeaponConfiscation"
+                        }
+                    },
+                    "ammunitionConfiscations": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MapAmmunitionConfiscation"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "MapConfiscationResponse": {
+                "properties": {
+                    "mapItems": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MapConfiscationItem"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "DrugConfiscation": {
+                "properties": {
+                    "identificador": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "cantidad": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "peso": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 12.5
+                    },
+                    "foto": {
+                        "type": "string",
+                        "example": "imagen.png",
+                        "nullable": true
+                    },
+                    "decomiso": {
+                        "properties": {
+                            "identificador": {
+                                "type": "integer",
+                                "example": 3
+                            },
+                            "descripcion": {
+                                "type": "string",
+                                "example": "Operativo zona norte"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "droga": {
+                        "properties": {
+                            "identificador": {
+                                "type": "integer",
+                                "example": 7
+                            },
+                            "descripcion": {
+                                "type": "string",
+                                "example": "Marihuana"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "presentacion": {
+                        "properties": {
+                            "identificador": {
+                                "type": "integer",
+                                "example": 2
+                            },
+                            "descripcion": {
+                                "type": "string",
+                                "example": "Bolsa plástica"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "DrugConfiscationCreateRequest": {
+                "required": [
+                    "cantidad",
+                    "peso",
+                    "foto",
+                    "decomiso",
+                    "droga",
+                    "presentacion"
+                ],
+                "properties": {
+                    "cantidad": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "peso": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 12.5
+                    },
+                    "foto": {
+                        "type": "string",
+                        "format": "binary"
+                    },
+                    "decomiso": {
+                        "description": "ID del decomiso",
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "droga": {
+                        "description": "ID de la droga",
+                        "type": "integer",
+                        "example": 7
+                    },
+                    "presentacion": {
+                        "description": "ID de la presentación de la droga",
+                        "type": "integer",
+                        "example": 2
+                    }
+                },
+                "type": "object"
+            },
+            "DrugConfiscationUpdateRequest": {
+                "required": [
+                    "cantidad",
+                    "peso",
+                    "decomiso",
+                    "droga",
+                    "presentacion"
+                ],
+                "properties": {
+                    "cantidad": {
+                        "type": "integer",
+                        "example": 6
+                    },
+                    "peso": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 10
+                    },
+                    "foto": {
+                        "type": "string",
+                        "format": "binary",
+                        "nullable": true
+                    },
+                    "decomiso": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "droga": {
+                        "type": "integer",
+                        "example": 7
+                    },
+                    "presentacion": {
+                        "type": "integer",
+                        "example": 2
+                    }
+                },
+                "type": "object"
+            },
+            "Drug": {
+                "properties": {
+                    "identificador": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "descripcion": {
+                        "type": "string",
+                        "example": "Cocaína"
+                    },
+                    "logo": {
+                        "description": "Nombre de archivo/logo",
+                        "type": "string",
+                        "example": "drug10.png"
+                    }
+                },
+                "type": "object"
+            },
+            "DrugCreateRequest": {
+                "required": [
+                    "descripcion",
+                    "logo"
+                ],
+                "properties": {
+                    "descripcion": {
+                        "type": "string",
+                        "example": "Cocaína"
+                    },
+                    "logo": {
+                        "description": "Archivo PNG",
+                        "type": "string",
+                        "format": "binary",
+                        "example": "imagen.png"
+                    }
+                },
+                "type": "object"
+            },
+            "DrugUpdateRequest": {
+                "required": [
+                    "descripcion"
+                ],
+                "properties": {
+                    "descripcion": {
+                        "type": "string",
+                        "example": "Cocaína refinada"
+                    },
+                    "logo": {
+                        "description": "Archivo PNG opcional",
+                        "type": "string",
+                        "format": "binary",
+                        "example": "imagen.png",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "DrugPresentation": {
+                "properties": {
+                    "identificador": {
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "descripcion": {
+                        "type": "string",
+                        "example": "Tabletas"
+                    },
+                    "logo": {
+                        "type": "string",
+                        "example": "present2.png"
+                    }
+                },
+                "type": "object"
+            },
+            "DrugPresentationCreateRequest": {
+                "required": [
+                    "descripcion",
+                    "logo"
+                ],
+                "properties": {
+                    "descripcion": {
+                        "type": "string",
+                        "example": "Tabletas"
+                    },
+                    "logo": {
+                        "type": "string",
+                        "format": "binary",
+                        "example": "tabletas.png"
+                    }
+                },
+                "type": "object"
+            },
+            "DrugPresentationUpdateRequest": {
+                "required": [
+                    "descripcion"
+                ],
+                "properties": {
+                    "descripcion": {
+                        "type": "string",
+                        "example": "Tabletas recubiertas"
+                    },
+                    "logo": {
+                        "type": "string",
+                        "format": "binary",
+                        "example": "tabletas.png",
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -2174,6 +6743,157 @@
                     }
                 },
                 "type": "object"
+            },
+            "WeaponConfiscation": {
+                "properties": {
+                    "identificador": {
+                        "type": "integer",
+                        "example": 11
+                    },
+                    "cantidad": {
+                        "type": "integer",
+                        "example": 4
+                    },
+                    "foto": {
+                        "type": "string",
+                        "example": "arma.png",
+                        "nullable": true
+                    },
+                    "decomiso": {
+                        "properties": {
+                            "identificador": {
+                                "type": "integer",
+                                "example": 3
+                            },
+                            "observacion": {
+                                "type": "string",
+                                "example": "Incautación nocturna"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "arma": {
+                        "properties": {
+                            "identificador": {
+                                "type": "integer",
+                                "example": 8
+                            },
+                            "descripcion": {
+                                "type": "string",
+                                "example": "Pistola 9mm"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "WeaponConfiscationCreateRequest": {
+                "required": [
+                    "cantidad",
+                    "foto",
+                    "decomiso",
+                    "arma"
+                ],
+                "properties": {
+                    "cantidad": {
+                        "type": "integer",
+                        "example": 4
+                    },
+                    "foto": {
+                        "type": "string",
+                        "format": "binary"
+                    },
+                    "decomiso": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "arma": {
+                        "type": "integer",
+                        "example": 8
+                    }
+                },
+                "type": "object"
+            },
+            "WeaponConfiscationUpdateRequest": {
+                "required": [
+                    "cantidad",
+                    "decomiso",
+                    "arma"
+                ],
+                "properties": {
+                    "cantidad": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "foto": {
+                        "type": "string",
+                        "format": "binary",
+                        "nullable": true
+                    },
+                    "decomiso": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "arma": {
+                        "type": "integer",
+                        "example": 8
+                    }
+                },
+                "type": "object"
+            },
+            "Weapon": {
+                "properties": {
+                    "identificador": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "descripcion": {
+                        "type": "string",
+                        "example": "Pistola 9mm"
+                    },
+                    "logo": {
+                        "type": "string",
+                        "example": "weapon5.png"
+                    }
+                },
+                "type": "object"
+            },
+            "WeaponCreateRequest": {
+                "required": [
+                    "descripcion",
+                    "logo"
+                ],
+                "properties": {
+                    "descripcion": {
+                        "type": "string",
+                        "example": "Pistola 9mm"
+                    },
+                    "logo": {
+                        "type": "string",
+                        "format": "binary",
+                        "example": "weapon.png"
+                    }
+                },
+                "type": "object"
+            },
+            "WeaponUpdateRequest": {
+                "required": [
+                    "descripcion"
+                ],
+                "properties": {
+                    "descripcion": {
+                        "type": "string",
+                        "example": "Pistola 9mm Modificada"
+                    },
+                    "logo": {
+                        "type": "string",
+                        "format": "binary",
+                        "example": "weapon.png",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
             }
         },
         "securitySchemes": {
@@ -2199,8 +6919,32 @@
             "description": "Logs de Actividad"
         },
         {
+            "name": "Decomisos Municiones",
+            "description": "Decomisos Municiones"
+        },
+        {
+            "name": "Municiones",
+            "description": "Municiones"
+        },
+        {
             "name": "Autenticación",
             "description": "Autenticación"
+        },
+        {
+            "name": "Decomisos",
+            "description": "Decomisos"
+        },
+        {
+            "name": "Decomisos Drogas",
+            "description": "Decomisos Drogas"
+        },
+        {
+            "name": "Drogas",
+            "description": "Drogas"
+        },
+        {
+            "name": "Presentaciones Drogas",
+            "description": "Presentaciones Drogas"
         },
         {
             "name": "Permisos",
@@ -2213,6 +6957,14 @@
         {
             "name": "Usuarios",
             "description": "Usuarios"
+        },
+        {
+            "name": "Decomisos Armas",
+            "description": "Decomisos Armas"
+        },
+        {
+            "name": "Armas",
+            "description": "Armas"
         }
     ]
 }
