@@ -5,11 +5,24 @@ namespace App\Http\Resources\Admin\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * Resource para el modelo User.
+ * 
+ * Transforma atributos del usuario al formato de API.
+ * Incluye arrays de IDs de roles y permisos asociados mediante Spatie Permission.
+ * Proporciona mapeo bidireccional para transformación de request/validación.
+ */
 class UserResource extends JsonResource
 {
     /**
-     * Transform the resource into an array.
-     *
+     * Transforma el recurso en un array para respuestas JSON.
+     * 
+     * Incluye:
+     * - identificador, nombre, correo
+     * - roles: array de IDs de roles asignados
+     * - permisos: array de IDs de permisos directos asignados
+     * 
+     * @param Request $request
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
@@ -23,6 +36,14 @@ class UserResource extends JsonResource
         ];
     }
 
+    /**
+     * Convierte atributo de API (español) a nombre de base de datos (inglés).
+     * 
+     * Incluye mapeo para roles y permisos (relaciones many-to-many).
+     * 
+     * @param string $index Nombre en español (identificador, nombre, correo, password, roles, permisos)
+     * @return string|null Nombre en base de datos (id, name, email, password, roles, permissions)
+     */
     public static function originalAttribute($index)
     {
         $attributes = [
@@ -37,6 +58,12 @@ class UserResource extends JsonResource
         return isset($attributes[$index]) ? $attributes[$index] : null;
     }
 
+    /**
+     * Convierte atributo de base de datos (inglés) a nombre de API (español).
+     * 
+     * @param string $index Nombre en base de datos (id, name, email, password)
+     * @return string|null Nombre en español (identificador, nombre, correo, password)
+     */
     public static function transformedAttribute($index)
     {
         $attributes = [
