@@ -15,18 +15,53 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
+/**
+ * Trait ApiResponser
+ * 
+ * Proporciona métodos reutilizables para formatear respuestas de API REST, incluyendo:
+ * - Respuestas de éxito y error estandarizadas
+ * - Transformación de datos mediante Resources
+ * - Paginación, ordenamiento, búsqueda y filtrado de colecciones
+ * - Caché de respuestas basado en URL y parámetros
+ * - Generación de períodos y agregación de datos para gráficas
+ * - Formateo específico para gráficas de barras, líneas y pastel
+ * 
+ * Uso: incluir este trait en controladores de API para estandarizar respuestas.
+ */
 trait ApiResponser
 {
+    /**
+     * Genera una respuesta JSON de éxito.
+     * 
+     * @param mixed $data Datos a incluir en la respuesta
+     * @param int $code Código de estado HTTP (por defecto 200)
+     * @return \Illuminate\Http\JsonResponse
+     */
     private function successResponse($data, $code)
     {
         return response()->json($data, $code);
     }
 
+    /**
+     * Genera una respuesta JSON de error estandarizada.
+     * 
+     * @param string $message Mensaje descriptivo del error
+     * @param int $code Código de estado HTTP (400, 404, 500, etc.)
+     * @return \Illuminate\Http\JsonResponse
+     */
     protected function errorResponse($message, $code)
     {
         return response()->json(['error' => $message, 'code' => $code], $code);
     }
 
+    /**
+     * Genera expresión SQL para agrupar confiscaciones por período.
+     * 
+     * Retorna la expresión SQL adecuada para GROUP BY según el tipo de período solicitado.
+     * 
+     * @param string $period Tipo de período: 'day', 'month', 'year', 'total'
+     * @return string Expresión SQL para agrupar por período (DATE, DATE_FORMAT, YEAR, etc.)
+     */
     protected function queryPeriod($period)
     {
         return match ($period) {
@@ -39,70 +74,26 @@ trait ApiResponser
         };
     }
 
-    protected function generatePeriods($startDate, $endDate, $periodType)
-    {
-        $periodos = collect();
-        $currentDate = Carbon::parse($startDate);
-        $endDate = Carbon::parse($endDate);
-
-        if ($periodType === 'total') {
-            return collect(["$startDate a $endDate"]);
-        }
-
-        while ($currentDate <= $endDate) {
-            switch ($periodType) {
-                case 'day':
-                    $formattedPeriod = $currentDate->format('Y-m-d');
-                    $currentDate->addDay();
-                    break;
-
-                case 'month':
-                    $formattedPeriod = $currentDate->format('Y-m');
-                    $currentDate->addMonth();
-                    break;
-
-                case 'quarter':
-                    $formattedPeriod = $currentDate->year . '-Q' . ceil($currentDate->month / 3);
-                    $currentDate->addMonths(3);
-                    break;
-
-                case 'semester':
-                    $formattedPeriod = $currentDate->year . '-S' . ($currentDate->month <= 6 ? '1' : '2');
-                    $currentDate->addMonths(6);
-                    break;
-
-                case 'year':
-                    $formattedPeriod = $currentDate->format('Y');
-                    $currentDate->addYear();
-                    break;
-
-                default:
-                    $formattedPeriod = $currentDate->format('Y-m-d');
-                    $currentDate->addDay();
-            }
-
-            $periodos->push($formattedPeriod);
-        }
-
-        return $periodos;
-    }
-
-    protected function ConfiscationId($criteria)
-    {
-        return match ($criteria) {
-            'drugs' => "drug_id",
-            'presentations' => "drug_presentation_id",
-            'weapons' => "weapon_id",
-            'ammunitions' => "ammunition_id",
-        };
-    }
-
-    protected function ConfiscationName($nameConfiscations, $idConfiscation, $typeConfiscation)
-    {
-        $name = $nameConfiscations->firstWhere($this->ConfiscationId($typeConfiscation), $idConfiscation);
-        return $name[$this->ConfiscationDescription($typeConfiscation)];
-    }
-
+    /**
+     * Formatea resultados para gráfica de líneas/barras agrupando por período.
+     *
+     * A partir de una colección de objetos con al menos las claves
+     * 'period', 'total_amount' y la descripción dinámica del criterio
+     * (por ejemplo, 'drug_description', 'weapon_description', etc.),
+     * agrupa por período y construye entradas con el nombre del período
+     * y pares clave-valor donde la clave es la descripción y el valor
+     * es el total del período.
+     *
+     * Ejemplo de salida:
+     * [
+     *   { name: '2025-11', 'Cocaína': 10, 'Marihuana': 5 },
+     *   { name: '2025-12', 'Cocaína': 3 }
+     * ]
+     *
+     * @param Collection $queryResult Colección de filas ya agregadas con 'period' y 'total_amount'.
+     * @param string $criteria Tipo de catálogo para resolver la descripción (drugs|presentations|weapons|ammunitions).
+     * @return Collection Colección indexada con entradas por período lista para consumo en gráficas.
+     */
     protected function FormatCollectionBarLine(Collection $queryResult, $criteria)
     {
         $linedata = collect($queryResult) //formateando data para grafica de linea
@@ -110,6 +101,7 @@ trait ApiResponser
             ->map(function ($group, $period) use ($criteria) {
                 $entry = ['name' => $period];
                 foreach ($group as $item) {
+                    /** @var object $item */
                     $entry[$item->{$this->ConfiscationDescription($criteria)}] = $item->total_amount; //accediendo de manera dinamica a las propiedades de un item
                 }
                 return $entry;
@@ -117,6 +109,25 @@ trait ApiResponser
             ->values(); // para tener índices numéricos (array plano)
         return $linedata;
     }
+
+    /**
+     * Formatea resultados para gráfica de pastel agrupando por descripción.
+     *
+     * Agrupa la colección por la descripción dinámica del criterio
+     * (por ejemplo, 'drug_description', 'weapon_description', etc.) y
+     * suma el campo 'total_amount' para cada grupo, retornando una
+     * colección de pares nombre/valor.
+     *
+     * Ejemplo de salida:
+     * [
+     *   { name: 'Cocaína', value: 13 },
+     *   { name: 'Marihuana', value: 5 }
+     * ]
+     *
+     * @param Collection $queryResult Colección de filas con la descripción y 'total_amount'.
+     * @param string $criteria Tipo de catálogo (drugs|presentations|weapons|ammunitions).
+     * @return Collection Colección de objetos con 'name' y 'value' lista para gráficas de pastel.
+     */
     protected function FormatCollectionPie(Collection $queryResult, $criteria)
     {
         $pieData = collect($queryResult) //formateando data para grafica de pastel
@@ -131,6 +142,16 @@ trait ApiResponser
         return $pieData;
     }
 
+    /**
+     * Retorna el nombre del campo descriptivo según el tipo de catálogo.
+     *
+     * Este método se usa para resolver dinámicamente el atributo
+     * descriptivo en los resultados agregados (por ejemplo, para drogas
+     * retorna 'drug_description').
+     *
+     * @param string $typeConfiscation Tipo de catálogo: 'drugs', 'presentations', 'weapons', 'ammunitions'.
+     * @return string Nombre del atributo descriptivo correspondiente.
+     */
     protected function ConfiscationDescription($typeConfiscation)
     {
         return match ($typeConfiscation) {
@@ -142,59 +163,36 @@ trait ApiResponser
     }
 
 
-
-
-    protected function queryFormater(Collection $queryResult, AmmunitionRequest|DrugRequest|WeaponRequest $request)
-    {
-        $periodType = $request->input('period');
-        $typeConfiscation = $request->input('typeConfiscation');
-        $magnitude = $request->input('magnitude');
-
-        $typeConfiscationsIds = json_decode($request->input($typeConfiscation) ?? '[]');
-        $periodos = $this->generatePeriods($request->input('start_date'), $request->input('end_date'), $periodType);
-
-        $namesConfiscations = $queryResult
-            ->unique($this->ConfiscationId($typeConfiscation))
-            ->select($this->ConfiscationDescription($typeConfiscation), $this->ConfiscationId($typeConfiscation));
-        // Agrupar los resultados por período
-        $groupedResults = $queryResult->groupBy('period');
-
-        $grouped = collect($typeConfiscationsIds)->mapWithKeys(function ($typeConfiscation_id) use ($groupedResults, $periodos, $periodType, $typeConfiscation, $magnitude, $namesConfiscations) {
-            $filtered = $groupedResults->map(
-                fn($items) =>
-                $items->where($this->ConfiscationId($typeConfiscation), $typeConfiscation_id)
-            );
-            $data = ($periodType === 'total')
-                ? [$filtered->flatten()->sum($magnitude == 'amount' ? 'total_amount' : 'total_weight')]
-                : $periodos->map(
-                    fn($period) =>
-                    optional($filtered->get($period))->sum($magnitude == 'amount' ? 'total_amount' : 'total_weight') ?? 0
-                )->toArray();
-
-            $typeConfiscationName = ($typeConfiscation == 'drugs')
-                ? Drug::find($typeConfiscation_id)->description
-                : DrugPresentation::find($typeConfiscation_id)->description;
-
-            return [$typeConfiscation_id => [
-                "atributo cualquiera 1" => "contenido de atributo1",
-                "label" => $this->ConfiscationName($namesConfiscations, $typeConfiscation_id, $typeConfiscation),
-                "data" => $data
-            ]];
-        });
-
-        return [
-            "datasets" => $grouped->values()->toArray(),
-            "periodos" => $periodos->toArray()
-        ];
-    }
-
-
+    /**
+     * Retorna una respuesta JSON con un único recurso transformado.
+     * 
+     * Transforma el modelo usando su Resource asociado (definido en $instance->resource)
+     * y retorna una respuesta JSON estandarizada.
+     * 
+     * @param Model $instance Instancia del modelo a retornar
+     * @param int $code Código de estado HTTP (por defecto 200)
+     * @return \Illuminate\Http\JsonResponse
+     */
     protected function showOne(Model $instance, $code = 200)
     {
         $resource = $instance->resource;
         $instance = new $resource($instance);
         return $this->successResponse($instance, $code);
     }
+    /**
+     * Retorna una respuesta JSON con una colección de recursos transformados, paginados y filtrados.
+     * 
+     * Aplica la siguiente pipeline de procesamiento:
+     * 1. Transformación mediante Resource
+     * 2. Ordenamiento por campo especificado
+     * 3. Búsqueda por columna (coincidencias parciales)
+     * 4. Paginación (por defecto 10 elementos por página)
+     * 5. Caché de respuesta basado en URL y parámetros
+     * 
+     * @param Collection $collection Colección de modelos a retornar
+     * @param int $code Código de estado HTTP (por defecto 200)
+     * @return \Illuminate\Http\JsonResponse
+     */
     protected function showAll(Collection $collection, $code = 200)
     {
         if ($collection->isEmpty()) {
@@ -204,60 +202,12 @@ trait ApiResponser
         $collection = $this->transformData($collection);
         $collection = $this->sortData($collection);
         $collection = $this->searchByColumn($collection);
-        //$collection = $this->filterData($collection);
         $collection = $this->paginate($collection);
         $collection = $this->cacheResponse($collection);
 
         return $this->successResponse($collection, $code);
     }
 
-
-
-
-
-    protected function filterData(Collection $collection)
-    {
-        //dd($collection);
-        // foreach (request()->query() as $query => $value) {
-        //     //$attribute = $transformer::originalAttribute($query);
-
-        //     if (isset($query, $value)) {
-        //         //dump($query);
-        //         if (count($collection->where($query, $value))) {
-        //             $collection = $collection->where($query, $value);
-        //         }
-        //         //$collection = $collection->where($query, $value);
-        //     }
-        // }
-
-        // return $collection;
-        $request = request();
-
-        return $collection->filter(function ($item) use ($request) {
-            $passes = true;
-            foreach ($item->getRelations() as $query => $relation) {
-                if ($request->filled('filters.' . $query)) {
-                    if (!$relation instanceof \Illuminate\Database\Eloquent\Collection) { // cuando la relación es de uno a muchos
-                        foreach (array_keys($item->$query->toArray()) as $query2 => $ind) {
-                            if ($ind != 'id') {
-                                $passes = $passes && in_array($item->$query->$ind, $request->filters[$query]);
-                            }
-                        }
-                    }
-                    if ($relation instanceof \Illuminate\Database\Eloquent\Collection) { // cuando la relación es de muchos a muchos
-                        $passes = $passes && $item->$query->contains(function ($item) use ($request, $query) {
-                            foreach (array_keys($item->toArray()) as $rtr => $ind) {
-                                if ($ind != 'id' && $ind != 'pivot') {
-                                    return in_array($item->$ind, $request->filters[$query]);
-                                }
-                            }
-                        });
-                    }
-                }
-            }
-            return $passes;
-        });
-    }
 
     protected function sortData(Collection $collection)
     {
@@ -268,8 +218,9 @@ trait ApiResponser
                 $collection = $collection->sortByDesc(request()->sort_by);
             }
         }
-        return $collection;
+        return $collection->values();
     }
+
     protected function searchByColumn(Collection $collection)
     {
         foreach (request()->query() as $field => $value) { //request()->query() obtiene un arreglo de parametros de la url de la columna y el valor a buscar
@@ -281,7 +232,7 @@ trait ApiResponser
                 }
             }
         }
-        return $collection;
+        return $collection->values();
     }
 
     protected function transformData(Collection $collection)
@@ -319,15 +270,22 @@ trait ApiResponser
 
     protected function cacheResponse($data)
     {
+        //se obtienen la URL sin parámetros, por ejemplo: http://localhost/test
         $url = request()->url();
+        //se obtienen los parámetros de la URL en forma de arreglo asociativo
+        //ejemplo: ['sort_by' => 'name', 'type' => 'asc']
         $queryParams = request()->query();
-
+        //se ordenan las claves alfabéticamente para generar una clave consistente
+        //ejemplo: ['sort_by' => 'name', 'type' => 'asc']
+        //en lugar de: ['type' => 'asc', 'sort_by' => 'name']
         ksort($queryParams);
-
+        //se construye la cadena de consulta a partir del arreglo ordenado
+        //ejemplo: sort_by=name&type=asc
         $queryString = http_build_query($queryParams);
-
+        //se combina la URL base con la cadena de consulta para formar la clave completa
+        //ejemplo: http://localhost/test?sort_by=name&type=asc
         $fullUrl = "{$url}?{$queryString}";
-
+        //se utiliza la fachada Cache para almacenar y recuperar la respuesta en caché
         return Cache::remember($fullUrl, 30 / 60, function () use ($data) {
             return $data;
         });
