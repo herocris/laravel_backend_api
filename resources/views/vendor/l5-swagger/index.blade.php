@@ -127,6 +127,7 @@
 
         @foreach($urlsToDocs as $title => $url)
             urls.push({name: "{{ $title }}", url: "{{ $url }}"});
+            // urls.push({name: "{{ $title }}", url: "{{ str_replace('?', '/', $url) }}"});  cambiar a esto en produccion
         @endforeach
 
         // Build a system
