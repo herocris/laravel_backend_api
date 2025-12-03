@@ -10,7 +10,12 @@ use Illuminate\Http\Request;
 class LogActivityController extends ApiController
 {
     /**
-     * Handle the incoming request.
+     * Controlador invocable que lista todas las entradas del Activity Log.
+     * Útil para auditoría rápida. No aplica filtros, orden ni paginación.
+     * Para grandes volúmenes se recomienda implementar criterios (fecha,
+     * usuario, evento) y paginar para mejorar rendimiento.
+     *
+     * @return \Illuminate\Http\JsonResponse Colección de actividades registradas.
      */
     public function __invoke()
     {

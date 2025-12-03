@@ -12,24 +12,36 @@ use Illuminate\Routing\Controllers\Middleware;
 
 class AmmunitionController extends ApiController implements HasMiddleware
 {
+    /**
+     * Middlewares del controlador de municiones.
+     * `transformInput` alinea la carga útil con `AmmunitionResource` en
+     * creación y actualización para mantener consistencia.
+     *
+     * @return array<Middleware> Lista de middlewares.
+     */
     public static function middleware(): array
     {
         return [
             new Middleware("transformInput:" . AmmunitionResource::class . "", only: ['store', 'update']),
         ];
     }
+
     /**
-     * Display a listing of the resource.
+     * Lista todas las municiones activas. Sin paginación.
+     *
+     * @return \Illuminate\Http\JsonResponse Colección de municiones.
      */
     public function index()
     {
-
         $ammunitions = Ammunition::all();
         return $this->showAll($ammunitions);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Crea una munición nueva con validaciones previas.
+     *
+     * @param StorePostRequest $request Datos validados.
+     * @return \Illuminate\Http\JsonResponse Munición creada.
      */
     public function store(StorePostRequest $request)
     {
@@ -39,7 +51,10 @@ class AmmunitionController extends ApiController implements HasMiddleware
     }
 
     /**
-     * Display the specified resource.
+     * Muestra una munición específica por ID.
+     *
+     * @param Ammunition $ammunition Instancia objetivo.
+     * @return \Illuminate\Http\JsonResponse Recurso solicitado.
      */
     public function show(Ammunition $ammunition)
     {
@@ -47,17 +62,24 @@ class AmmunitionController extends ApiController implements HasMiddleware
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza una munición con datos validados.
+     *
+     * @param UpdatePutRequest $request Datos validados.
+     * @param Ammunition $ammunition Recurso a actualizar.
+     * @return \Illuminate\Http\JsonResponse Recurso actualizado.
      */
     public function update(UpdatePutRequest $request, Ammunition $ammunition)
     {
-        $validated=$request->validated();
+        $validated = $request->validated();
         $ammunition->update($validated);
         return $this->showOne($ammunition);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Soft delete de la munición.
+     *
+     * @param Ammunition $ammunition Recurso a eliminar lógicamente.
+     * @return \Illuminate\Http\JsonResponse Recurso eliminado.
      */
     public function destroy(Ammunition $ammunition)
     {
@@ -65,13 +87,22 @@ class AmmunitionController extends ApiController implements HasMiddleware
         return $this->showOne($ammunition);
     }
 
+    /**
+     * Lista municiones en papelera (soft-deleted).
+     *
+     * @return \Illuminate\Http\JsonResponse Colección en papelera.
+     */
     public function indexDeleted()
     {
-        $ammunitions= Ammunition::onlyTrashed()->get();
+        $ammunitions = Ammunition::onlyTrashed()->get();
         return $this->showAll($ammunitions);
     }
+
     /**
-     * Restore the specified resource from storage.
+     * Restaura una munición previamente eliminada.
+     *
+     * @param Ammunition $ammunition Recurso a restaurar.
+     * @return \Illuminate\Http\JsonResponse Recurso restaurado.
      */
     public function restore(Ammunition $ammunition)
     {

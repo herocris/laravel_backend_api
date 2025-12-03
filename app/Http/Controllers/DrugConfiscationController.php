@@ -17,29 +17,46 @@ use function Psy\debug;
 
 class DrugConfiscationController extends ApiController implements HasMiddleware
 {
+    /**
+     * Middlewares para items de decomiso de droga: transforma entrada según recurso.
+     *
+     * @return array<Middleware> Middlewares registrados.
+     */
     public static function middleware(): array
     {
         return [
             new Middleware("transformInput:" . DrugConfiscationResource::class . "", only: ['store', 'update']),
         ];
     }
+
     /**
-     * Display a listing of the resource.
+     * Lista todos los registros de droga decomisada.
+     *
+     * @return \Illuminate\Http\JsonResponse Colección de registros.
      */
     public function index()
     {
-
         $drugConfiscations = DrugConfiscation::all();
         return $this->showAll($drugConfiscations);
     }
-    public function indexByConfiscation($idConfiscation)
+
+    /**
+     * Lista registros filtrados por decomiso padre.
+     *
+     * @param int $idConfiscation ID del decomiso.
+     * @return \Illuminate\Http\JsonResponse Colección filtrada.
+     */
+    public function indexByConfiscation(int $idConfiscation)
     {
         $drugConfiscations = DrugConfiscation::where('confiscation_id', $idConfiscation);
         return $this->showAll($drugConfiscations->get());
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Crea un registro de droga decomisada.
+     *
+     * @param StorePostRequest $request Datos validados.
+     * @return \Illuminate\Http\JsonResponse Recurso creado.
      */
     public function store(StorePostRequest $request)
     {
@@ -49,7 +66,10 @@ class DrugConfiscationController extends ApiController implements HasMiddleware
     }
 
     /**
-     * Display the specified resource.
+     * Muestra un registro específico.
+     *
+     * @param DrugConfiscation $drugConfiscation Instancia objetivo.
+     * @return \Illuminate\Http\JsonResponse Recurso solicitado.
      */
     public function show(DrugConfiscation $drugConfiscation)
     {
@@ -57,7 +77,11 @@ class DrugConfiscationController extends ApiController implements HasMiddleware
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza un registro de droga decomisada.
+     *
+     * @param UpdatePutRequest $request Datos validados.
+     * @param DrugConfiscation $drugConfiscation Recurso objetivo.
+     * @return \Illuminate\Http\JsonResponse Recurso actualizado.
      */
     public function update(UpdatePutRequest $request, DrugConfiscation $drugConfiscation)
     {
@@ -67,7 +91,10 @@ class DrugConfiscationController extends ApiController implements HasMiddleware
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Soft delete del registro.
+     *
+     * @param DrugConfiscation $drugConfiscation Recurso a eliminar.
+     * @return \Illuminate\Http\JsonResponse Recurso eliminado.
      */
     public function destroy(DrugConfiscation $drugConfiscation)
     {
@@ -75,13 +102,22 @@ class DrugConfiscationController extends ApiController implements HasMiddleware
         return $this->showOne($drugConfiscation);
     }
 
+    /**
+     * Lista registros soft-deleted.
+     *
+     * @return \Illuminate\Http\JsonResponse Colección en papelera.
+     */
     public function indexDeleted()
     {
         $drugConfiscations = DrugConfiscation::onlyTrashed()->get();
         return $this->showAll($drugConfiscations);
     }
+
     /**
-     * Restore the specified resource from storage.
+     * Restaura un registro eliminado.
+     *
+     * @param DrugConfiscation $drugConfiscation Recurso a restaurar.
+     * @return \Illuminate\Http\JsonResponse Recurso restaurado.
      */
     public function restore(DrugConfiscation $drugConfiscation)
     {
@@ -89,20 +125,26 @@ class DrugConfiscationController extends ApiController implements HasMiddleware
         return $this->showOne($drugConfiscation);
     }
 
+    /**
+     * Genera datos agregados para gráficos (línea, barras, pie) según período
+     * y rango de fechas, filtrando por conjunto de drogas. Usa vistas/materializada.
+     *
+     * @param GetRequest $request Parámetros: period, start_date, end_date, drugs[].
+     * @return \Illuminate\Http\JsonResponse lineBarData y pieData formateados.
+     */
     public function graphIndex(GetRequest $request)
     {
-        $period = $request->input('period'); // Por defecto: día
+        $period = $request->input('period');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
         $drugs = json_decode($request->input('drugs') ?? '[]');
         $queryp = $this->queryPeriod($period);
 
-        // Construir la consulta con el período seleccionado
         $query = DB::table('data_graph_drug_confiscation')
             ->whereIn('drug_id', $drugs)
             ->whereBetween('full_date', [$startDate, $endDate]);
 
-        $queryBarLine = $query->clone()->select( //clonando query para poder utilizar la misma en otra consulta
+        $queryBarLine = $query->clone()->select(
             DB::raw("{$queryp} as period"),
             'drug_description',
             DB::raw('SUM(total_amount) as total_amount'),
@@ -121,7 +163,6 @@ class DrugConfiscationController extends ApiController implements HasMiddleware
 
         $linedata = $this->FormatCollectionBarLine($queryBarLine, "drugs");
         $pieData = $this->FormatCollectionPie($queryPie, "drugs");
-
 
         return response()->json(['lineBarData' => $linedata, 'pieData' => $pieData]);
     }

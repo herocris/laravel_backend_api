@@ -14,31 +14,46 @@ use Illuminate\Support\Facades\DB;
 
 class WeaponConfiscationController extends ApiController implements HasMiddleware
 {
+    /**
+     * Middlewares para items de decomiso de armas: transforma entrada según recurso.
+     *
+     * @return array<Middleware> Middlewares registrados.
+     */
     public static function middleware(): array
     {
         return [
             new Middleware("transformInput:" . WeaponConfiscationResource::class . "", only: ['store', 'update']),
         ];
     }
+
     /**
-     * Display a listing of the resource.
+     * Lista todos los registros de armas decomisadas.
+     *
+     * @return \Illuminate\Http\JsonResponse Colección de registros.
      */
     public function index()
     {
-
         $weaponConfiscations = WeaponConfiscation::all();
         return $this->showAll($weaponConfiscations);
     }
 
-    public function indexByConfiscation($idConfiscation)
+    /**
+     * Lista registros filtrados por ID de decomiso padre.
+     *
+     * @param int $idConfiscation ID del decomiso.
+     * @return \Illuminate\Http\JsonResponse Colección filtrada.
+     */
+    public function indexByConfiscation(int $idConfiscation)
     {
-
         $weaponConfiscations = WeaponConfiscation::where('confiscation_id', $idConfiscation);
         return $this->showAll($weaponConfiscations->get());
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Crea un registro de arma decomisada.
+     *
+     * @param StorePostRequest $request Datos validados.
+     * @return \Illuminate\Http\JsonResponse Recurso creado.
      */
     public function store(StorePostRequest $request)
     {
@@ -48,7 +63,10 @@ class WeaponConfiscationController extends ApiController implements HasMiddlewar
     }
 
     /**
-     * Display the specified resource.
+     * Muestra un registro específico.
+     *
+     * @param WeaponConfiscation $weaponConfiscation Instancia objetivo.
+     * @return \Illuminate\Http\JsonResponse Recurso solicitado.
      */
     public function show(WeaponConfiscation $weaponConfiscation)
     {
@@ -56,7 +74,11 @@ class WeaponConfiscationController extends ApiController implements HasMiddlewar
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza un registro de arma decomisada.
+     *
+     * @param UpdatePutRequest $request Datos validados.
+     * @param WeaponConfiscation $weaponConfiscation Recurso objetivo.
+     * @return \Illuminate\Http\JsonResponse Recurso actualizado.
      */
     public function update(UpdatePutRequest $request, WeaponConfiscation $weaponConfiscation)
     {
@@ -66,7 +88,10 @@ class WeaponConfiscationController extends ApiController implements HasMiddlewar
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Soft delete del registro.
+     *
+     * @param WeaponConfiscation $weaponConfiscation Recurso a eliminar.
+     * @return \Illuminate\Http\JsonResponse Recurso eliminado.
      */
     public function destroy(WeaponConfiscation $weaponConfiscation)
     {
@@ -74,13 +99,22 @@ class WeaponConfiscationController extends ApiController implements HasMiddlewar
         return $this->showOne($weaponConfiscation);
     }
 
+    /**
+     * Lista registros soft-deleted.
+     *
+     * @return \Illuminate\Http\JsonResponse Colección en papelera.
+     */
     public function indexDeleted()
     {
         $weaponConfiscations = WeaponConfiscation::onlyTrashed()->get();
         return $this->showAll($weaponConfiscations);
     }
+
     /**
-     * Restore the specified resource from storage.
+     * Restaura un registro eliminado.
+     *
+     * @param WeaponConfiscation $weaponConfiscation Recurso a restaurar.
+     * @return \Illuminate\Http\JsonResponse Recurso restaurado.
      */
     public function restore(WeaponConfiscation $weaponConfiscation)
     {
@@ -88,39 +122,42 @@ class WeaponConfiscationController extends ApiController implements HasMiddlewar
         return $this->showOne($weaponConfiscation);
     }
 
+    /**
+     * Genera datos agregados de armas decomisadas para gráficos.
+     * Usa período (día, mes, etc.) y rango de fechas; filtra por conjunto de armas.
+     *
+     * @param GetRequest $request Parámetros: period, start_date, end_date, weapons[].
+     * @return \Illuminate\Http\JsonResponse lineBarData y pieData.
+     */
     public function graphIndex(GetRequest $request)
     {
-        $period = $request->input('period'); // Por defecto: día
+        $period = $request->input('period');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
         $weapons = json_decode($request->input('weapons') ?? '[]');
         $queryp = $this->queryPeriod($period);
 
-        // Construir la consulta con el período seleccionado
         $query = DB::table('data_graph_weapon_confiscation')
             ->whereIn('weapon_id', $weapons)
             ->whereBetween('full_date', [$startDate, $endDate]);
 
-        $queryBarLine = $query->clone()->select( //clonando query para poder utilizar la misma en otra consulta
+        $queryBarLine = $query->clone()->select(
             DB::raw("{$queryp} as period"),
             'weapon_description',
-            DB::raw('SUM(total_amount) as total_amount'),
-            //DB::raw('SUM(total_weight) as total_weight')
+            DB::raw('SUM(total_amount) as total_amount')
         )
             ->groupBy('period', 'weapon_id')
             ->orderBy('period', 'asc')->get();
 
         $queryPie = $query->clone()->select(
             'weapon_description',
-            DB::raw('SUM(total_amount) as total_amount'),
-           // DB::raw('SUM(total_weight) as total_weight')
+            DB::raw('SUM(total_amount) as total_amount')
         )
             ->groupBy('weapon_description')
             ->orderBy('weapon_description', 'asc')->get();
 
         $linedata = $this->FormatCollectionBarLine($queryBarLine, "weapons");
         $pieData = $this->FormatCollectionPie($queryPie, "weapons");
-
 
         return response()->json(['lineBarData' => $linedata, 'pieData' => $pieData]);
     }
