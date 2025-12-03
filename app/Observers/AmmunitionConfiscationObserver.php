@@ -5,10 +5,23 @@ namespace App\Observers;
 use App\Models\AmmunitionConfiscation;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * Observer para el modelo AmmunitionConfiscation.
+ * 
+ * Gestiona automáticamente la carga y eliminación de archivos photo (imagen PNG) asociados a confiscaciones de municiones.
+ * Los archivos se almacenan en storage/app/public/ammunitionConfiscation.
+ * Nota: El request envía 'foto' pero el modelo almacena en 'photo'.
+ */
 class AmmunitionConfiscationObserver
 {
     /**
-     * Handle the AmmunitionConfiscation "created" event.
+     * Maneja el evento "creating" del modelo AmmunitionConfiscation.
+     * 
+     * Si el request contiene un archivo 'foto', lo almacena en el disco público bajo el directorio 'ammunitionConfiscation'
+     * y asigna la ruta al atributo photo del modelo antes de guardarlo.
+     * 
+     * @param AmmunitionConfiscation $ammunitionConfiscation La confiscación de munición que está siendo creada
+     * @return void
      */
     public function creating(AmmunitionConfiscation $ammunitionConfiscation): void
     {
@@ -18,7 +31,15 @@ class AmmunitionConfiscationObserver
     }
 
     /**
-     * Handle the AmmunitionConfiscation "updated" event.
+     * Maneja el evento "updating" del modelo AmmunitionConfiscation.
+     * 
+     * Si el request contiene un nuevo archivo 'foto':
+     * - Elimina la foto anterior del disco público si existe
+     * - Almacena la nueva foto en el directorio 'ammunitionConfiscation'
+     * - Actualiza el atributo photo con la nueva ruta
+     * 
+     * @param AmmunitionConfiscation $ammunitionConfiscation La confiscación de munición que está siendo actualizada
+     * @return void
      */
     public function updating(AmmunitionConfiscation $ammunitionConfiscation): void
     {

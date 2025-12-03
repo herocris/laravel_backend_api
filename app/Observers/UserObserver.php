@@ -4,10 +4,22 @@ namespace App\Observers;
 
 use App\Models\User;
 
+/**
+ * Observer para el modelo User.
+ * 
+ * Gestiona la sincronización automática de roles y permisos cuando se crea o actualiza un usuario.
+ * Los roles y permisos se obtienen del request actual y se sincronizan mediante Spatie Permission.
+ */
 class UserObserver
 {
     /**
-     * Handle the User "created" event.
+     * Maneja el evento "created" del modelo User.
+     * 
+     * Sincroniza roles y permisos del usuario recién creado con los valores recibidos en el request.
+     * Si no se proporcionan roles o permisos, sincroniza con arrays vacíos.
+     * 
+     * @param User $user El usuario recién creado
+     * @return void
      */
     public function created(User $user): void
     {
@@ -16,7 +28,13 @@ class UserObserver
     }
 
     /**
-     * Handle the User "updated" event.
+     * Maneja el evento "updated" del modelo User.
+     * 
+     * Resincroniza roles y permisos del usuario actualizado con los valores recibidos en el request.
+     * Reemplaza completamente los roles y permisos existentes con los nuevos.
+     * 
+     * @param User $user El usuario actualizado
+     * @return void
      */
     public function updated(User $user): void
     {

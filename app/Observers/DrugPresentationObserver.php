@@ -5,10 +5,22 @@ namespace App\Observers;
 use App\Models\DrugPresentation;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * Observer para el modelo DrugPresentation.
+ * 
+ * Gestiona automáticamente la carga y eliminación de archivos logo (imagen PNG) asociados a presentaciones de drogas.
+ * Los archivos se almacenan en storage/app/public/drugPresentation.
+ */
 class DrugPresentationObserver
 {
     /**
-     * Handle the DrugPresentation "created" event.
+     * Maneja el evento "creating" del modelo DrugPresentation.
+     * 
+     * Si el request contiene un archivo 'logo', lo almacena en el disco público bajo el directorio 'drugPresentation'
+     * y asigna la ruta al atributo logo del modelo antes de guardarlo.
+     * 
+     * @param DrugPresentation $drugPresentation La presentación de droga que está siendo creada
+     * @return void
      */
     public function creating(DrugPresentation $drugPresentation): void
     {
@@ -18,7 +30,15 @@ class DrugPresentationObserver
     }
 
     /**
-     * Handle the DrugPresentation "updated" event.
+     * Maneja el evento "updating" del modelo DrugPresentation.
+     * 
+     * Si el request contiene un nuevo archivo 'logo':
+     * - Elimina el logo anterior del disco público si existe
+     * - Almacena el nuevo logo en el directorio 'drugPresentation'
+     * - Actualiza el atributo logo con la nueva ruta
+     * 
+     * @param DrugPresentation $drugPresentation La presentación de droga que está siendo actualizada
+     * @return void
      */
     public function updating(DrugPresentation $drugPresentation): void
     {

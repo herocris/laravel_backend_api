@@ -5,10 +5,23 @@ namespace App\Observers;
 use App\Models\WeaponConfiscation;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * Observer para el modelo WeaponConfiscation.
+ * 
+ * Gestiona automáticamente la carga y eliminación de archivos photo (imagen PNG) asociados a confiscaciones de armas.
+ * Los archivos se almacenan en storage/app/public/weaponConfiscation.
+ * Nota: El request envía 'foto' pero el modelo almacena en 'photo'.
+ */
 class WeaponConfiscationObserver
 {
     /**
-     * Handle the WeaponConfiscation "created" event.
+     * Maneja el evento "creating" del modelo WeaponConfiscation.
+     * 
+     * Si el request contiene un archivo 'foto', lo almacena en el disco público bajo el directorio 'weaponConfiscation'
+     * y asigna la ruta al atributo photo del modelo antes de guardarlo.
+     * 
+     * @param WeaponConfiscation $weaponConfiscation La confiscación de arma que está siendo creada
+     * @return void
      */
     public function creating(WeaponConfiscation $weaponConfiscation): void
     {
@@ -18,7 +31,15 @@ class WeaponConfiscationObserver
     }
 
     /**
-     * Handle the WeaponConfiscation "updated" event.
+     * Maneja el evento "updating" del modelo WeaponConfiscation.
+     * 
+     * Si el request contiene un nuevo archivo 'foto':
+     * - Elimina la foto anterior del disco público si existe
+     * - Almacena la nueva foto en el directorio 'weaponConfiscation'
+     * - Actualiza el atributo photo con la nueva ruta
+     * 
+     * @param WeaponConfiscation $weaponConfiscation La confiscación de arma que está siendo actualizada
+     * @return void
      */
     public function updating(WeaponConfiscation $weaponConfiscation): void
     {
