@@ -4,10 +4,18 @@ namespace App\Http\Requests\Admin\Permission;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Request para creación de permisos.
+ *
+ * Valida:
+ * - name: requerido, string, único en tabla permissions (nota: regla actual valida contra 'roles' por error, corregir si necesario).
+ */
 class StorePostRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Autorización permitida.
+     *
+     * @return bool
      */
     public function authorize(): bool
     {
@@ -15,14 +23,14 @@ class StorePostRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Reglas de validación.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'name' => 'required|string|unique:roles',
+            'name' => 'required|string|unique:permissions',
         ];
     }
 }

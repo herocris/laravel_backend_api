@@ -4,20 +4,19 @@ namespace App\Http\Requests\Admin\User;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
-use Illuminate\Validation\Rule;
 
 /**
- * Request para actualización de usuarios.
+ * Request para creación de usuarios.
  *
  * Valida:
  * - name: requerido, string.
- * - email: requerido, email único excepto para el propio registro (usa Rule::unique con ignore).
- * - password: mínimo 6 caracteres.
+ * - email: requerido, email único en tabla users.
+ * - password: mínimo 6 caracteres (se puede reforzar con Password::min(8) y reglas adicionales).
  */
-class UpdatePutRequest extends FormRequest
+class LoginPostRequest extends FormRequest
 {
     /**
-     * Autorización siempre permitida.
+     * Autorización: siempre permitido (lógica delegada a gates/policies si es necesario).
      *
      * @return bool
      */
@@ -27,19 +26,14 @@ class UpdatePutRequest extends FormRequest
     }
 
     /**
-     * Reglas de validación para actualización de usuario.
+     * Reglas de validación para creación de usuario.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'name' => 'required|string',
-            'email' => [
-                'required',
-                'email',
-                Rule::unique('users')->ignore($this->route('user')->id), // para validar si se esta actualizando el correo con uno ya existente
-            ],
+            'email' => 'required|email',
             // 'password' => ['required',
             // Password::min(8)
             // ->letters()

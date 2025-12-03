@@ -5,10 +5,23 @@ namespace App\Http\Requests\DrugConfiscation;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\File;
 
+/**
+ * Request para creación de registro de droga decomisada.
+ *
+ * Valida:
+ * - amount: requerido, entero (cantidad).
+ * - weight: requerido, numérico (peso).
+ * - photo: imagen PNG requerida, máximo 2048 KB.
+ * - confiscation_id: requerido, debe existir en tabla confiscations.
+ * - drug_id: requerido, debe existir en tabla drugs.
+ * - drug_presentation_id: requerido, debe existir en tabla drug_presentations.
+ */
 class StorePostRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Autorización permitida.
+     *
+     * @return bool
      */
     public function authorize(): bool
     {
@@ -16,7 +29,7 @@ class StorePostRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Reglas de validación.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */

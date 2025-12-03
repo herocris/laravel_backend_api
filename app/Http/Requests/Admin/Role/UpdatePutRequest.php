@@ -4,10 +4,18 @@ namespace App\Http\Requests\Admin\Role;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Request para actualización de roles.
+ *
+ * Valida:
+ * - name: requerido, string.
+ */
 class UpdatePutRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Autorización permitida.
+     *
+     * @return bool
      */
     public function authorize(): bool
     {
@@ -15,7 +23,7 @@ class UpdatePutRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Reglas de validación.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */

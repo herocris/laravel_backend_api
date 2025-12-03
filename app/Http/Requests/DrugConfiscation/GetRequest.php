@@ -4,10 +4,21 @@ namespace App\Http\Requests\DrugConfiscation;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Request para obtener datos de gráficos de decomisos de droga.
+ *
+ * Valida:
+ * - period: requerido, string, valores permitidos: day|month|quarter|semester|year|total.
+ * - start_date, end_date: requeridos, formato Y-m-d.
+ * - drugs: requerido, array de IDs de drogas (deben existir en tabla drugs).
+ * - typeGraph: requerido, tipo de gráfico (bar|line|pie).
+ */
 class GetRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Autorización permitida.
+     *
+     * @return bool
      */
     public function authorize(): bool
     {
@@ -15,7 +26,7 @@ class GetRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Reglas de validación.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */

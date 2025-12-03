@@ -5,10 +5,19 @@ namespace App\Http\Requests\DrugPresentation;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\File;
 
+/**
+ * Request para actualización de presentaciones de droga.
+ *
+ * Valida:
+ * - description: requerido, string.
+ * - logo: opcional (imagen PNG, máximo 2048 KB).
+ */
 class UpdatePutRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Autorización permitida.
+     *
+     * @return bool
      */
     public function authorize(): bool
     {
@@ -16,7 +25,7 @@ class UpdatePutRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Reglas de validación.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */

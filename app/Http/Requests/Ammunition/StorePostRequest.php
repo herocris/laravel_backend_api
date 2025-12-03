@@ -5,10 +5,19 @@ namespace App\Http\Requests\Ammunition;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\File;
 
+/**
+ * Request para creación de municiones.
+ *
+ * Valida:
+ * - description: requerido, string, único en tabla ammunitions.
+ * - logo: imagen PNG requerida, máximo 2048 KB.
+ */
 class StorePostRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Autorización permitida.
+     *
+     * @return bool
      */
     public function authorize(): bool
     {
@@ -16,7 +25,7 @@ class StorePostRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Reglas de validación.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */

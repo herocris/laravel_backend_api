@@ -4,10 +4,19 @@ namespace App\Http\Requests\Confiscation;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Request para creación de decomisos.
+ *
+ * Valida:
+ * - date, observation, direction, department, municipality: requeridos.
+ * - latitude, length: requeridos (coordenadas geográficas).
+ */
 class StorePostRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Autorización permitida.
+     *
+     * @return bool
      */
     public function authorize(): bool
     {
@@ -15,7 +24,7 @@ class StorePostRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Reglas de validación.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */

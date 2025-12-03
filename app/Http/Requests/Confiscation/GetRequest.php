@@ -4,10 +4,19 @@ namespace App\Http\Requests\Confiscation;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Request para obtener decomisos filtrados por rango de fechas.
+ *
+ * Valida:
+ * - start_date: requerido, formato Y-m-d.
+ * - end_date: requerido, formato Y-m-d.
+ */
 class GetRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Autorización permitida.
+     *
+     * @return bool
      */
     public function authorize(): bool
     {
@@ -15,7 +24,7 @@ class GetRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Reglas de validación.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
