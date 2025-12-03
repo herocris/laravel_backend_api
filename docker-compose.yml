@@ -47,6 +47,19 @@ services:
                 - '-p${DB_PASSWORD}'
             retries: 3
             timeout: 5s
+    redis: # 👈 SERVICIO REDIS AGREGADO
+        image: 'redis:alpine'
+        ports:
+            - '6379:6379'    # se expone el puerto
+        networks:
+            - sail
+        volumes:
+            - 'sail-redis:/data'
+        command: ["redis-server", "--appendonly", "yes"]
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            retries: 3
+            timeout: 5s
     phpmyadmin:
         image: phpmyadmin
         restart: always
@@ -62,4 +75,6 @@ networks:
         driver: bridge
 volumes:
     sail-mysql:
+        driver: local
+    sail-redis:       # 👈 Volumen para persistencia del cache Redis
         driver: local
