@@ -1,6 +1,6 @@
-# Sistema de Gestión de Decomisos
+# Sistema de Gestión de Sucesos
 
-API REST desarrollada con **Laravel 11** para la gestión y visualización de decomisos de drogas, armas y municiones. Incluye autenticación JWT, auditoría completa de operaciones, generación de estadísticas agregadas y visualización geográfica de decomisos.
+API REST desarrollada con **Laravel 11** para la gestión y visualización de sucesos de drogas, armas y municiones. Incluye autenticación JWT, auditoría completa de operaciones, generación de estadísticas agregadas y visualización geográfica de sucesos.
 
 ---
 
@@ -30,12 +30,12 @@ API REST desarrollada con **Laravel 11** para la gestión y visualización de de
 - **Autenticación JWT**: Sistema de autenticación basado en tokens JWT almacenados en cookies HttpOnly seguras
 - **Gestión de Usuarios**: CRUD completo con sistema de roles y permisos (Spatie Permission)
 - **Catálogos**: Gestión de drogas, armas, municiones y presentaciones de drogas
-- **Decomisos**: Registro de decomisos con ubicación geográfica (coordenadas, departamento, municipio)
-- **Items de Decomisos**: Gestión detallada de drogas, armas y municiones decomisadas por evento
+- **Sucesos**: Registro de sucesos con ubicación geográfica (coordenadas, departamento, municipio)
+- **Items de Sucesos**: Gestión detallada de drogas, armas y municiones decomisadas por evento
 - **Auditoría**: Registro automático de todas las operaciones CRUD (Spatie Activity Log)
 - **Soft Deletes**: Eliminación lógica con restauración para todas las entidades
 - **Estadísticas**: Endpoints para generación de gráficas con agregación por períodos (día, mes, trimestre, semestre, año)
-- **Visualización Geográfica**: Endpoint especializado para visualizar decomisos en mapa
+- **Visualización Geográfica**: Endpoint especializado para visualizar sucesos en mapa
 - **API en Español**: Todos los atributos de respuesta transformados al español
 - **Documentación Swagger**: Documentación interactiva completa de la API
 
@@ -107,7 +107,7 @@ cp .env.example .env
 Editar `.env` con tus credenciales:
 
 ```env
-APP_NAME="Sistema de Decomisos"
+APP_NAME="Sistema de Sucesos"
 APP_ENV=local
 APP_DEBUG=true
 APP_URL=http://localhost:8000
@@ -115,7 +115,7 @@ APP_URL=http://localhost:8000
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=decomisos_db
+DB_DATABASE=sucesos_db
 DB_USERNAME=root
 DB_PASSWORD=
 
@@ -188,7 +188,7 @@ Editar `config/cors.php` si necesitas acceso desde frontend:
 
 ### Configuración de Almacenamiento
 
-Los archivos (logos de catálogos, fotos de decomisos) se almacenan en:
+Los archivos (logos de catálogos, fotos de sucesos) se almacenan en:
 
 ```
 storage/app/public/
@@ -214,7 +214,7 @@ php artisan storage:link
 ### 1. Crear la Base de Datos
 
 ```sql
-CREATE DATABASE decomisos_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE sucesos_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 ### 2. Ejecutar Migraciones
@@ -227,7 +227,7 @@ Esto creará todas las tablas necesarias:
 - `users`, `roles`, `permissions` (autenticación y permisos)
 - `activity_log` (auditoría)
 - `drugs`, `weapons`, `ammunitions`, `drug_presentations` (catálogos)
-- `confiscations` (decomisos principales)
+- `confiscations` (sucesos principales)
 - `drug_confiscations`, `weapon_confiscations`, `ammunition_confiscations` (items)
 
 ### 3. Poblar Base de Datos (Desarrollo)
@@ -240,7 +240,7 @@ Esto creará:
 - Usuario administrador por defecto
 - Roles y permisos básicos
 - Datos de ejemplo de catálogos
-- Decomisos de prueba con items asociados
+- Sucesos de prueba con items asociados
 
 **Credenciales por defecto**:
 - Email: `admin@example.com`
@@ -497,7 +497,7 @@ Apuntar document root a `/public` y configurar rewrite rules.
 ```nginx
 server {
     listen 80;
-    server_name api.decomisos.com;
+    server_name api.sucesos.com;
     root /var/www/example-app/public;
 
     add_header X-Frame-Options "SAMEORIGIN";
