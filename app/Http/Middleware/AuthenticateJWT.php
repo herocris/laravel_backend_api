@@ -19,7 +19,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
  * Consideraciones de seguridad:
  * - Usa cookie HttpOnly para mitigar XSS.
  * - Recomendado combinar con verificación CSRF si se emplean métodos state-changing.
- * - Tokens expirados generan excepción capturada y devuelven 401.
+ * - Tokens expirados generan excepción capturada y devuelven 401.....
  */
 class AuthenticateJWT
 {
