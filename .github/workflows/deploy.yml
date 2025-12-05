@@ -26,7 +26,8 @@ jobs:
       # Ejecutar tests con PHPUnit 11
       - name: Run Tests
         run: |
-          vendor/bin/phpunit --stop-on-failure --no-coverage
+          # vendor/bin/phpunit --stop-on-failure --no-coverage
+          php artisan test --no-interaction --stop-on-failure
 
       # Ahora instalar dependencias solo de producción
       - name: Install production dependencies
