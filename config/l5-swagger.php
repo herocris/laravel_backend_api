@@ -18,7 +18,7 @@ return [
                 /*
                  * Edit to include full URL in ui for assets
                  */
-                'use_absolute_path' => env('L5_SWAGGER_USE_ABSOLUTE_PATH', true),//parsar a false en produccion
+                'use_absolute_path' => env('L5_SWAGGER_USE_ABSOLUTE_PATH', false),//parsar a false en produccion
 
                 /*
                 * Edit to set path where swagger ui assets should be stored
@@ -54,7 +54,7 @@ return [
             /*
              * Route for accessing parsed swagger annotations.
              */
-            'docs' => 'docs',
+            'docs' => 'api/docs',
 
             /*
              * Route for Oauth2 authentication callback.
