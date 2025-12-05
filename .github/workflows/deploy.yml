@@ -63,4 +63,4 @@ jobs:
 
             # reiniciar contenedor php
             cd ..
-            docker compose restart php-fpm
+            docker compose restart apiapp
