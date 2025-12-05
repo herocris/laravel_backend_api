@@ -21,14 +21,14 @@ jobs:
       - name: Prepare environment
         run: |
           composer require --dev phpunit/phpunit "^11.0" || true
-
+          
       - name: Install dependencies
         run: |
           composer install --no-dev --optimize-autoloader
 
       - name: Run Tests
         run: |
-          vendor/bin/phpunit --stop-on-failure --no-coverage
+          php artisan test --no-interaction --stop-on-failure
 
       - name: Create deployment package
         run: |
