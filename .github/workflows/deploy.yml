@@ -18,17 +18,20 @@ jobs:
           php-version: '8.2'
           tools: composer
 
-      - name: Prepare environment
+      # Instalar dependencias CON DEV para correr tests
+      - name: Install dependencies (with dev)
         run: |
-          composer require --dev phpunit/phpunit "^11.0" || true
+          composer install --no-interaction --no-progress
 
-      - name: Install dependencies
-        run: |
-          composer install --no-dev --optimize-autoloader
-
+      # Ejecutar tests con PHPUnit 11
       - name: Run Tests
         run: |
           vendor/bin/phpunit --stop-on-failure --no-coverage
+
+      # Ahora instalar dependencias solo de producción
+      - name: Install production dependencies
+        run: |
+          composer install --no-dev --optimize-autoloader --no-interaction
 
       - name: Create deployment package
         run: |
