@@ -24,7 +24,7 @@ jobs:
 
       - name: Run Tests
         run: |
-          php artisan test --no-interaction --stop-on-failure
+          vendor/bin/phpunit --stop-on-failure --no-coverage
 
       - name: Create deployment package
         run: |
