@@ -66,10 +66,10 @@ jobs:
 
             # restaurar .env (2 opciones)
             # OPCIÓN A: usar la versión local del servidor
-            cp .env.laravel laravel-backend-app/.env
+            # cp .env.laravel laravel-backend-app/.env
 
             # OPCIÓN B: usar secrets desde GitHub
-            # echo "${{ secrets.LARAVEL_ENV }}" > laravel-backend-app/.env
+            echo "${{ secrets.LARAVEL_ENV }}" > laravel-backend-app/.env
 
             # permisos storage y cache
             cd laravel-backend-app
