@@ -22,6 +22,10 @@ jobs:
         run: |
           composer install --no-dev --optimize-autoloader
 
+      - name: Run Tests
+        run: |
+          php artisan test --no-interaction --stop-on-failure
+
       - name: Create deployment package
         run: |
           zip -r backend.zip .
