@@ -32,7 +32,8 @@ jobs:
       - name: Install production dependencies
         run: |
           composer install --no-dev --optimize-autoloader --no-interaction
-
+      
+      # Crear ZIP final ya SIN dependencias dev
       - name: Create deployment package
         run: |
           zip -r backend.zip .
