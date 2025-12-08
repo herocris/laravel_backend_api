@@ -2,7 +2,7 @@
     "openapi": "3.0.0",
     "info": {
         "title": "GraphMapApp API",
-        "description": "Documentacion la API graphMapApp, accede al apartado de auntenticación y por medio del Login con el usuario que esta por defecto; obten el token de autorización y pegalo en boton Authorize para consumir los endpoints que requieran autenticación.",
+        "description": "Documentacion la API graphMapApp, accede al apartado de auntenticación y haz Login con el usuario que esta por defecto; para consumir los endpoints que requieran autenticación.",
         "version": "1.0.0"
     },
     "servers": [
