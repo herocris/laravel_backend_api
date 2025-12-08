@@ -19,7 +19,7 @@ class AuthDocs
         schema: 'AuthResponse',
         type: 'object',
         properties: [
-            new OA\Property(property: 'access_token', type: 'string', example: 'token_jwt_ejemplo_1234567890'),
+            // new OA\Property(property: 'access_token', type: 'string', example: 'token_jwt_ejemplo_1234567890'),
             new OA\Property(property: 'token_type', type: 'string', example: 'bearer'),
             new OA\Property(property: 'expires_in', type: 'integer', example: 3600),
             new OA\Property(property: 'user', type: 'object', properties: [

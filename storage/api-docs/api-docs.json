@@ -7,16 +7,16 @@
     },
     "servers": [
         {
-            "url": "http://127.0.0.1",
+            "url": "http://188.166.7.141",
+            "description": "production server"
+        },
+        {
+            "url": "http://localhost",
             "description": "local server"
         },
         {
             "url": "http://staging.example.com",
             "description": "staging server"
-        },
-        {
-            "url": "http://example.com",
-            "description": "production server"
         }
     ],
     "paths": {
@@ -5904,10 +5904,6 @@
             },
             "AuthResponse": {
                 "properties": {
-                    "access_token": {
-                        "type": "string",
-                        "example": "token_jwt_ejemplo_1234567890"
-                    },
                     "token_type": {
                         "type": "string",
                         "example": "bearer"
@@ -6901,13 +6897,11 @@
             }
         },
         "securitySchemes": {
-            "bearerAuth": {
-                "type": "http",
-                "description": "Enviar 'Authorization: Bearer <token>'",
-                "name": "Authorization",
-                "in": "header",
-                "bearerFormat": "JWT",
-                "scheme": "bearer"
+            "authCookie": {
+                "type": "apiKey",
+                "description": "Cookie HttpOnly 'token' con el JWT. El explorador ya la envía automáticamente en cada request.",
+                "name": "token",
+                "in": "cookie"
             }
         }
     },
