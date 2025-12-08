@@ -49,6 +49,7 @@ class LoginTest extends TestCase
     {
         $response = $this->postJson(route('auth.login'), $this->user_data);
         $response->assertExactJson([
+            'access_token' => $response['access_token'],
             'token_type' => 'bearer',
             'expires_in' => 3600,
             'user' => [
