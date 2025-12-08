@@ -2,7 +2,7 @@
     "openapi": "3.0.0",
     "info": {
         "title": "GraphMapApp API",
-        "description": "Documentacion la API graphMapApp",
+        "description": "Documentacion la API graphMapApp, accede al apartado de auntenticación y por medio del Login con el usuario que esta por defecto; obten el token de autorización y pegalo en boton Authorize para consumir los endpoints que requieran autenticación.",
         "version": "1.0.0"
     },
     "servers": [
@@ -5893,17 +5893,21 @@
                     "email": {
                         "type": "string",
                         "format": "email",
-                        "example": "juan@example.com"
+                        "example": "demoSwagger@test.com"
                     },
                     "password": {
                         "type": "string",
-                        "example": "Secret123"
+                        "example": "password"
                     }
                 },
                 "type": "object"
             },
             "AuthResponse": {
                 "properties": {
+                    "access_token": {
+                        "type": "string",
+                        "example": "token_jwt_ejemplo_1234567890"
+                    },
                     "token_type": {
                         "type": "string",
                         "example": "bearer"
@@ -6904,12 +6908,6 @@
                 "in": "header",
                 "bearerFormat": "JWT",
                 "scheme": "bearer"
-            },
-            "authCookie": {
-                "type": "apiKey",
-                "description": "Cookie HttpOnly 'access_token' con el JWT. El explorador ya la envía automáticamente en cada request.",
-                "name": "access_token",
-                "in": "cookie"
             }
         }
     },

@@ -11,14 +11,15 @@ class AuthDocs
         type: 'object',
         required: ['email','password'],
         properties: [
-            new OA\Property(property: 'email', type: 'string', format: 'email', example: 'juan@example.com'),
-            new OA\Property(property: 'password', type: 'string', example: 'Secret123')
+            new OA\Property(property: 'email', type: 'string', format: 'email', example: 'demoSwagger@test.com'),
+            new OA\Property(property: 'password', type: 'string', example: 'password')
         ]
     )]
     #[OA\Schema(
         schema: 'AuthResponse',
         type: 'object',
         properties: [
+            new OA\Property(property: 'access_token', type: 'string', example: 'token_jwt_ejemplo_1234567890'),
             new OA\Property(property: 'token_type', type: 'string', example: 'bearer'),
             new OA\Property(property: 'expires_in', type: 'integer', example: 3600),
             new OA\Property(property: 'user', type: 'object', properties: [

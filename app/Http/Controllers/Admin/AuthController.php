@@ -110,6 +110,7 @@ class AuthController extends Controller
         //$cookie = cookie('token', $token, 60, '/', null, true, true, false, 'Strict');
         $cookie = cookie('token', $token, 60);
         return response()->json([
+            'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => Auth::factory()->getTTL() * 60,
             'user' => Auth::user()->only(['name', 'email']),

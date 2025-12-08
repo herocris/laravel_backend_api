@@ -45,6 +45,10 @@ class DatabaseSeeder extends Seeder
             'name' => 'cris',
             'email' => 'cris_itg@yahoo.es',
         ]);
+        User::factory()->create([
+            'name' => 'demoSwagger',
+            'email' => 'demoSwagger@test.com',
+        ]);
         Auth::attempt([
             'email' => 'cris_itg@yahoo.es',
             'password' => 'password',
