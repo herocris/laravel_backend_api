@@ -38,7 +38,6 @@ class RegisterTest extends TestCase
     {
         $response = $this->postJson(route('auth.register'), $this->user_data);
         $response->assertJsonStructure([
-            'access_token',
             'token_type',
             'expires_in',
             'user' => [
@@ -54,7 +53,6 @@ class RegisterTest extends TestCase
     {
         $response = $this->postJson(route('auth.register'), $this->user_data);
         $response->assertExactJson([
-            'access_token' => $response['access_token'],
             'token_type' => 'bearer',
             'expires_in' => 3600,
             'user' => [
