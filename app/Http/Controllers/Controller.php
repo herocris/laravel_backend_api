@@ -11,7 +11,7 @@ use OpenApi\Attributes as OA;
     ),
     OA\Server(url: 'http://127.0.0.1', description: "local server"),
     OA\Server(url: 'http://staging.example.com', description: "staging server"),
-    OA\Server(url: 'http://example.com', description: "production server"),
+    OA\Server(url: 'http://188.166.7.141', description: "production server"),
     // Autenticación por header Authorization (opcional si también usas cookie)
     OA\SecurityScheme(
         securityScheme: "bearerAuth",
