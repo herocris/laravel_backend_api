@@ -6,12 +6,12 @@ use OpenApi\Attributes as OA;
 #[
     OA\Info(
         version: "1.0.0", 
-        description: "Documentacion la API graphMapApp, accede al apartado de auntenticación y por medio del Login con el usuario que esta por defecto; obten el token de autorización y pegalo en boton Authorize para consumir los endpoints que requieran autenticación.", 
+        description: "Esta API esta hecha en PHP Laravel; accede al apartado de Auntenticación y por medio del Login con el usuario que esta por defecto; obten el token de autorización y pegalo en boton Authorize para consumir los endpoints que requieran autenticación.", 
         title: "GraphMapApp API"
     ),
+    OA\Server(url: 'https://crisdemo.xyz/', description: "production server"),
     OA\Server(url: 'http://localhost', description: "local server"),
     OA\Server(url: 'http://staging.example.com', description: "staging server"),
-    OA\Server(url: 'http://188.166.7.141', description: "production server"),
     // Autenticación por header Authorization (opcional si también usas cookie)
     // OA\SecurityScheme(
     //     securityScheme: "bearerAuth",
