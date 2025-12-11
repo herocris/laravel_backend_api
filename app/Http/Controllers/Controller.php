@@ -6,7 +6,7 @@ use OpenApi\Attributes as OA;
 #[
     OA\Info(
         version: "1.0.0", 
-        description: "Esta API esta hecha en PHP Laravel; accede al apartado de Auntenticación y realiza el Login con el usuario que esta por defecto para consumir los endpoints que requieran autenticación.", 
+        description: "Esta API esta hecha en PHP Laravel; accede al apartado de Auntenticación y realiza el Login con el usuario que esta por defecto para consumir los endpoints que requieran autenticación. Mira el github para más información: https://github.com/herocris/laravel_backend_api", 
         title: "GraphMapApp API"
     ),
     OA\Server(url: 'https://crisdemo.xyz/', description: "production server"),
