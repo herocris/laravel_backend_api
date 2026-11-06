@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\WeaponConfiscation\GetRequest;
-use App\Models\WeaponConfiscation;
-use Illuminate\Http\Request;
 use App\Http\Requests\WeaponConfiscation\StorePostRequest;
 use App\Http\Requests\WeaponConfiscation\UpdatePutRequest;
 use App\Http\Resources\WeaponConfiscation\WeaponConfiscationResource;
+use App\Models\WeaponConfiscation;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
@@ -22,51 +22,54 @@ class WeaponConfiscationController extends ApiController implements HasMiddlewar
     public static function middleware(): array
     {
         return [
-            new Middleware("transformInput:" . WeaponConfiscationResource::class . "", only: ['store', 'update']),
+            new Middleware('transformInput:'.WeaponConfiscationResource::class.'', only: ['store', 'update']),
         ];
     }
 
     /**
      * Lista todos los registros de armas decomisadas.
      *
-     * @return \Illuminate\Http\JsonResponse Colección de registros.
+     * @return JsonResponse Colección de registros.
      */
     public function index()
     {
         $weaponConfiscations = WeaponConfiscation::all();
+
         return $this->showAll($weaponConfiscations);
     }
 
     /**
      * Lista registros filtrados por ID de decomiso padre.
      *
-     * @param int $idConfiscation ID del decomiso.
-     * @return \Illuminate\Http\JsonResponse Colección filtrada.
+     * @param  int  $idConfiscation  ID del decomiso.
+     * @return JsonResponse Colección filtrada.
      */
     public function indexByConfiscation(int $idConfiscation)
     {
         $weaponConfiscations = WeaponConfiscation::where('confiscation_id', $idConfiscation);
+
         return $this->showAll($weaponConfiscations->get());
     }
 
     /**
      * Crea un registro de arma decomisada.
      *
-     * @param StorePostRequest $request Datos validados.
-     * @return \Illuminate\Http\JsonResponse Recurso creado.
+     * @param  StorePostRequest  $request  Datos validados.
+     * @return JsonResponse Recurso creado.
      */
     public function store(StorePostRequest $request)
     {
         $validated = $request->validated();
         $weaponConfiscation = WeaponConfiscation::create($validated);
+
         return $this->showOne($weaponConfiscation);
     }
 
     /**
      * Muestra un registro específico.
      *
-     * @param WeaponConfiscation $weaponConfiscation Instancia objetivo.
-     * @return \Illuminate\Http\JsonResponse Recurso solicitado.
+     * @param  WeaponConfiscation  $weaponConfiscation  Instancia objetivo.
+     * @return JsonResponse Recurso solicitado.
      */
     public function show(WeaponConfiscation $weaponConfiscation)
     {
@@ -76,49 +79,53 @@ class WeaponConfiscationController extends ApiController implements HasMiddlewar
     /**
      * Actualiza un registro de arma decomisada.
      *
-     * @param UpdatePutRequest $request Datos validados.
-     * @param WeaponConfiscation $weaponConfiscation Recurso objetivo.
-     * @return \Illuminate\Http\JsonResponse Recurso actualizado.
+     * @param  UpdatePutRequest  $request  Datos validados.
+     * @param  WeaponConfiscation  $weaponConfiscation  Recurso objetivo.
+     * @return JsonResponse Recurso actualizado.
      */
     public function update(UpdatePutRequest $request, WeaponConfiscation $weaponConfiscation)
     {
         $validated = $request->validated();
         $weaponConfiscation->update($validated);
+
         return $this->showOne($weaponConfiscation);
     }
 
     /**
      * Soft delete del registro.
      *
-     * @param WeaponConfiscation $weaponConfiscation Recurso a eliminar.
-     * @return \Illuminate\Http\JsonResponse Recurso eliminado.
+     * @param  WeaponConfiscation  $weaponConfiscation  Recurso a eliminar.
+     * @return JsonResponse Recurso eliminado.
      */
     public function destroy(WeaponConfiscation $weaponConfiscation)
     {
         $weaponConfiscation->delete();
+
         return $this->showOne($weaponConfiscation);
     }
 
     /**
      * Lista registros soft-deleted.
      *
-     * @return \Illuminate\Http\JsonResponse Colección en papelera.
+     * @return JsonResponse Colección en papelera.
      */
     public function indexDeleted()
     {
         $weaponConfiscations = WeaponConfiscation::onlyTrashed()->get();
+
         return $this->showAll($weaponConfiscations);
     }
 
     /**
      * Restaura un registro eliminado.
      *
-     * @param WeaponConfiscation $weaponConfiscation Recurso a restaurar.
-     * @return \Illuminate\Http\JsonResponse Recurso restaurado.
+     * @param  WeaponConfiscation  $weaponConfiscation  Recurso a restaurar.
+     * @return JsonResponse Recurso restaurado.
      */
     public function restore(WeaponConfiscation $weaponConfiscation)
     {
         $weaponConfiscation->restore();
+
         return $this->showOne($weaponConfiscation);
     }
 
@@ -126,8 +133,8 @@ class WeaponConfiscationController extends ApiController implements HasMiddlewar
      * Genera datos agregados de armas decomisadas para gráficos.
      * Usa período (día, mes, etc.) y rango de fechas; filtra por conjunto de armas.
      *
-     * @param GetRequest $request Parámetros: period, start_date, end_date, weapons[].
-     * @return \Illuminate\Http\JsonResponse lineBarData y pieData.
+     * @param  GetRequest  $request  Parámetros: period, start_date, end_date, weapons[].
+     * @return JsonResponse lineBarData y pieData.
      */
     public function graphIndex(GetRequest $request)
     {
@@ -146,7 +153,7 @@ class WeaponConfiscationController extends ApiController implements HasMiddlewar
             'weapon_description',
             DB::raw('SUM(total_amount) as total_amount')
         )
-            ->groupBy('period', 'weapon_id')
+            ->groupBy('period', 'weapon_id', 'weapon_description')
             ->orderBy('period', 'asc')->get();
 
         $queryPie = $query->clone()->select(
@@ -156,8 +163,8 @@ class WeaponConfiscationController extends ApiController implements HasMiddlewar
             ->groupBy('weapon_description')
             ->orderBy('weapon_description', 'asc')->get();
 
-        $linedata = $this->FormatCollectionBarLine($queryBarLine, "weapons");
-        $pieData = $this->FormatCollectionPie($queryPie, "weapons");
+        $linedata = $this->FormatCollectionBarLine($queryBarLine, 'weapons');
+        $pieData = $this->FormatCollectionPie($queryPie, 'weapons');
 
         return response()->json(['lineBarData' => $linedata, 'pieData' => $pieData]);
     }

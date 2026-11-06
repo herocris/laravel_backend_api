@@ -114,11 +114,11 @@ APP_DEBUG=true
 APP_URL=http://localhost:8000
 
 DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
+DB_HOST=mysql
 DB_PORT=3306
 DB_DATABASE=sucesos_db
-DB_USERNAME=root
-DB_PASSWORD=
+DB_USERNAME=sail
+DB_PASSWORD=password
 
 # Configuración JWT
 JWT_SECRET=
