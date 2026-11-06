@@ -1,0 +1,5 @@
+[mcp_servers.laravel-boost]
+command = "vendor/bin/sail"
+args = ["artisan", "boost:mcp"]
+
+cwd = "/home/cris/projects/laravel/laravel_backend_api"
