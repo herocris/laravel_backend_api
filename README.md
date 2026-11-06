@@ -1,6 +1,6 @@
 # Sistema de Gestión de Sucesos
 
-API REST desarrollada con **Laravel 11** para la gestión y visualización de sucesos de drogas, armas y municiones. Incluye autenticación JWT, auditoría completa de operaciones, generación de estadísticas agregadas y visualización geográfica de sucesos.
+API REST desarrollada con **Laravel 13** para la gestión y visualización de sucesos de drogas, armas y municiones. Incluye autenticación JWT, auditoría completa de operaciones, generación de estadísticas agregadas y visualización geográfica de sucesos.
 
 ---
 
@@ -54,8 +54,8 @@ API REST desarrollada con **Laravel 11** para la gestión y visualización de su
 
 ## 🛠 Tecnologías
 
-- **Framework**: Laravel 11.x
-- **PHP**: ^8.2
+- **Framework**: Laravel 13.x
+- **PHP**: ^8.3 (Sail utiliza PHP 8.4)
 - **Base de Datos**: MySQL 8.0+ / PostgreSQL 13+
 - **Autenticación**: Tymon JWT Auth 2.x
 - **Permisos**: Spatie Laravel Permission 6.x
@@ -67,7 +67,8 @@ API REST desarrollada con **Laravel 11** para la gestión y visualización de su
 
 ## 📦 Requisitos Previos
 
-- PHP >= 8.2
+- PHP >= 8.3
+- Extensiones PHP GD (pruebas de imágenes), PDO SQLite (pruebas en memoria) y PDO MySQL (base de datos de la aplicación).
 - Composer >= 2.5
 - MySQL >= 8.0 o PostgreSQL >= 13
 - Node.js >= 18.x y npm >= 9.x (opcional, para assets)
@@ -409,6 +410,14 @@ example-app/
 
 ### Ejecutar Todos los Tests
 
+Con Sail, que incluye las extensiones necesarias:
+
+```bash
+./vendor/bin/sail artisan test
+```
+
+Con PHP local (requiere las extensiones indicadas en los requisitos):
+
 ```bash
 php artisan test
 ```
@@ -517,7 +526,7 @@ server {
     error_page 404 /index.php;
 
     location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php8.4-fpm.sock;
         fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
         include fastcgi_params;
     }
