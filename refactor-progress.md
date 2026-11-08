@@ -3,11 +3,11 @@
 ## Estado para retomar
 
 - Última actualización: 2026-11-08, zona Europe/Madrid.
-- Trabajo actual: paso 01 completado; base de referencia verificada y registrada.
+- Trabajo actual: paso 02 completado; errores HTTP conservan estado, formato y cabeceras.
 - Paso en curso: ninguno.
-- Siguiente paso: 02, conservar la semántica de errores HTTP.
-- Próxima acción: ejecutar únicamente 02, leyendo su sección del plan y la sesión 01 de esta bitácora; antes de integrar en `main`, preparar `15a` por el workflow de despliegue automático existente.
-- Base vigente: rama local `refactor/01-base-referencia`, HEAD `9bbcefff060ce8b424af4c7548cf9673dc7c229d`; suite actual: 433 pruebas, 2.790 aserciones, todas pasan; Composer válido y auditoría sin incidencias. Solo se modifica esta bitácora.
+- Siguiente paso: 03, crear permisos y roles estables.
+- Próxima acción: ejecutar únicamente 03, leyendo su sección del plan y la sesión 02 de esta bitácora; antes de integrar en `main`, preparar `15a` por el workflow de despliegue automático existente.
+- Base vigente: rama local `refactor/01-base-referencia`, HEAD `9bbcefff060ce8b424af4c7548cf9673dc7c229d`; suite tras 02: 448 pruebas, 2.834 aserciones, todas pasan. Cambios locales: `bootstrap/app.php`, nueva prueba HTTP y esta bitácora, que conserva los cambios previos de 01.
 - Referencia de preparación: rama `upgrade/laravel-13`, HEAD `ed718be`. Es una referencia histórica; comprobar rama, HEAD y estado actuales al retomar.
 - Alcance ejecutado en esta preparación: actualizar `AGENTS.md` y crear `refactor-plan.md` y este archivo. No se corrigió código de aplicación.
 - Verificaciones de esta preparación: revisión de los tres documentos y correspondencia de los 16 prompts con el tablero; comprobaciones de whitespace sin incidencias. No se ejecutaron tests ni Pint porque solo se modificó documentación.
@@ -19,7 +19,7 @@ Estados: `pendiente`, `en_curso`, `bloqueado`, `completado`. `no_aplica` se usa 
 | Paso | Trabajo | Estado | Evidencia o pendiente principal |
 | --- | --- | --- | --- |
 | 01 | Base de referencia | completado | SQLite aislado; 433 pruebas / 2.790 aserciones; Composer válido y sin advisories; contratos y riesgos registrados |
-| 02 | Errores HTTP | pendiente | Preservar 403 y corregir respuestas inconsistentes |
+| 02 | Errores HTTP | completado | 15 regresiones HTTP; suite completa 448 pruebas / 2.834 aserciones; Pint y whitespace correctos |
 | 03 | Catálogo de permisos | pendiente | Matriz determinista y seeder idempotente |
 | 04 | Asignación de privilegios | pendiente | Cerrar escalada y evitar pérdida de asignaciones |
 | 05 | Protección de endpoints | pendiente | Inventario completo y casos 401/403/éxito |
@@ -98,6 +98,22 @@ No solicitar todas estas respuestas al iniciar: resolver en su paso y continuar 
 Pendiente de construir en 03 y contrastar con las rutas efectivas en 05. Registrar recurso, acción, permiso exacto, guard y roles autorizados. Los nombres `drugs.view`, `drugs.create`, `drugs.update`, `drugs.delete`, `drugs.viewDeleted`, `drugs.restore` son una propuesta, no permisos creados ni asignados.
 
 ## Registro de sesiones y verificaciones
+
+### Paso 02 — 2026-11-08, Europe/Madrid — completado
+
+- Inicio: rama `refactor/01-base-referencia`, HEAD `9bbcefff060ce8b424af4c7548cf9673dc7c229d`; único cambio previo: bitácora del paso 01, conservada. Sin commits, push ni despliegues.
+- Prerrequisitos: 01 completado según evidencia registrada y código actual contrastado; leídos `AGENTS.md`, plan 02 y skills de Laravel/pruebas con sus reglas aplicables. `.ai/rules` sigue ausente, sin reglas adicionales por ruta o palabra clave que consultar.
+- Entorno: `vendor/bin/sail composer show --direct` falló dentro del sandbox con `Docker or Podman is not running.`; repetido con acceso autorizado a Docker, código 0: Laravel 13.40.0, Spatie Permission 6.25.0 y PHPUnit 12.5.43. Boost `search-docs` consultado para renderizado de excepciones y aserciones HTTP; contrastada la normalización de `AuthorizationException` a excepción HTTP en el framework instalado.
+- Aislamiento reconfirmado antes de pruebas: `phpunit.xml` y `.env.testing` usan SQLite `:memory:`; sin configuración cacheada, `DB_URL`, conexión alternativa de Activitylog ni cambios de conexión/seeders en tests. `config:show ... --env=testing --no-interaction` mediante Sail: `database.default=sqlite`, `database.connections.sqlite.database=:memory:`, `activitylog.database_connection=null` (código 0 en los tres).
+- Defectos contrastados: renderizador general convierte rechazos de autorización en 500; roles/permisos inexistentes devuelven HTTP 429 con cuerpo 422; renderizadores 405/404/throttle descartan cabeceras. Alcance: `bootstrap/app.php`, regresiones de errores HTTP y esta bitácora, sin proteger todavía rutas productivas ni definir catálogo de permisos.
+- Hito de regresiones: generado `tests/Feature/HttpExceptionResponseTest.php` con `artisan make:test --phpunit HttpExceptionResponseTest --no-interaction` (código 0). Primera ejecución: 9 fallos y 6 éxitos (24 aserciones); dos fallos de preparación se debían a crear permisos sin actor, defecto de auditoría ya registrado para 14. Ajustada la preparación para autenticar al usuario antes de crear el permiso, sin desactivar eventos ni autorización. Reejecución del rechazo real de `can`: falla con HTTP 500 en lugar de 403, código 1, antes de corregir aplicación.
+- Implementación: renderizador de `HttpExceptionInterface` antes de `Throwable`, preservando estado, cabeceras y forma `error`/`code`; mensajes 5xx genéricos sin detalles con debug desactivado. Renderizadores específicos 404/405/throttle transfieren sus cabeceras; roles/permisos inexistentes responden HTTP 422 coherente con el cuerpo. Contrato de diagnóstico del renderizador general con debug activado conservado.
+- Pruebas tras corregir: `vendor/bin/sail artisan test --compact tests/Feature/HttpExceptionResponseTest.php`, código 0, **15 passed (44 assertions)**, 0,47 s. Cubren 401 real, 403 mediante `auth` + `can` con Spatie (sin mocks ni gates duplicados), éxito con permiso explícito, 404 de URL y binding, 405 con `Allow`, validación 422, asignaciones Spatie inexistentes 422, throttle real 429 con tiempo congelado y cabeceras, excepción HTTP genérica con challenge, mensaje vacío y errores 500/503 con debug desactivado y diagnóstico debug activado. Las rutas auxiliares solo se registran dentro de los tests.
+- Verificaciones finales mediante Sail: `vendor/bin/sail bin pint --dirty --format agent`, código 0, aplica formato a `bootstrap/app.php`; comprobación explícita del archivo nuevo con `vendor/bin/sail bin pint tests/Feature/HttpExceptionResponseTest.php --format agent`, código 0, sin cambios. `vendor/bin/sail artisan test --compact` después del formato, código 0: **448 passed (2834 assertions), Duration: 11.42s**. La suite incluye las 15 regresiones nuevas y las 433 pruebas previas; sin fallos pendientes.
+- Revisión final: `git diff --check` sin incidencias y comprobación de whitespace del archivo nuevo con `git diff --no-index --check /dev/null tests/Feature/HttpExceptionResponseTest.php` sin diagnósticos (código 1 esperado por archivo nuevo). Revisados diff, archivo nuevo y reglas de skills aplicables. Archivos finales: `bootstrap/app.php`, `tests/Feature/HttpExceptionResponseTest.php` y `refactor-progress.md`. Cambios de estilo en bootstrap aplicados por Pint, incluida retirada de un import sin uso.
+- Impacto de contrato autorizado en 02: rechazos de autorización devuelven 403 en lugar del 500 defectuoso; roles/permisos inexistentes devuelven HTTP 422, ya presente en su cuerpo, en lugar de 429. Otros errores HTTP antes capturados como 500 conservan su estado. El cliente debe tratar 403 como falta de autorización, 422 como entrada inválida y reservar reintentos por límite para 429 con `Retry-After`; se mantiene la forma JSON y los textos existentes de los renderizadores específicos. Los errores HTTP 5xx ocultan mensajes internos con debug desactivado y mantienen estado/cabeceras. No se modificó ningún cliente.
+- Cierre: aceptación de 02 satisfecha. Sin bloqueos ni verificaciones pendientes de este paso. No se modificaron rutas productivas, modelos, dependencias, datos reales ni workflow; sin commits, push o despliegue. La protección efectiva de administración sigue pendiente de 03–05; la suite verde de 02 no acredita esa protección. Se conserva la limitación de auditoría sin actor para 14.
+- Entrega de 03: inventariar acciones y catálogo determinista con guard `api`, preparar seeder idempotente y mecanismo de asignación inicial sin ejecutar sobre datos reales; resolver decisiones de roles/identidad solo cuando sean necesarias. `15a` sigue pendiente antes de integración en `main`. No se inicia 03 en esta sesión.
 
 ### Preparación documental — 2026-11-08
 
