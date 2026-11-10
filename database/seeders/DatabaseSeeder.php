@@ -15,8 +15,8 @@ use App\Models\Weapon;
 use App\Models\WeaponConfiscation;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\Models\Activity;
 
 class DatabaseSeeder extends Seeder
@@ -46,6 +46,12 @@ class DatabaseSeeder extends Seeder
             'email' => 'cris_itg@yahoo.es',
         ]);
         User::factory()->create([
+            'name' => 'analista',
+        ]);
+        User::factory()->create([
+            'name' => 'operador',
+        ]);
+        User::factory()->create([
             'name' => 'demoSwagger',
             'email' => 'demoSwagger@test.com',
         ]);
@@ -54,7 +60,69 @@ class DatabaseSeeder extends Seeder
             'password' => 'password',
         ]);
 
+        foreach ([
+            'frontend.user.view',
+            'frontend.user.create',
+            'frontend.user.update',
+            'frontend.user.delete',
+            'frontend.role.view',
+            'frontend.role.create',
+            'frontend.role.update',
+            'frontend.role.delete',
+            'frontend.permission.view',
+            'frontend.permission.create',
+            'frontend.permission.update',
+            'frontend.permission.delete',
+            'frontend.drug.view',
+            'frontend.drug.create',
+            'frontend.drug.update',
+            'frontend.drug.delete',
+            'frontend.drugPresentation.view',
+            'frontend.drugPresentation.create',
+            'frontend.drugPresentation.update',
+            'frontend.drugPresentation.delete',
+            'frontend.weapon.view',
+            'frontend.weapon.create',
+            'frontend.weapon.update',
+            'frontend.weapon.delete',
+            'frontend.ammunition.view',
+            'frontend.ammunition.create',
+            'frontend.ammunition.update',
+            'frontend.ammunition.delete',
+            'frontend.confiscation.view',
+            'frontend.confiscation.create',
+            'frontend.confiscation.update',
+            'frontend.confiscation.delete',
+            'frontend.drugConfiscation.view',
+            'frontend.drugConfiscation.create',
+            'frontend.drugConfiscation.update',
+            'frontend.drugConfiscation.delete',
+            'frontend.weaponConfiscation.view',
+            'frontend.weaponConfiscation.create',
+            'frontend.weaponConfiscation.update',
+            'frontend.weaponConfiscation.delete',
+            'frontend.ammunitionConfiscation.view',
+            'frontend.ammunitionConfiscation.create',
+            'frontend.ammunitionConfiscation.update',
+            'frontend.ammunitionConfiscation.delete',
+            'frontend.dashboard.view',
+            'frontend.graph.view',
+            'frontend.map.view',
+            'frontend.activity.view',
+        ] as $permissionName) {
+            Permission::factory()->create(['name' => $permissionName]);
+        }
+
         Permission::factory(25)->create();
+
+        foreach ([
+            'frontend.administrador',
+            'frontend.operador',
+            'frontend.analista',
+        ] as $roleName) {
+            Role::factory()->create(['name' => $roleName]);
+        }
+
         Role::factory(4)->givePermissionsToRole()->create();
         User::factory(30)->giveRolesToUser()->create();
         Ammunition::factory(5)->create();
