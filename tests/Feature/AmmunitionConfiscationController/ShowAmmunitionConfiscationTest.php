@@ -13,8 +13,11 @@ use Tests\TestCase;
 class ShowAmmunitionConfiscationTest extends TestCase
 {
     private User $user;
+
     private Confiscation $confiscation;
+
     private Ammunition $ammunition;
+
     private AmmunitionConfiscation $ammunitionConfiscation;
 
     protected function setUp(): void
@@ -22,6 +25,7 @@ class ShowAmmunitionConfiscationTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['ammunitionConfiscation.delete', 'ammunitionConfiscation.view']);
         $this->confiscation = Confiscation::factory()->create();
         $this->ammunition = Ammunition::factory()->create();
         $this->ammunitionConfiscation = AmmunitionConfiscation::factory()->create();
@@ -55,7 +59,7 @@ class ShowAmmunitionConfiscationTest extends TestCase
         $response->assertOk();
         $response = $this->getJson(route('ammunitionConfiscation.show', ['ammunitionConfiscation' => $this->ammunitionConfiscation->id]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo ammunitionconfiscation",
+            'error' => 'No existe el recurso con ese id para el modelo ammunitionconfiscation',
             'code' => 404,
         ]);
     }

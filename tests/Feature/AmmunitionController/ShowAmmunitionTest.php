@@ -11,6 +11,7 @@ use Tests\TestCase;
 class ShowAmmunitionTest extends TestCase
 {
     private User $user;
+
     private Ammunition $ammunition;
 
     protected function setUp(): void
@@ -18,6 +19,7 @@ class ShowAmmunitionTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['ammunition.delete', 'ammunition.view']);
         $this->ammunition = Ammunition::factory()->create(['description' => 'test_ammunition', 'logo' => 'test_logo.png']);
     }
 
@@ -41,7 +43,7 @@ class ShowAmmunitionTest extends TestCase
         $response->assertOk();
         $response = $this->getJson(route('ammunition.show', ['ammunition' => $this->ammunition->id]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo ammunition",
+            'error' => 'No existe el recurso con ese id para el modelo ammunition',
             'code' => 404,
         ]);
     }

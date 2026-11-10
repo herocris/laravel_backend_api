@@ -11,6 +11,7 @@ use Tests\TestCase;
 class RestoreDrugPresentationTest extends TestCase
 {
     private User $user;
+
     private DrugPresentation $drugPresentation;
 
     protected function setUp(): void
@@ -18,6 +19,7 @@ class RestoreDrugPresentationTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['drugPresentation.update']);
         $this->drugPresentation = DrugPresentation::factory()->create([
             'description' => 'drugPresentation_test',
             'logo' => 'logo_test.png',
@@ -26,7 +28,7 @@ class RestoreDrugPresentationTest extends TestCase
     }
 
     #[Test]
-    public function restore_recovers_drugPresentation_successfully()
+    public function restore_recovers_drug_presentation_successfully()
     {
         $this->assertSoftDeleted('drug_presentations', ['id' => $this->drugPresentation->id]);
 
@@ -38,19 +40,19 @@ class RestoreDrugPresentationTest extends TestCase
             'descripcion' => $this->drugPresentation->description,
             'logo' => $this->drugPresentation->logo,
         ]);
-        
+
         $this->assertDatabaseHas('drug_presentations', [
             'id' => $this->drugPresentation->id,
             'deleted_at' => null,
         ]);
     }
 
-#[Test]
-    public function not_restore_non_existent_drugPresentation(): void
-    {       
-        $response = $this->postJson(route('drugPresentation.restore', ['drugPresentation' =>829]));
+    #[Test]
+    public function not_restore_non_existent_drug_presentation(): void
+    {
+        $response = $this->postJson(route('drugPresentation.restore', ['drugPresentation' => 829]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo drugpresentation",
+            'error' => 'No existe el recurso con ese id para el modelo drugpresentation',
             'code' => 404,
         ]);
     }

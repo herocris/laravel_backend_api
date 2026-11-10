@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Feature\Admin\AmmunitionConfiscationController;
 
 use App\Models\Ammunition;
-use App\Models\AmmunitionConfiscation;
 use App\Models\Confiscation;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -18,7 +17,9 @@ use Tests\TestCase;
 class StoreAmmunitionConfiscationTest extends TestCase
 {
     private User $admin;
+
     private Confiscation $confiscation;
+
     private Ammunition $ammunition;
 
     protected function setUp(): void
@@ -27,12 +28,13 @@ class StoreAmmunitionConfiscationTest extends TestCase
         Storage::fake('public');
         $this->admin = $this->superAdminLogin();
         Auth::login($this->admin);
+        $this->grantPermissions($this->admin, ['ammunitionConfiscation.create']);
         $this->confiscation = Confiscation::factory()->create();
         $this->ammunition = Ammunition::factory()->create();
     }
 
     #[Test]
-    public function store_creates_ammunitionConfiscation(): void
+    public function store_creates_ammunition_confiscation(): void
     {
         $payload = [
             'cantidad' => 10,
@@ -71,64 +73,65 @@ class StoreAmmunitionConfiscationTest extends TestCase
             'municion' => 0,
             'foto' => UploadedFile::fake()->image('ammunition_confiscation_photo.png'),
         ];
+
         return [
             'missing cantidad' => [
                 array_diff_key($invalidData, ['cantidad' => '']),
                 'cantidad',
-                'The cantidad field is required.'
+                'The cantidad field is required.',
             ],
             'missing cantidad format' => [
                 array_merge($invalidData, ['cantidad' => 'dgd']),
                 'cantidad',
-                'The cantidad field must be an integer.'
+                'The cantidad field must be an integer.',
             ],
             'missing decomiso' => [
                 array_diff_key($invalidData, ['decomiso' => '']),
                 'decomiso',
-                'The confiscation id field is required.'
+                'The confiscation id field is required.',
             ],
             'invalid decomiso' => [
                 array_merge($invalidData, ['decomiso' => 861]),
                 'decomiso',
-                'The selected confiscation id is invalid.'
+                'The selected confiscation id is invalid.',
             ],
             'missing municion' => [
                 array_diff_key($invalidData, ['municion' => '']),
                 'municion',
-                'The ammunition id field is required.'
+                'The ammunition id field is required.',
             ],
             'invalid municion' => [
                 array_merge($invalidData, ['municion' => 861]),
                 'municion',
-                'The selected ammunition id is invalid.'
+                'The selected ammunition id is invalid.',
             ],
 
             'missing foto' => [
                 array_diff_key($invalidData, ['foto' => '']),
                 'foto',
-                'The foto field is required.'
+                'The foto field is required.',
             ],
             'invalid foto format' => [
                 array_merge($invalidData, ['foto' => UploadedFile::fake()->create('ammunition_confiscation_photo.pdf')]),
                 'foto',
                 [
-                    "The foto field must be an image.",
-                    "The foto field must be a file of type: png."
-                ]
+                    'The foto field must be an image.',
+                    'The foto field must be a file of type: png.',
+                ],
             ],
             'invalid foto image format' => [
                 array_merge($invalidData, ['foto' => UploadedFile::fake()->create('ammunition_confiscation_photo.jpg')]),
                 'foto',
                 [
-                    "The foto field must be a file of type: png."
-                ]
+                    'The foto field must be a file of type: png.',
+                ],
             ],
             'invalid foto image size' => [
                 array_merge($invalidData, ['foto' => UploadedFile::fake()->create('ammunition_confiscation_photo.png', 3000)]),
                 'foto',
                 [
-                    "The foto field must not be greater than 2048 kilobytes.",
-                ]
+                    'The foto field must not be greater than 2048 kilobytes.',
+                ],
             ],
         ];
     }
@@ -137,8 +140,8 @@ class StoreAmmunitionConfiscationTest extends TestCase
     #[DataProvider('invalidAmmunitionConfiscationDataProvider')]
     public function status_422_to_store_ammunition_confiscation(array $data, string $error_field, string|array $error_message): void
     {
-        //se agrega decomiso y municion si no son el campo con error
-        //por no se pueden agregar en el data provider porque dependen de IDs creados en setUp
+        // se agrega decomiso y municion si no son el campo con error
+        // por no se pueden agregar en el data provider porque dependen de IDs creados en setUp
         if ($error_field !== 'decomiso') {
             $data['decomiso'] = $this->confiscation->id;
         }
@@ -151,10 +154,10 @@ class StoreAmmunitionConfiscationTest extends TestCase
         $response->assertExactJson([
             'error' => [
                 $error_field => is_array($error_message) ? $error_message : [
-                    $error_message
-                ]
+                    $error_message,
+                ],
             ],
-            'code' => 422
+            'code' => 422,
         ]);
     }
 

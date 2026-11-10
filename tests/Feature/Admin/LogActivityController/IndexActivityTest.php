@@ -17,6 +17,7 @@ class IndexActivityTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['activity.view']);
     }
 
     #[Test]
@@ -30,13 +31,13 @@ class IndexActivityTest extends TestCase
             'current_page',
             'data' => [
                 '*' => [
-                    "identificador",
-                    "tipo_de_evento",
-                    "descripcion",
-                    "id_usuario",
-                    "usuario",
-                    "cambios",
-                    "fecha"
+                    'identificador',
+                    'tipo_de_evento',
+                    'descripcion',
+                    'id_usuario',
+                    'usuario',
+                    'cambios',
+                    'fecha',
                 ],
             ],
             'first_page_url',

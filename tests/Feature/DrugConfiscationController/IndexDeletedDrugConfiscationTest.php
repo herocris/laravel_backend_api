@@ -2,10 +2,9 @@
 
 namespace Tests\Feature\Admin\DrugConfiscationController;
 
-use App\Models\Ammunition;
-use App\Models\DrugConfiscation;
 use App\Models\Confiscation;
 use App\Models\Drug;
+use App\Models\DrugConfiscation;
 use App\Models\DrugPresentation;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -21,15 +20,16 @@ class IndexDeletedDrugConfiscationTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['drugConfiscation.view']);
         Confiscation::factory()->create();
         Drug::factory()->create();
         DrugPresentation::factory()->create();
         $drugConfiscations = DrugConfiscation::factory()->count(10)->create();
-        $drugConfiscations->each->delete(); //para borrar los registros creados
+        $drugConfiscations->each->delete(); // para borrar los registros creados
     }
 
     #[Test]
-    public function index_deleted_returns_only_soft_deleted_drugConfiscations()
+    public function index_deleted_returns_only_soft_deleted_drug_confiscations()
     {
         $response = $this->getJson(route('drugConfiscation.indexDeleted'));
         $response->assertOk();
@@ -77,7 +77,7 @@ class IndexDeletedDrugConfiscationTest extends TestCase
     }
 
     #[Test]
-    public function index_deleted_returns_empty_when_no_deleted_drugConfiscations()
+    public function index_deleted_returns_empty_when_no_deleted_drug_confiscations()
     {
         DrugConfiscation::onlyTrashed()->get()->each->restore();
 

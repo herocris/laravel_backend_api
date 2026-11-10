@@ -19,12 +19,13 @@ class IndexAmmunitionConfiscationTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['ammunitionConfiscation.view']);
         Confiscation::factory()->create();
         Ammunition::factory()->create();
     }
 
     #[Test]
-    public function index_returns_all_ammunitionConfiscations()
+    public function index_returns_all_ammunition_confiscations()
     {
         AmmunitionConfiscation::factory()->count(10)->create();
 
@@ -68,8 +69,9 @@ class IndexAmmunitionConfiscationTest extends TestCase
 
         $response->assertJsonCount(10, 'data');
     }
+
     #[Test]
-    public function empty_ammunitionConfiscation_collection(): void
+    public function empty_ammunition_confiscation_collection(): void
     {
         $response = $this->getJson(route('ammunitionConfiscation.index'));
         $response->assertOk();

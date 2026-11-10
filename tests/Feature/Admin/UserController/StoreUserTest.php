@@ -7,8 +7,8 @@ namespace Tests\Feature\Admin\UserController;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use PHPUnit\Framework\Attributes\DataProvider;
 use Illuminate\Support\Facades\Hash;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -20,14 +20,16 @@ class StoreUserTest extends TestCase
     {
         parent::setUp();
         $this->user = $this->superAdminLogin();
-        Auth::login($this->user);        
+        Auth::login($this->user);
+        $this->grantPermissions($this->user, ['user.create']);
     }
+
     #[Test]
     public function store_creates_user_successfully(): void
     {
         $role = Role::factory()->create(['name' => 'Role1']);
         $role2 = Role::factory()->create(['name' => 'Role2']);
-        $user=[
+        $user = [
             'nombre' => 'User1',
             'correo' => 'user1@example.com',
             'password' => 'password123',
@@ -83,7 +85,6 @@ class StoreUserTest extends TestCase
         $this->assertArrayNotHasKey('remember_token', $data);
     }
 
-
     public static function invalidUserDataProvider(): array
     {
         $invalidData = [
@@ -91,39 +92,41 @@ class StoreUserTest extends TestCase
             'correo' => 'usuario@prueba.com',
             'password' => 'password123',
         ];
+
         return [
             'missing name' => [
                 array_diff_key($invalidData, ['nombre' => '']),
                 'nombre',
-                'The nombre field is required.'
+                'The nombre field is required.',
             ],
             'missing email' => [
-                array_diff_key($invalidData, ['correo' => '']),//array_diff_key compara las claves de los arrays y elimina las que coinciden
+                array_diff_key($invalidData, ['correo' => '']), // array_diff_key compara las claves de los arrays y elimina las que coinciden
                 'correo',
-                'The correo field is required.'
+                'The correo field is required.',
             ],
             'unique email' => [
                 array_merge($invalidData, ['correo' => 'admin@yahoo.es']),
                 'correo',
-                'The correo has already been taken.'
+                'The correo has already been taken.',
             ],
             'invalid email' => [
-                array_merge($invalidData, ['correo' => 'invalid-email']),//array_merge sobre escribe el valor de una clave
+                array_merge($invalidData, ['correo' => 'invalid-email']), // array_merge sobre escribe el valor de una clave
                 'correo',
-                'The correo field must be a valid correo address.'
+                'The correo field must be a valid correo address.',
             ],
             'missing password' => [
                 array_diff_key($invalidData, ['password' => '']),
                 'password',
-                'The password field is required.'
+                'The password field is required.',
             ],
             'invalid length password' => [
                 array_merge($invalidData, ['password' => 'short']),
                 'password',
-                'The password field must be at least 6 characters.'
+                'The password field must be at least 6 characters.',
             ],
         ];
     }
+
     #[Test]
     #[DataProvider('invalidUserDataProvider')]
     public function status_422_to_store_user(array $data, string $error_field, string $error_message): void
@@ -131,16 +134,16 @@ class StoreUserTest extends TestCase
         $response = $this->postJson(route('user.store'), $data);
         $response->assertUnprocessable();
         $response->assertExactJson([
-            "error" => [
+            'error' => [
                 $error_field => [
-                    $error_message
-                ]
+                    $error_message,
+                ],
             ],
-            "code" => 422
+            'code' => 422,
         ]);
     }
 
-        #[Test]
+    #[Test]
     public function unauthenticated_store_user_returns_401(): void
     {
         Auth::logout();
@@ -155,5 +158,4 @@ class StoreUserTest extends TestCase
             'error' => 'No autenticado',
         ]);
     }
-
 }

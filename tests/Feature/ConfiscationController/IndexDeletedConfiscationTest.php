@@ -17,8 +17,9 @@ class IndexDeletedConfiscationTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['confiscation.view']);
         $confiscations = Confiscation::factory()->count(10)->create();
-        $confiscations->each->delete(); //para borrar los deocomisos creados
+        $confiscations->each->delete(); // para borrar los deocomisos creados
     }
 
     #[Test]

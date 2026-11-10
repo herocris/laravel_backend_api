@@ -17,8 +17,10 @@ class indexUserTest extends TestCase
     {
         parent::setUp();
         $this->user = $this->superAdminLogin();
-        Auth::login($this->user);        
+        Auth::login($this->user);
+        $this->grantPermissions($this->user, ['user.view']);
     }
+
     #[Test]
     public function index_returns_collection_if_exists(): void
     {
@@ -57,7 +59,8 @@ class indexUserTest extends TestCase
 
         $response->assertJsonCount(10, 'data');
     }
-    //este test falla si hay otros usuarios en la base de datos aparte del admin
+
+    // este test falla si hay otros usuarios en la base de datos aparte del admin
     #[Test]
     public function index_if_only_admin_user_exists(): void
     {

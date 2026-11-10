@@ -21,6 +21,7 @@ class StoreRoleTest extends TestCase
         parent::setUp();
         $this->admin = $this->superAdminLogin();
         Auth::login($this->admin);
+        $this->grantPermissions($this->admin, ['role.create']);
         Role::factory()->create(['name' => 'admin']);
     }
 
@@ -44,10 +45,10 @@ class StoreRoleTest extends TestCase
         $this->assertDatabaseHas('roles', [
             'name' => 'Supervisor',
         ]);
-        
+
         $role = Role::where('name', 'Supervisor')->first();
-        //assertEqualsCanonicalizing para comparar arrays sin importar el orden
-        //esta asercion verifica que los permisos asociados al rol sean exactamente los esperados
+        // assertEqualsCanonicalizing para comparar arrays sin importar el orden
+        // esta asercion verifica que los permisos asociados al rol sean exactamente los esperados
         $this->assertEqualsCanonicalizing(
             [$perm1->id, $perm2->id],
             $role->permissions->pluck('id')->toArray()
@@ -57,18 +58,19 @@ class StoreRoleTest extends TestCase
     public static function invalidRoleDataProvider(): array
     {
         $invalidData = [
-            'nombre' => 'Rol de Prueba'
+            'nombre' => 'Rol de Prueba',
         ];
+
         return [
             'missing nombre' => [
                 array_diff_key($invalidData, ['nombre' => '']),
                 'nombre',
-                'The nombre field is required.'
+                'The nombre field is required.',
             ],
             'unique nombre' => [
                 array_merge($invalidData, ['nombre' => 'admin']),
                 'nombre',
-                'The nombre has already been taken.'
+                'The nombre has already been taken.',
             ],
         ];
     }
@@ -82,10 +84,10 @@ class StoreRoleTest extends TestCase
         $response->assertExactJson([
             'error' => [
                 $error_field => [
-                    $error_message
-                ]
+                    $error_message,
+                ],
             ],
-            'code' => 422
+            'code' => 422,
         ]);
     }
 

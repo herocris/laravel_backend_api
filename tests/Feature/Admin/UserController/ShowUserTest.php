@@ -13,6 +13,7 @@ use Tests\TestCase;
 class ShowUserTest extends TestCase
 {
     private User $admin;
+
     private User $user;
 
     protected function setUp(): void
@@ -20,6 +21,7 @@ class ShowUserTest extends TestCase
         parent::setUp();
         $this->admin = $this->superAdminLogin();
         Auth::login($this->admin);
+        $this->grantPermissions($this->admin, ['user.delete', 'user.view']);
         $this->user = User::factory()->create([
             'name' => 'Original Name',
             'email' => 'original@example.com',
@@ -31,7 +33,7 @@ class ShowUserTest extends TestCase
     public function show_user_successfully(): void
     {
         $response = $this->getJson(route('user.show', ['user' => $this->user->id]));
-        
+
         $response->assertOk();
         $response->assertExactJson([
             'identificador' => $this->user->id,
@@ -49,7 +51,7 @@ class ShowUserTest extends TestCase
         $response->assertOk();
         $response = $this->getJson(route('user.show', ['user' => $this->user->id]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo user",
+            'error' => 'No existe el recurso con ese id para el modelo user',
             'code' => 404,
         ]);
     }

@@ -17,6 +17,7 @@ class IndexDrugTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['drug.view']);
     }
 
     #[Test]
@@ -56,6 +57,7 @@ class IndexDrugTest extends TestCase
 
         $response->assertJsonCount(10, 'data');
     }
+
     #[Test]
     public function empty_drug_collection(): void
     {

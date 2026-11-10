@@ -7,13 +7,14 @@ namespace Tests\Feature\Admin\UserController;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class UpdateUserTest extends TestCase
 {
     private User $admin;
+
     private User $user;
 
     protected function setUp(): void
@@ -21,6 +22,7 @@ class UpdateUserTest extends TestCase
         parent::setUp();
         $this->admin = $this->superAdminLogin();
         Auth::login($this->admin);
+        $this->grantPermissions($this->admin, ['user.update']);
         $this->user = User::factory()->create([
             'name' => 'Original Name',
             'email' => 'original@example.com',
@@ -74,27 +76,27 @@ class UpdateUserTest extends TestCase
             'unique email' => [
                 array_merge($invalidData, ['correo' => 'second@example.com']),
                 'correo',
-                'The correo has already been taken.'
+                'The correo has already been taken.',
             ],
             'missing nombre' => [
                 array_diff_key($invalidData, ['nombre' => '']),
                 'nombre',
-                'The nombre field is required.'
+                'The nombre field is required.',
             ],
             'missing correo' => [
                 array_diff_key($invalidData, ['correo' => '']),
                 'correo',
-                'The correo field is required.'
+                'The correo field is required.',
             ],
             'missing password' => [
                 array_diff_key($invalidData, ['password' => '']),
                 'password',
-                'The password field is required.'
+                'The password field is required.',
             ],
             'invalid correo format' => [
                 array_merge($invalidData, ['correo' => 'not-an-email']),
                 'correo',
-                'The correo field must be a valid correo address.'
+                'The correo field must be a valid correo address.',
             ],
         ];
     }
@@ -106,12 +108,12 @@ class UpdateUserTest extends TestCase
         $response = $this->putJson(route('user.update', ['user' => $this->user->id]), $data);
         $response->assertUnprocessable();
         $response->assertExactJson([
-            "error" => [
+            'error' => [
                 $error_field => [
-                    $error_message
-                ]
+                    $error_message,
+                ],
             ],
-            "code" => 422
+            'code' => 422,
         ]);
     }
 

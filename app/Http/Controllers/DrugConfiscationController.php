@@ -22,6 +22,11 @@ class DrugConfiscationController extends ApiController implements HasMiddleware
     public static function middleware(): array
     {
         return [
+            new Middleware('permission:drugConfiscation.view,api', only: ['index', 'show', 'indexDeleted', 'indexByConfiscation']),
+            new Middleware('permission:drugConfiscation.create,api', only: ['store']),
+            new Middleware('permission:drugConfiscation.update,api', only: ['update', 'restore']),
+            new Middleware('permission:drugConfiscation.delete,api', only: ['destroy']),
+            new Middleware('permission:graph.view,api', only: ['graphIndex']),
             new Middleware('transformInput:'.DrugConfiscationResource::class.'', only: ['store', 'update']),
         ];
     }

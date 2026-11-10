@@ -11,9 +11,11 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use Spatie\Permission\Exceptions\RoleDoesNotExist;
+use Spatie\Permission\Middleware\PermissionMiddleware;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
@@ -30,7 +32,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'transformInput' => TransformInput::class,
             'jwt.auth' => AuthenticateJWT::class,
+            'permission' => PermissionMiddleware::class,
         ]);
+
+        $middleware->prependToPriorityList(
+            before: SubstituteBindings::class,
+            prepend: PermissionMiddleware::class,
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
 

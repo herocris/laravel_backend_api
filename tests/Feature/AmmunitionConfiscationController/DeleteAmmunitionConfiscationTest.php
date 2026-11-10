@@ -13,8 +13,11 @@ use Tests\TestCase;
 class DeleteAmmunitionConfiscationTest extends TestCase
 {
     private User $user;
+
     private Confiscation $confiscation;
+
     private Ammunition $ammunition;
+
     private AmmunitionConfiscation $ammunitionConfiscation;
 
     protected function setUp(): void
@@ -22,13 +25,14 @@ class DeleteAmmunitionConfiscationTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['ammunitionConfiscation.delete']);
         $this->confiscation = Confiscation::factory()->create();
         $this->ammunition = Ammunition::factory()->create();
         $this->ammunitionConfiscation = AmmunitionConfiscation::factory()->create();
     }
 
     #[Test]
-    public function delete_ammunitionConfiscation()
+    public function delete_ammunition_confiscation()
     {
         $response = $this->deleteJson(route('ammunitionConfiscation.destroy', $this->ammunitionConfiscation->id));
         $response->assertOk();
@@ -49,13 +53,13 @@ class DeleteAmmunitionConfiscationTest extends TestCase
     }
 
     #[Test]
-    public function delete_deleted_ammunitionConfiscation(): void
+    public function delete_deleted_ammunition_confiscation(): void
     {
         $response = $this->deleteJson(route('ammunitionConfiscation.destroy', ['ammunitionConfiscation' => $this->ammunitionConfiscation->id]));
         $response->assertOk();
         $response = $this->deleteJson(route('ammunitionConfiscation.destroy', ['ammunitionConfiscation' => $this->ammunitionConfiscation->id]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo ammunitionconfiscation",
+            'error' => 'No existe el recurso con ese id para el modelo ammunitionconfiscation',
             'code' => 404,
         ]);
     }

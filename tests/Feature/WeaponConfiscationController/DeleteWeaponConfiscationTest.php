@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Admin\WeaponConfiscationController;
 
-use App\Models\Weapon;
-use App\Models\WeaponConfiscation;
 use App\Models\Confiscation;
 use App\Models\User;
+use App\Models\Weapon;
+use App\Models\WeaponConfiscation;
 use Illuminate\Support\Facades\Auth;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -13,8 +13,11 @@ use Tests\TestCase;
 class DeleteWeaponConfiscationTest extends TestCase
 {
     private User $user;
+
     private Confiscation $confiscation;
+
     private Weapon $weapon;
+
     private WeaponConfiscation $weaponConfiscation;
 
     protected function setUp(): void
@@ -22,13 +25,14 @@ class DeleteWeaponConfiscationTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['weaponConfiscation.delete']);
         $this->confiscation = Confiscation::factory()->create();
         $this->weapon = Weapon::factory()->create();
         $this->weaponConfiscation = WeaponConfiscation::factory()->create();
     }
 
     #[Test]
-    public function delete_weaponConfiscation()
+    public function delete_weapon_confiscation()
     {
         $response = $this->deleteJson(route('weaponConfiscation.destroy', $this->weaponConfiscation->id));
         $response->assertOk();
@@ -49,13 +53,13 @@ class DeleteWeaponConfiscationTest extends TestCase
     }
 
     #[Test]
-    public function delete_deleted_weaponConfiscation(): void
+    public function delete_deleted_weapon_confiscation(): void
     {
         $response = $this->deleteJson(route('weaponConfiscation.destroy', ['weaponConfiscation' => $this->weaponConfiscation->id]));
         $response->assertOk();
         $response = $this->deleteJson(route('weaponConfiscation.destroy', ['weaponConfiscation' => $this->weaponConfiscation->id]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo weaponconfiscation",
+            'error' => 'No existe el recurso con ese id para el modelo weaponconfiscation',
             'code' => 404,
         ]);
     }

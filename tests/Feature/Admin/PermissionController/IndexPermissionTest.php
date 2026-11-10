@@ -17,6 +17,7 @@ class IndexPermissionTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['permission.view']);
     }
 
     #[Test]
@@ -54,13 +55,16 @@ class IndexPermissionTest extends TestCase
         ]);
 
         $response->assertJsonCount(10, 'data');
+        $response->assertJsonPath('total', 11);
     }
+
     #[Test]
-    public function empty_permission_collection(): void
+    public function index_returns_the_access_permission_when_no_other_permissions_exist(): void
     {
         $response = $this->getJson(route('permission.index'));
         $response->assertOk();
-        $response->assertJsonCount(0, 'data');
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonPath('data.0.nombre', 'permission.view');
     }
 
     #[Test]

@@ -11,6 +11,7 @@ use Tests\TestCase;
 class DeleteConfiscationTest extends TestCase
 {
     private User $user;
+
     private Confiscation $confiscation;
 
     protected function setUp(): void
@@ -18,6 +19,7 @@ class DeleteConfiscationTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['confiscation.delete']);
         $this->confiscation = Confiscation::factory()->create();
     }
 
@@ -46,7 +48,7 @@ class DeleteConfiscationTest extends TestCase
         $response->assertOk();
         $response = $this->deleteJson(route('confiscation.destroy', ['confiscation' => $this->confiscation->id]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo confiscation",
+            'error' => 'No existe el recurso con ese id para el modelo confiscation',
             'code' => 404,
         ]);
     }

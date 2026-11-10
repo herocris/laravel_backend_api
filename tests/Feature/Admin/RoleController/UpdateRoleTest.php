@@ -15,6 +15,7 @@ use Tests\TestCase;
 class UpdateRoleTest extends TestCase
 {
     private User $admin;
+
     private Role $role;
 
     protected function setUp(): void
@@ -22,6 +23,7 @@ class UpdateRoleTest extends TestCase
         parent::setUp();
         $this->admin = $this->superAdminLogin();
         Auth::login($this->admin);
+        $this->grantPermissions($this->admin, ['role.update']);
         $this->role = Role::factory()->create(['name' => 'Operator']);
     }
 
@@ -48,8 +50,8 @@ class UpdateRoleTest extends TestCase
         ]);
 
         $this->role->refresh();
-        //assertEqualsCanonicalizing para comparar arrays sin importar el orden
-        //esta asercion verifica que los permisos asociados al rol sean exactamente los esperados
+        // assertEqualsCanonicalizing para comparar arrays sin importar el orden
+        // esta asercion verifica que los permisos asociados al rol sean exactamente los esperados
         $this->assertEqualsCanonicalizing(
             [$perm1->id, $perm2->id],
             $this->role->permissions->pluck('id')->toArray()
@@ -62,11 +64,12 @@ class UpdateRoleTest extends TestCase
             'nombre' => 'Operator',
             'permisos' => [],
         ];
+
         return [
             'missing nombre' => [
                 array_diff_key($base, ['nombre' => '']),
                 'nombre',
-                'The nombre field is required.'
+                'The nombre field is required.',
             ],
         ];
     }
@@ -80,10 +83,10 @@ class UpdateRoleTest extends TestCase
         $response->assertExactJson([
             'error' => [
                 $error_field => [
-                    $error_message
-                ]
+                    $error_message,
+                ],
             ],
-            'code' => 422
+            'code' => 422,
         ]);
     }
 

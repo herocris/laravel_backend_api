@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Admin\WeaponController;
 
-use App\Models\Weapon;
 use App\Models\User;
+use App\Models\Weapon;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -23,6 +23,7 @@ class StoreWeaponTest extends TestCase
         Storage::fake('public');
         $this->admin = $this->superAdminLogin();
         Auth::login($this->admin);
+        $this->grantPermissions($this->admin, ['weapon.create']);
         Weapon::factory()->create(['description' => 'test_weapon', 'logo' => 'test_logo.png']);
     }
 
@@ -52,45 +53,46 @@ class StoreWeaponTest extends TestCase
     {
         $invalidData = [
             'descripcion' => 'Droga de Prueba',
-            'logo' => UploadedFile::fake()->image('droga_logo.png')
+            'logo' => UploadedFile::fake()->image('droga_logo.png'),
         ];
+
         return [
             'missing descripcion' => [
                 array_diff_key($invalidData, ['descripcion' => '']),
                 'descripcion',
-                'The descripcion field is required.'
+                'The descripcion field is required.',
             ],
             'missing logo' => [
                 array_diff_key($invalidData, ['logo' => '']),
                 'logo',
-                'The logo field is required.'
+                'The logo field is required.',
             ],
             'invalid logo format' => [
                 array_merge($invalidData, ['logo' => UploadedFile::fake()->create('droga_logo.pdf')]),
                 'logo',
                 [
-                    "The logo field must be an image.",
-                    "The logo field must be a file of type: png."
-                ]
+                    'The logo field must be an image.',
+                    'The logo field must be a file of type: png.',
+                ],
             ],
             'invalid logo image format' => [
                 array_merge($invalidData, ['logo' => UploadedFile::fake()->create('droga_logo.jpg')]),
                 'logo',
                 [
-                    "The logo field must be a file of type: png."
-                ]
+                    'The logo field must be a file of type: png.',
+                ],
             ],
             'invalid logo image size' => [
                 array_merge($invalidData, ['logo' => UploadedFile::fake()->create('droga_logo.png', 3000)]),
                 'logo',
                 [
-                    "The logo field must not be greater than 2048 kilobytes.",
-                ]
+                    'The logo field must not be greater than 2048 kilobytes.',
+                ],
             ],
             'unique descripcion' => [
                 array_merge($invalidData, ['descripcion' => 'test_weapon']),
                 'descripcion',
-                'The descripcion has already been taken.'
+                'The descripcion has already been taken.',
             ],
         ];
     }
@@ -104,10 +106,10 @@ class StoreWeaponTest extends TestCase
         $response->assertExactJson([
             'error' => [
                 $error_field => is_array($error_message) ? $error_message : [
-                    $error_message
-                ]
+                    $error_message,
+                ],
             ],
-            'code' => 422
+            'code' => 422,
         ]);
     }
 

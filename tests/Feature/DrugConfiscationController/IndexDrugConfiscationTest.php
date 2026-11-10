@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Admin\DrugConfiscationController;
 
-use App\Models\DrugConfiscation;
 use App\Models\Confiscation;
 use App\Models\Drug;
+use App\Models\DrugConfiscation;
 use App\Models\DrugPresentation;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -20,13 +20,14 @@ class IndexDrugConfiscationTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['drugConfiscation.view']);
         Confiscation::factory()->create();
         Drug::factory()->create();
         DrugPresentation::factory()->create();
     }
 
     #[Test]
-    public function index_returns_all_drugConfiscations()
+    public function index_returns_all_drug_confiscations()
     {
         DrugConfiscation::factory()->count(10)->create();
 
@@ -75,8 +76,9 @@ class IndexDrugConfiscationTest extends TestCase
 
         $response->assertJsonCount(10, 'data');
     }
+
     #[Test]
-    public function empty_drugConfiscation_collection(): void
+    public function empty_drug_confiscation_collection(): void
     {
         $response = $this->getJson(route('drugConfiscation.index'));
         $response->assertOk();

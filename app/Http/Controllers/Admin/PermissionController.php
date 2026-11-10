@@ -6,9 +6,8 @@ use App\Http\Controllers\ApiController;
 use App\Http\Requests\Admin\Permission\StorePostRequest;
 use App\Http\Requests\Admin\Permission\UpdatePutRequest;
 use App\Http\Resources\Admin\Permission\PermissionResource;
-use Illuminate\Http\Request;
 use App\Models\Permission;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
@@ -19,12 +18,16 @@ class PermissionController extends ApiController implements HasMiddleware
      * que los datos de creación/actualización se alineen con `PermissionResource`.
      * Esto permite mantener consistencia si se agregan alias/cambios de keys.
      *
-     * @return array<\Illuminate\Routing\Controllers\Middleware> Middlewares a aplicar.
+     * @return array<Middleware> Middlewares a aplicar.
      */
     public static function middleware(): array
     {
         return [
-            new Middleware("transformInput:" . PermissionResource::class . "", only: ['store','update']),
+            new Middleware('permission:permission.view,api', only: ['index', 'show', 'indexDeleted']),
+            new Middleware('permission:permission.create,api', only: ['store']),
+            new Middleware('permission:permission.update,api', only: ['update', 'restore']),
+            new Middleware('permission:permission.delete,api', only: ['destroy']),
+            new Middleware('transformInput:'.PermissionResource::class.'', only: ['store', 'update']),
         ];
     }
 
@@ -32,11 +35,12 @@ class PermissionController extends ApiController implements HasMiddleware
      * Devuelve todos los permisos registrados. Útil para construcción de
      * matrices de acceso o para poblar formularios. No incluye paginación.
      *
-     * @return \Illuminate\Http\JsonResponse Colección completa de permisos.
+     * @return JsonResponse Colección completa de permisos.
      */
     public function index()
     {
         $permissions = Permission::all();
+
         return $this->showAll($permissions);
     }
 
@@ -45,13 +49,14 @@ class PermissionController extends ApiController implements HasMiddleware
      * dispara eventos Eloquent y queda disponible inmediatamente para asignar
      * a roles. Retorna estado final (HTTP 200 por uso de `showOne`).
      *
-     * @param StorePostRequest $request Datos validados.
-     * @return \Illuminate\Http\JsonResponse Permiso creado.
+     * @param  StorePostRequest  $request  Datos validados.
+     * @return JsonResponse Permiso creado.
      */
     public function store(StorePostRequest $request)
     {
         $validated = $request->validated();
         $permission = Permission::create($validated);
+
         return $this->showOne($permission);
     }
 
@@ -59,8 +64,8 @@ class PermissionController extends ApiController implements HasMiddleware
      * Muestra un permiso específico por ID (binding). Si el recurso no existe
      * Laravel genera 404 automáticamente antes de ejecutar este método.
      *
-     * @param Permission $permission Instancia objetivo.
-     * @return \Illuminate\Http\JsonResponse Datos del permiso.
+     * @param  Permission  $permission  Instancia objetivo.
+     * @return JsonResponse Datos del permiso.
      */
     public function show(Permission $permission)
     {
@@ -71,14 +76,15 @@ class PermissionController extends ApiController implements HasMiddleware
      * Actualiza campos permitidos del permiso. Ideal para ajustar nombre
      * legible o guard_name. Retorna representación actualizada (HTTP 200).
      *
-     * @param UpdatePutRequest $request Datos validados.
-     * @param Permission $permission Permiso objetivo.
-     * @return \Illuminate\Http\JsonResponse Permiso actualizado.
+     * @param  UpdatePutRequest  $request  Datos validados.
+     * @param  Permission  $permission  Permiso objetivo.
+     * @return JsonResponse Permiso actualizado.
      */
     public function update(UpdatePutRequest $request, Permission $permission)
     {
         $validated = $request->validated();
         $permission->update($validated);
+
         return $this->showOne($permission);
     }
 
@@ -86,12 +92,13 @@ class PermissionController extends ApiController implements HasMiddleware
      * Soft delete del permiso: marca `deleted_at` sin borrar físicamente.
      * Esto permite auditoría y restauración posterior sin pérdida de integridad.
      *
-     * @param Permission $permission Permiso a eliminar lógicamente.
-     * @return \Illuminate\Http\JsonResponse Permiso eliminado.
+     * @param  Permission  $permission  Permiso a eliminar lógicamente.
+     * @return JsonResponse Permiso eliminado.
      */
     public function destroy(Permission $permission)
     {
         $permission->delete();
+
         return $this->showOne($permission);
     }
 
@@ -99,11 +106,12 @@ class PermissionController extends ApiController implements HasMiddleware
      * Lista permisos soft-deleted para administración y posible restauración.
      * Puede requerir paginación si la lista crece significativamente.
      *
-     * @return \Illuminate\Http\JsonResponse Colección de permisos eliminados.
+     * @return JsonResponse Colección de permisos eliminados.
      */
     public function indexDeleted()
     {
         $permissions = Permission::onlyTrashed()->get();
+
         return $this->showAll($permissions);
     }
 
@@ -111,12 +119,13 @@ class PermissionController extends ApiController implements HasMiddleware
      * Restaura un permiso previamente soft-deleted. Requiere binding con
      * `withTrashed()` en la definición de la ruta. Si ya estaba activo no cambia.
      *
-     * @param Permission $permission Permiso a restaurar.
-     * @return \Illuminate\Http\JsonResponse Permiso restaurado.
+     * @param  Permission  $permission  Permiso a restaurar.
+     * @return JsonResponse Permiso restaurado.
      */
     public function restore(Permission $permission)
     {
         $permission->restore();
+
         return $this->showOne($permission);
     }
 }

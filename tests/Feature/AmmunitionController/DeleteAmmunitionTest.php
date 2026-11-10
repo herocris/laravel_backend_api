@@ -11,6 +11,7 @@ use Tests\TestCase;
 class DeleteAmmunitionTest extends TestCase
 {
     private User $user;
+
     private Ammunition $ammunition;
 
     protected function setUp(): void
@@ -18,9 +19,10 @@ class DeleteAmmunitionTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['ammunition.delete']);
         $this->ammunition = Ammunition::factory()->create([
             'description' => 'ammunition_test',
-            'logo' => 'ammunition_logo.png'
+            'logo' => 'ammunition_logo.png',
         ]);
     }
 
@@ -44,7 +46,7 @@ class DeleteAmmunitionTest extends TestCase
         $response->assertOk();
         $response = $this->deleteJson(route('ammunition.destroy', ['ammunition' => $this->ammunition->id]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo ammunition",
+            'error' => 'No existe el recurso con ese id para el modelo ammunition',
             'code' => 404,
         ]);
     }

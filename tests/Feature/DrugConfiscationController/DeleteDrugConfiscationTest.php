@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Admin\DrugConfiscationController;
 
+use App\Models\Confiscation;
 use App\Models\Drug;
 use App\Models\DrugConfiscation;
-use App\Models\Confiscation;
 use App\Models\DrugPresentation;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -14,9 +14,13 @@ use Tests\TestCase;
 class DeleteDrugConfiscationTest extends TestCase
 {
     private User $user;
+
     private Confiscation $confiscation;
+
     private Drug $drug;
+
     private DrugPresentation $drugPresentation;
+
     private DrugConfiscation $drugConfiscation;
 
     protected function setUp(): void
@@ -24,6 +28,7 @@ class DeleteDrugConfiscationTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['drugConfiscation.delete']);
         $this->confiscation = Confiscation::factory()->create();
         $this->drug = Drug::factory()->create();
         $this->drugPresentation = DrugPresentation::factory()->create();
@@ -31,7 +36,7 @@ class DeleteDrugConfiscationTest extends TestCase
     }
 
     #[Test]
-    public function delete_drugConfiscation()
+    public function delete_drug_confiscation()
     {
         $response = $this->deleteJson(route('drugConfiscation.destroy', $this->drugConfiscation->id));
         $response->assertOk();
@@ -57,13 +62,13 @@ class DeleteDrugConfiscationTest extends TestCase
     }
 
     #[Test]
-    public function delete_deleted_drugConfiscation(): void
+    public function delete_deleted_drug_confiscation(): void
     {
         $response = $this->deleteJson(route('drugConfiscation.destroy', ['drugConfiscation' => $this->drugConfiscation->id]));
         $response->assertOk();
         $response = $this->deleteJson(route('drugConfiscation.destroy', ['drugConfiscation' => $this->drugConfiscation->id]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo drugconfiscation",
+            'error' => 'No existe el recurso con ese id para el modelo drugconfiscation',
             'code' => 404,
         ]);
     }

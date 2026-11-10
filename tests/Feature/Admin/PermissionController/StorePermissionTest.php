@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Feature\Admin\PermissionController;
 
 use App\Models\Permission;
-use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -21,6 +20,7 @@ class StorePermissionTest extends TestCase
         parent::setUp();
         $this->admin = $this->superAdminLogin();
         Auth::login($this->admin);
+        $this->grantPermissions($this->admin, ['permission.create']);
         Permission::factory()->create(['name' => 'perimission_test']);
     }
 
@@ -45,18 +45,19 @@ class StorePermissionTest extends TestCase
     public static function invalidPermissionDataProvider(): array
     {
         $invalidData = [
-            'nombre' => 'Permiso de Prueba'
+            'nombre' => 'Permiso de Prueba',
         ];
+
         return [
             'missing nombre' => [
                 array_diff_key($invalidData, ['nombre' => '']),
                 'nombre',
-                'The nombre field is required.'
+                'The nombre field is required.',
             ],
             'unique nombre' => [
                 array_merge($invalidData, ['nombre' => 'perimission_test']),
                 'nombre',
-                'The nombre has already been taken.'
+                'The nombre has already been taken.',
             ],
         ];
     }
@@ -70,10 +71,10 @@ class StorePermissionTest extends TestCase
         $response->assertExactJson([
             'error' => [
                 $error_field => [
-                    $error_message
-                ]
+                    $error_message,
+                ],
             ],
-            'code' => 422
+            'code' => 422,
         ]);
     }
 

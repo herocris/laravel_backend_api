@@ -2,12 +2,12 @@
 
 ## Estado para retomar
 
-- Última actualización: 2026-11-08, zona Europe/Madrid.
-- Trabajo actual: paso 02 completado; errores HTTP conservan estado, formato y cabeceras.
-- Paso en curso: ninguno.
+- Última actualización: 2026-11-10, zona Europe/Madrid.
+- Trabajo actual: solicitud directa de protección mediante middleware de Spatie completada; 85 rutas de módulos protegidas, suite 739 pruebas / 3.325 aserciones sin incidencias.
+- Paso en curso: 05 parcialmente adelantado por solicitud directa; su aceptación integral sigue pendiente de los prerrequisitos 03–04. No se han iniciado automáticamente otros pasos.
 - Siguiente paso: 03, crear permisos y roles estables.
-- Próxima acción: ejecutar únicamente 03, leyendo su sección del plan y la sesión 02 de esta bitácora; antes de integrar en `main`, preparar `15a` por el workflow de despliegue automático existente.
-- Base vigente: rama local `refactor/01-base-referencia`, HEAD `9bbcefff060ce8b424af4c7548cf9673dc7c229d`; suite tras 02: 448 pruebas, 2.834 aserciones, todas pasan. Cambios locales: `bootstrap/app.php`, nueva prueba HTTP y esta bitácora, que conserva los cambios previos de 01.
+- Próxima acción: completar 03 con el catálogo singular actual y posteriormente 04 para cerrar la escalada de asignaciones, conservando la protección añadida. Antes de integrar en `main`, preparar `15a` por el workflow de despliegue automático existente.
+- Base vigente: rama local `refactor/01-base-referencia`, HEAD `79d9827e32e861859319f5a7ec7d377523849016`; cambios locales en los 12 controladores de módulos/auditoría, `bootstrap/app.php`, pruebas afectadas, nuevo `ModuleAuthorizationTest` y esta bitácora. Árbol limpio al inicio de la solicitud actual. Suite final: 739 pruebas / 3.325 aserciones, todas pasan.
 - Referencia de preparación: rama `upgrade/laravel-13`, HEAD `ed718be`. Es una referencia histórica; comprobar rama, HEAD y estado actuales al retomar.
 - Alcance ejecutado en esta preparación: actualizar `AGENTS.md` y crear `refactor-plan.md` y este archivo. No se corrigió código de aplicación.
 - Verificaciones de esta preparación: revisión de los tres documentos y correspondencia de los 16 prompts con el tablero; comprobaciones de whitespace sin incidencias. No se ejecutaron tests ni Pint porque solo se modificó documentación.
@@ -22,7 +22,7 @@ Estados: `pendiente`, `en_curso`, `bloqueado`, `completado`. `no_aplica` se usa 
 | 02 | Errores HTTP | completado | 15 regresiones HTTP; suite completa 448 pruebas / 2.834 aserciones; Pint y whitespace correctos |
 | 03 | Catálogo de permisos | pendiente | Matriz determinista y seeder idempotente |
 | 04 | Asignación de privilegios | pendiente | Cerrar escalada y evitar pérdida de asignaciones |
-| 05 | Protección de endpoints | pendiente | Inventario completo y casos 401/403/éxito |
+| 05 | Protección de endpoints | en_curso | 85 rutas con auth + permission, 291 regresiones nuevas; aceptación integral pendiente de 03–04 |
 | 06 | Policies contextuales | pendiente | Revisar reglas confirmadas; creación condicional |
 | 07 | Autenticación y límites | pendiente | Confirmar consumidores y estrategia |
 | 08 | Validación e integridad | pendiente | Invariantes, unidades y soft deletes |
@@ -68,12 +68,13 @@ Hallazgos que deben contrastarse con el código al entrar en cada paso:
 
 | ID | Decisión | Procedencia / alcance |
 | --- | --- | --- |
-| D01 | Aprovechar Spatie con `can` para permisos generales | Plan acordado; no crear gates duplicados |
+| D01 | Aprovechar la integración de Spatie con Gate para permisos generales | Inicialmente previsto `can`; D07 concreta el middleware solicitado después por el usuario; sin gates duplicados |
 | D02 | Policies solo para restricciones sobre registros confirmadas | No inventar propiedad, estados o multitenencia |
 | D03 | Refactor incremental en 16 pasos, una conversación por paso | Detalle y prompts en `refactor-plan.md` |
 | D04 | Separar instrucciones, plan y progreso | Solicitud explícita; documentación autorizada |
 | D05 | Preservar contrato existente salvo correcciones expresas | Registrar impacto y adaptación del cliente |
 | D06 | No usar seeders destructivos ni cuentas elegidas por suposición | Configuración nueva idempotente y pruebas aisladas |
+| D07 | Usar `permission:<permiso>,api` de Spatie en los módulos, conservando Gate mediante `canAny()` | Solicitud directa del usuario, 2026-11-10; sustituye el alias `can` previsto en D01 para estas acciones |
 
 Agregar decisiones confirmadas con identificador, fecha, motivo e impacto. Distinguir propuestas de decisiones; conservar el historial si se sustituye alguna.
 
@@ -95,9 +96,43 @@ No solicitar todas estas respuestas al iniciar: resolver en su paso y continuar 
 
 ## Matriz de autorización
 
-Pendiente de construir en 03 y contrastar con las rutas efectivas en 05. Registrar recurso, acción, permiso exacto, guard y roles autorizados. Los nombres `drugs.view`, `drugs.create`, `drugs.update`, `drugs.delete`, `drugs.viewDeleted`, `drugs.restore` son una propuesta, no permisos creados ni asignados.
+Matriz vigente del 2026-11-10, contrastada con `route:list --except-vendor --json`: 91 rutas totales, de las que 85 corresponden a módulos y todas tienen `auth` y `PermissionMiddleware`. Guard `api` en todos los permisos; ninguno depende del nombre del rol. Permisos directos y heredados de roles son válidos. No se asignaron permisos a cuentas reales ni se decidió la distribución entre roles.
+
+`<recurso>` corresponde exactamente a `user`, `role`, `permission`, `drug`, `drugPresentation`, `weapon`, `ammunition`, `confiscation`, `drugConfiscation`, `weaponConfiscation` y `ammunitionConfiscation`. Todos conservan sus URLs y nombres de rutas.
+
+| Método y ruta | Acción | Permiso |
+| --- | --- | --- |
+| GET/HEAD `api/<recurso>` | index | `<recurso>.view` |
+| GET/HEAD `api/<recurso>/{registro}` | show | `<recurso>.view` |
+| GET/HEAD `api/<recurso>/deleted` | indexDeleted | `<recurso>.view` |
+| POST `api/<recurso>` | store | `<recurso>.create` |
+| PUT/PATCH `api/<recurso>/{registro}` | update | `<recurso>.update` |
+| POST `api/<recurso>/restore/{registro}` | restore | `<recurso>.update` |
+| DELETE `api/<recurso>/{registro}` | destroy | `<recurso>.delete` |
+| GET/HEAD `api/{drug,weapon,ammunition}Confiscation/{idConfiscation}/confiscation` | indexByConfiscation | `{drug,weapon,ammunition}Confiscation.view`, respectivamente |
+| GET/HEAD `api/{drug,weapon,ammunition}GraphIndex` | graphIndex | `graph.view` |
+| GET/HEAD `api/confiscation/map` | mapConfiscations | `map.view` |
+| GET/HEAD `api/activity` | __invoke | `activity.view` |
+
+El catálogo incluye `dashboard.view`, sin endpoint equivalente actual: no se inventa uno ni se impone ese permiso al resto de módulos. `login/register` siguen públicos y con throttle; `me/logout/refresh` siguen con auth y throttle, sin permiso administrativo. La raíz web no pertenece a estos módulos. Se usan 47 permisos distintos del catálogo de 48; la preparación idempotente y asignación inicial de 03 continúan pendientes. Cambio de contrato: un usuario autenticado sin permiso ahora recibe 403 antes de validar entrada o resolver modelos; invitados reciben 401, y usuarios autorizados conservan sus respuestas anteriores. El cliente debe gestionar 403 y disponer de asignaciones explícitas; el nombre `administrador` por sí solo no concede nada.
 
 ## Registro de sesiones y verificaciones
+
+### Protección de acciones solicitada — 2026-11-10, Europe/Madrid — completado (alcance directo)
+
+- Inicio: rama `refactor/01-base-referencia`, árbol limpio. Leídos bitácora, apartado 05 del plan y skills de Laravel y pruebas. `.ai/rules` sigue ausente.
+- Solicitud actual autoriza proteger acciones con los permisos ya creados. El catálogo vigente de `DatabaseSeeder` usa nombres sin prefijo `frontend.` y guard `api`; no equivale a haber completado el seeder idempotente ni el bootstrap de 03. No se asignarán privilegios a usuarios reales ni se ejecutarán seeders destructivos.
+- Inventario inicial mediante `vendor/bin/sail artisan route:list --except-vendor -v`: 91 rutas, módulos con `auth` y throttle, sin comprobación de permisos. Composer confirma Laravel 13.40.0, Spatie Permission 6.25.0 y PHPUnit 12.5.43. Consultado Boost para middleware y recursos; implementación instalada de `PermissionMiddleware` contrastada: usa `$user->canAny()`, conservando Gate.
+- Decisión específica de esta solicitud: usar middleware `permission` de Spatie, tal como solicita el usuario, en lugar del alias `can` previsto originalmente por D01. No se añaden gates ni bypass de administrador. `auth` precede a permisos y estos precederán al binding para evitar 404 antes de 403.
+- Matriz prevista: recursos `user`, `role`, `permission`, `drug`, `drugPresentation`, `weapon`, `ammunition`, `confiscation`, `drugConfiscation`, `weaponConfiscation`, `ammunitionConfiscation`; `index/show/indexDeleted/indexByConfiscation` → `<recurso>.view`; `store` → `.create`; `update/restore` → `.update`; `destroy` → `.delete`. `graphIndex` → `graph.view`, `mapConfiscations` → `map.view`, auditoría → `activity.view`. No existe endpoint dashboard. Roles autorizados: cualquiera con el permiso explícito, directo o heredado; sin matriz de roles inventada. Autenticación propia y registro/login conservan su contrato actual.
+- Pendientes al inicio: implementar middleware, adaptar preparación explícita de pruebas, cubrir 401/403/permiso correcto y revisar inventario efectivo; ejecutar suite completa y Pint. Riesgo previo conocido: la gestión de asignaciones/registro de 04 aún no se ha refactorizado; esta tarea no acredita cerrar esa escalada.
+- Hito: regresión inicial de `ModuleAuthorizationTest` falla como se esperaba (GET de usuarios sin permiso devuelve 200 en vez de 403, código 1). Añadidos middlewares por acción a los 11 controladores de recursos y a auditoría usando el patrón `HasMiddleware` existente, conservando transformaciones. `bootstrap/app.php` registra `permission` y lo prioriza antes de `SubstituteBindings`, después de autenticación.
+- Matriz HTTP tras implementación: `vendor/bin/sail artisan test --compact tests/Feature/ModuleAuthorizationTest.php`, código 0, **291 passed / 486 assertions**. Cubre 96 combinaciones de ruta/método en tres estados (invitado, sin permiso, permiso exacto), permiso ajeno insuficiente, permiso heredado de rol y rol `administrador` sin privilegios. Para recursos inexistentes, el permiso correcto permite llegar al 404; para altas inválidas al 422; los éxitos CRUD con datos válidos permanecen cubiertos por sus pruebas existentes. Gráficas probadas con período `day` compatible con SQLite, sin acreditar otros períodos MySQL.
+- Adaptación: helper `grantPermissions` en `tests/TestCase.php` concede únicamente los permisos explícitos solicitados por cada test; 78 archivos CRUD/auditoría adaptados después de autenticar al actor. El helper `superAdminLogin()` no recibe privilegios implícitos. El listado de permisos incluye ahora el permiso necesario para consultarlo (total 11 con diez fixtures y un permiso de acceso); prueba 404 de binding recibe `drug.view`.
+- Suite completa antes de formato: `vendor/bin/sail bin phpunit --display-warnings --no-progress`, código 0, **739 tests / 3325 assertions**, 18,585 s. Inventario final `vendor/bin/sail artisan route:list --except-vendor --json`, código 0: 91 rutas totales; 85 de módulos, sin ninguna carente de auth o permiso; 47 permisos distintos, todos existentes en el catálogo actual. Las cinco rutas de autenticación conservan sus middlewares previos.
+- Formato: `vendor/bin/sail bin pint --dirty --format agent`, código 0; además de las adiciones, normaliza formato previo de archivos modificados (imports, espacios, comillas, PHPDoc y nombres PHPUnit). Suite completa posterior al formato, mismo comando PHPUnit, código 0: **739 tests / 3325 assertions**, 18,751 s, sin advertencias. `git diff --check` sin diagnósticos.
+- Aislamiento: `phpunit.xml` y `.env.testing` mantienen SQLite `:memory:`, sin configuración cacheada ni cambios de conexión en los tests. No se han ejecutado migraciones/seeders sobre MySQL ni operaciones con datos reales. No se cambian dependencias, seeders, rutas, autenticación ni reglas de asignación. Sin commits, push o despliegue.
+- Cierre: solicitud directa satisfecha; archivos funcionales en `app/Http/Controllers/{Admin,}*Controller.php` y `bootstrap/app.php`, preparación en `tests/TestCase.php`, pruebas de módulos/auditoría y `tests/Feature/HttpExceptionResponseTest.php`, nuevo `tests/Feature/ModuleAuthorizationTest.php`, más esta bitácora. Contrato e inventario registrados arriba. Limitaciones: 03 y 04 siguen pendientes; registro/asignaciones todavía pueden permitir escalada y requieren su corrección separada, por lo que no se declara completado el paso 05 integral ni el refactor de seguridad. Siguiente acción concreta: preparar 03 con los permisos vigentes y luego cerrar 04, sin iniciar esos pasos en esta sesión.
 
 ### Paso 02 — 2026-11-08, Europe/Madrid — completado
 

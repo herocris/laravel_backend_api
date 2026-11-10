@@ -19,14 +19,15 @@ class IndexDeletedAmmunitionConfiscationTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['ammunitionConfiscation.view']);
         Confiscation::factory()->create();
         Ammunition::factory()->create();
         $ammunitionConfiscations = AmmunitionConfiscation::factory()->count(10)->create();
-        $ammunitionConfiscations->each->delete(); //para borrar los permisos creados
+        $ammunitionConfiscations->each->delete(); // para borrar los permisos creados
     }
 
     #[Test]
-    public function index_deleted_returns_only_soft_deleted_ammunitionConfiscations()
+    public function index_deleted_returns_only_soft_deleted_ammunition_confiscations()
     {
         $response = $this->getJson(route('ammunitionConfiscation.indexDeleted'));
         $response->assertOk();
@@ -69,7 +70,7 @@ class IndexDeletedAmmunitionConfiscationTest extends TestCase
     }
 
     #[Test]
-    public function index_deleted_returns_empty_when_no_deleted_ammunitionConfiscations()
+    public function index_deleted_returns_empty_when_no_deleted_ammunition_confiscations()
     {
         AmmunitionConfiscation::onlyTrashed()->get()->each->restore();
 

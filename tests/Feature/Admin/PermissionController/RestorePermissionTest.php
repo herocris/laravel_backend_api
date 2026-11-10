@@ -11,6 +11,7 @@ use Tests\TestCase;
 class RestorePermissionTest extends TestCase
 {
     private User $user;
+
     private Permission $permission;
 
     protected function setUp(): void
@@ -18,8 +19,9 @@ class RestorePermissionTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['permission.update']);
         $this->permission = Permission::factory()->create([
-            'name' => 'permission_test'
+            'name' => 'permission_test',
         ]);
         $this->permission->delete();
     }
@@ -36,19 +38,19 @@ class RestorePermissionTest extends TestCase
             'identificador' => $this->permission->id,
             'nombre' => $this->permission->name,
         ]);
-        
+
         $this->assertDatabaseHas('permissions', [
             'id' => $this->permission->id,
             'deleted_at' => null,
         ]);
     }
 
-#[Test]
+    #[Test]
     public function not_restore_non_existent_permission(): void
-    {       
-        $response = $this->postJson(route('permission.restore', ['permission' =>829]));
+    {
+        $response = $this->postJson(route('permission.restore', ['permission' => 829]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo permission",
+            'error' => 'No existe el recurso con ese id para el modelo permission',
             'code' => 404,
         ]);
     }

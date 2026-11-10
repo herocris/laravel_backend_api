@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Drug;
 use App\Http\Requests\Drug\StorePostRequest;
 use App\Http\Requests\Drug\UpdatePutRequest;
 use App\Http\Resources\Drug\DrugResource;
+use App\Models\Drug;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
-use Illuminate\Http\Request;
 
 class DrugController extends ApiController implements HasMiddleware
 {
@@ -23,7 +23,11 @@ class DrugController extends ApiController implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware("transformInput:" . DrugResource::class . "", only: ['store', 'update']),
+            new Middleware('permission:drug.view,api', only: ['index', 'show', 'indexDeleted']),
+            new Middleware('permission:drug.create,api', only: ['store']),
+            new Middleware('permission:drug.update,api', only: ['update', 'restore']),
+            new Middleware('permission:drug.delete,api', only: ['destroy']),
+            new Middleware('transformInput:'.DrugResource::class.'', only: ['store', 'update']),
         ];
     }
 
@@ -33,11 +37,12 @@ class DrugController extends ApiController implements HasMiddleware
      * evitar respuestas muy grandes. HTTP 200 siempre que la consulta
      * concluya sin excepciones.
      *
-     * @return \Illuminate\Http\JsonResponse Colección de drogas activas.
+     * @return JsonResponse Colección de drogas activas.
      */
     public function index()
     {
         $drugs = Drug::all();
+
         return $this->showAll($drugs);
     }
 
@@ -46,13 +51,14 @@ class DrugController extends ApiController implements HasMiddleware
      * Side effects: dispara eventos Eloquent (creating/created). No retorna
      * 201 por diseño del helper `showOne` (puede ajustarse si se requiere).
      *
-     * @param StorePostRequest $request Datos validados (descripcion, logo, etc.).
-     * @return \Illuminate\Http\JsonResponse Recurso recién creado.
+     * @param  StorePostRequest  $request  Datos validados (descripcion, logo, etc.).
+     * @return JsonResponse Recurso recién creado.
      */
     public function store(StorePostRequest $request)
     {
         $validated = $request->validated();
         $drug = Drug::create($validated);
+
         return $this->showOne($drug);
     }
 
@@ -60,8 +66,8 @@ class DrugController extends ApiController implements HasMiddleware
      * Muestra una droga específica mediante Route Model Binding.
      * Si el ID no existe Laravel responde 404 antes de entrar al método.
      *
-     * @param Drug $drug Instancia objetivo.
-     * @return \Illuminate\Http\JsonResponse Representación del recurso.
+     * @param  Drug  $drug  Instancia objetivo.
+     * @return JsonResponse Representación del recurso.
      */
     public function show(Drug $drug)
     {
@@ -72,14 +78,15 @@ class DrugController extends ApiController implements HasMiddleware
      * Actualiza atributos permitidos de una droga. Campos verificados por
      * `UpdatePutRequest`. Retorna estado final tras persistencia.
      *
-     * @param UpdatePutRequest $request Datos validados.
-     * @param Drug $drug Modelo a actualizar.
-     * @return \Illuminate\Http\JsonResponse Recurso actualizado.
+     * @param  UpdatePutRequest  $request  Datos validados.
+     * @param  Drug  $drug  Modelo a actualizar.
+     * @return JsonResponse Recurso actualizado.
      */
     public function update(UpdatePutRequest $request, Drug $drug)
     {
         $validated = $request->validated();
         $drug->update($validated);
+
         return $this->showOne($drug);
     }
 
@@ -87,12 +94,13 @@ class DrugController extends ApiController implements HasMiddleware
      * Soft delete (marca `deleted_at`) de la droga. Preserva datos para
      * futura restauración y auditoría. No elimina relaciones dependientes.
      *
-     * @param Drug $drug Recurso a eliminar lógicamente.
-     * @return \Illuminate\Http\JsonResponse Recurso eliminado.
+     * @param  Drug  $drug  Recurso a eliminar lógicamente.
+     * @return JsonResponse Recurso eliminado.
      */
     public function destroy(Drug $drug)
     {
         $drug->delete();
+
         return $this->showOne($drug);
     }
 
@@ -100,11 +108,12 @@ class DrugController extends ApiController implements HasMiddleware
      * Lista drogas en estado soft-deleted para panel de recuperación.
      * Puede requerir paginación futura.
      *
-     * @return \Illuminate\Http\JsonResponse Colección en papelera.
+     * @return JsonResponse Colección en papelera.
      */
     public function indexDeleted()
     {
         $drugs = Drug::onlyTrashed()->get();
+
         return $this->showAll($drugs);
     }
 
@@ -112,12 +121,13 @@ class DrugController extends ApiController implements HasMiddleware
      * Restaura una droga previamente eliminada. Requiere que la ruta use
      * binding con `withTrashed()`. Si ya estaba activa no cambia estado.
      *
-     * @param Drug $drug Recurso a restaurar.
-     * @return \Illuminate\Http\JsonResponse Recurso restaurado.
+     * @param  Drug  $drug  Recurso a restaurar.
+     * @return JsonResponse Recurso restaurado.
      */
     public function restore(Drug $drug)
     {
         $drug->restore();
+
         return $this->showOne($drug);
     }
 }

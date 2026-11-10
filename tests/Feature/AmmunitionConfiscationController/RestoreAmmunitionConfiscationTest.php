@@ -13,8 +13,11 @@ use Tests\TestCase;
 class RestoreAmmunitionConfiscationTest extends TestCase
 {
     private User $user;
+
     private Confiscation $confiscation;
+
     private Ammunition $ammunition;
+
     private AmmunitionConfiscation $ammunitionConfiscation;
 
     protected function setUp(): void
@@ -22,6 +25,7 @@ class RestoreAmmunitionConfiscationTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['ammunitionConfiscation.update']);
         $this->confiscation = Confiscation::factory()->create();
         $this->ammunition = Ammunition::factory()->create();
         $this->ammunitionConfiscation = AmmunitionConfiscation::factory()->create();
@@ -29,7 +33,7 @@ class RestoreAmmunitionConfiscationTest extends TestCase
     }
 
     #[Test]
-    public function restore_recovers_ammunitionConfiscation_successfully()
+    public function restore_recovers_ammunition_confiscation_successfully()
     {
         $this->assertSoftDeleted('ammunition_confiscations', ['id' => $this->ammunitionConfiscation->id]);
 
@@ -49,19 +53,19 @@ class RestoreAmmunitionConfiscationTest extends TestCase
             ],
             'foto' => $this->ammunitionConfiscation->photo,
         ]);
-        
+
         $this->assertDatabaseHas('ammunition_confiscations', [
             'id' => $this->ammunitionConfiscation->id,
             'deleted_at' => null,
         ]);
     }
 
-#[Test]
-    public function not_restore_non_existent_ammunitionConfiscation(): void
-    {       
-        $response = $this->postJson(route('ammunitionConfiscation.restore', ['ammunitionConfiscation' =>829]));
+    #[Test]
+    public function not_restore_non_existent_ammunition_confiscation(): void
+    {
+        $response = $this->postJson(route('ammunitionConfiscation.restore', ['ammunitionConfiscation' => 829]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo ammunitionconfiscation",
+            'error' => 'No existe el recurso con ese id para el modelo ammunitionconfiscation',
             'code' => 404,
         ]);
     }

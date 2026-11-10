@@ -19,6 +19,7 @@ class IndexRoleTest extends TestCase
         parent::setUp();
         $this->admin = $this->superAdminLogin();
         Auth::login($this->admin);
+        $this->grantPermissions($this->admin, ['role.view']);
     }
 
     #[Test]

@@ -17,12 +17,13 @@ class IndexDeletedDrugPresentationTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['drugPresentation.view']);
         $drugPresentations = DrugPresentation::factory()->count(10)->create();
-        $drugPresentations->each->delete(); //para borrar los permisos creados
+        $drugPresentations->each->delete(); // para borrar los permisos creados
     }
 
     #[Test]
-    public function index_deleted_returns_only_soft_deleted_drugPresentations()
+    public function index_deleted_returns_only_soft_deleted_drug_presentations()
     {
         $response = $this->getJson(route('drugPresentation.indexDeleted'));
         $response->assertOk();
@@ -57,7 +58,7 @@ class IndexDeletedDrugPresentationTest extends TestCase
     }
 
     #[Test]
-    public function index_deleted_returns_empty_when_no_deleted_drugPresentations()
+    public function index_deleted_returns_empty_when_no_deleted_drug_presentations()
     {
         DrugPresentation::onlyTrashed()->get()->each->restore();
 

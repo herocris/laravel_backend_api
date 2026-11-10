@@ -17,6 +17,7 @@ class IndexAmmunitionTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['ammunition.view']);
     }
 
     #[Test]
@@ -56,6 +57,7 @@ class IndexAmmunitionTest extends TestCase
 
         $response->assertJsonCount(10, 'data');
     }
+
     #[Test]
     public function empty_ammunition_collection(): void
     {

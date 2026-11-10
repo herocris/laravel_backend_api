@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Admin\WeaponController;
 
-use App\Models\Weapon;
 use App\Models\User;
+use App\Models\Weapon;
 use Illuminate\Support\Facades\Auth;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -11,6 +11,7 @@ use Tests\TestCase;
 class RestoreWeaponTest extends TestCase
 {
     private User $user;
+
     private Weapon $weapon;
 
     protected function setUp(): void
@@ -18,6 +19,7 @@ class RestoreWeaponTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['weapon.update']);
         $this->weapon = Weapon::factory()->create([
             'description' => 'weapon_test',
             'logo' => 'logo_test.png',
@@ -38,19 +40,19 @@ class RestoreWeaponTest extends TestCase
             'descripcion' => $this->weapon->description,
             'logo' => $this->weapon->logo,
         ]);
-        
+
         $this->assertDatabaseHas('weapons', [
             'id' => $this->weapon->id,
             'deleted_at' => null,
         ]);
     }
 
-#[Test]
+    #[Test]
     public function not_restore_non_existent_weapon(): void
-    {       
-        $response = $this->postJson(route('weapon.restore', ['weapon' =>829]));
+    {
+        $response = $this->postJson(route('weapon.restore', ['weapon' => 829]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo weapon",
+            'error' => 'No existe el recurso con ese id para el modelo weapon',
             'code' => 404,
         ]);
     }

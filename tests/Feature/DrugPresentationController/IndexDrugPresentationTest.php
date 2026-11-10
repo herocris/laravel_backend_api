@@ -17,10 +17,11 @@ class IndexDrugPresentationTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['drugPresentation.view']);
     }
 
     #[Test]
-    public function index_returns_all_drugPresentations()
+    public function index_returns_all_drug_presentations()
     {
         DrugPresentation::factory()->count(10)->create();
 
@@ -56,8 +57,9 @@ class IndexDrugPresentationTest extends TestCase
 
         $response->assertJsonCount(10, 'data');
     }
+
     #[Test]
-    public function empty_drugPresentation_collection(): void
+    public function empty_drug_presentation_collection(): void
     {
         $response = $this->getJson(route('drugPresentation.index'));
         $response->assertOk();

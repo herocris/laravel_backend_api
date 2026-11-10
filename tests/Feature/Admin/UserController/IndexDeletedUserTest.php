@@ -18,13 +18,14 @@ class IndexDeletedUserTest extends TestCase
         parent::setUp();
         $this->admin = $this->superAdminLogin();
         Auth::login($this->admin);
+        $this->grantPermissions($this->admin, ['user.view']);
     }
 
     #[Test]
     public function show_index_deleted_successfully(): void
     {
         $users = User::factory()->count(10)->create();
-        $users->each->delete(); //para borrar los usuarios creados
+        $users->each->delete(); // para borrar los usuarios creados
 
         $response = $this->getJson(route('user.indexDeleted'));
         $response->assertOk();
@@ -65,7 +66,7 @@ class IndexDeletedUserTest extends TestCase
     {
         $response = $this->getJson(route('user.indexDeleted'));
         $response->assertOk();
-        $response->assertExactJson([            
+        $response->assertExactJson([
             'data' => [],
         ]);
         $response->assertJsonCount(0, 'data');

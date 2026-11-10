@@ -17,8 +17,9 @@ class IndexDeletedDrugTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['drug.view']);
         $drugs = Drug::factory()->count(10)->create();
-        $drugs->each->delete(); //para borrar los permisos creados
+        $drugs->each->delete(); // para borrar los permisos creados
     }
 
     #[Test]

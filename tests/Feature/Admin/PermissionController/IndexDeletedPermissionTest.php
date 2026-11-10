@@ -17,8 +17,9 @@ class IndexDeletedPermissionTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['permission.view']);
         $permissions = Permission::factory()->count(10)->create();
-        $permissions->each->delete(); //para borrar los permisos creados
+        $permissions->each->delete(); // para borrar los permisos creados
     }
 
     #[Test]

@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Admin\DrugConfiscationController;
 
-use App\Models\DrugConfiscation;
 use App\Models\Confiscation;
 use App\Models\Drug;
+use App\Models\DrugConfiscation;
 use App\Models\DrugPresentation;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -14,9 +14,13 @@ use Tests\TestCase;
 class ShowDrugConfiscationTest extends TestCase
 {
     private User $user;
+
     private Confiscation $confiscation;
+
     private Drug $drug;
+
     private DrugPresentation $drugPresentation;
+
     private DrugConfiscation $drugConfiscation;
 
     protected function setUp(): void
@@ -24,6 +28,7 @@ class ShowDrugConfiscationTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['drugConfiscation.delete', 'drugConfiscation.view']);
         $this->confiscation = Confiscation::factory()->create();
         $this->drug = Drug::factory()->create();
         $this->drugPresentation = DrugPresentation::factory()->create();
@@ -63,7 +68,7 @@ class ShowDrugConfiscationTest extends TestCase
         $response->assertOk();
         $response = $this->getJson(route('drugConfiscation.show', ['drugConfiscation' => $this->drugConfiscation->id]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo drugconfiscation",
+            'error' => 'No existe el recurso con ese id para el modelo drugconfiscation',
             'code' => 404,
         ]);
     }

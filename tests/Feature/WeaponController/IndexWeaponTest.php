@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Admin\WeaponController;
 
-use App\Models\Weapon;
 use App\Models\User;
+use App\Models\Weapon;
 use Illuminate\Support\Facades\Auth;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -17,6 +17,7 @@ class IndexWeaponTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['weapon.view']);
     }
 
     #[Test]
@@ -56,6 +57,7 @@ class IndexWeaponTest extends TestCase
 
         $response->assertJsonCount(10, 'data');
     }
+
     #[Test]
     public function empty_weapon_collection(): void
     {

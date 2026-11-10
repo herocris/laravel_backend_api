@@ -22,6 +22,11 @@ class AmmunitionConfiscationController extends ApiController implements HasMiddl
     public static function middleware(): array
     {
         return [
+            new Middleware('permission:ammunitionConfiscation.view,api', only: ['index', 'show', 'indexDeleted', 'indexByConfiscation']),
+            new Middleware('permission:ammunitionConfiscation.create,api', only: ['store']),
+            new Middleware('permission:ammunitionConfiscation.update,api', only: ['update', 'restore']),
+            new Middleware('permission:ammunitionConfiscation.delete,api', only: ['destroy']),
+            new Middleware('permission:graph.view,api', only: ['graphIndex']),
             new Middleware('transformInput:'.AmmunitionConfiscationResource::class.'', only: ['store', 'update']),
         ];
     }

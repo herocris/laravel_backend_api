@@ -11,6 +11,7 @@ use Tests\TestCase;
 class ShowDrugPresentationTest extends TestCase
 {
     private User $user;
+
     private DrugPresentation $drugPresentation;
 
     protected function setUp(): void
@@ -18,11 +19,12 @@ class ShowDrugPresentationTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['drugPresentation.delete', 'drugPresentation.view']);
         $this->drugPresentation = DrugPresentation::factory()->create(['description' => 'test_drugPresentation', 'logo' => 'test_logo.png']);
     }
 
     #[Test]
-    public function show_returns_single_drugPresentation()
+    public function show_returns_single_drug_presentation()
     {
         $response = $this->getJson(route('drugPresentation.show', ['drugPresentation' => $this->drugPresentation->id]));
 
@@ -35,13 +37,13 @@ class ShowDrugPresentationTest extends TestCase
     }
 
     #[Test]
-    public function show_404_to_inactive_drugPresentation(): void
+    public function show_404_to_inactive_drug_presentation(): void
     {
         $response = $this->deleteJson(route('drugPresentation.destroy', ['drugPresentation' => $this->drugPresentation->id]));
         $response->assertOk();
         $response = $this->getJson(route('drugPresentation.show', ['drugPresentation' => $this->drugPresentation->id]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo drugpresentation",
+            'error' => 'No existe el recurso con ese id para el modelo drugpresentation',
             'code' => 404,
         ]);
     }

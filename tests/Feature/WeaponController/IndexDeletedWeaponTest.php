@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Admin\WeaponController;
 
-use App\Models\Weapon;
 use App\Models\User;
+use App\Models\Weapon;
 use Illuminate\Support\Facades\Auth;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -17,8 +17,9 @@ class IndexDeletedWeaponTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['weapon.view']);
         $weapons = Weapon::factory()->count(10)->create();
-        $weapons->each->delete(); //para borrar los permisos creados
+        $weapons->each->delete(); // para borrar los permisos creados
     }
 
     #[Test]

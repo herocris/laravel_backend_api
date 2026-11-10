@@ -13,6 +13,7 @@ use Tests\TestCase;
 class RestoreRoleTest extends TestCase
 {
     private User $admin;
+
     private Role $role;
 
     protected function setUp(): void
@@ -20,7 +21,8 @@ class RestoreRoleTest extends TestCase
         parent::setUp();
         $this->admin = $this->superAdminLogin();
         Auth::login($this->admin);
-        
+        $this->grantPermissions($this->admin, ['role.update']);
+
         $this->role = Role::factory()->create(['name' => 'DeletedRole']);
         $this->role->delete();
     }
@@ -28,19 +30,19 @@ class RestoreRoleTest extends TestCase
     #[Test]
     public function restore_role_successfully(): void
     {
-        //assertSoftDeleted comprueba que el recurso está eliminado con soft delete ()
-        //comprueba que el rol está eliminado con soft delete
+        // assertSoftDeleted comprueba que el recurso está eliminado con soft delete ()
+        // comprueba que el rol está eliminado con soft delete
         $this->assertSoftDeleted('roles', ['id' => $this->role->id]);
-        
+
         $response = $this->postJson(route('role.restore', ['role' => $this->role->id]));
-        
+
         $response->assertOk();
         $response->assertExactJson([
             'identificador' => $this->role->id,
             'nombre' => 'DeletedRole',
             'permisos' => [],
         ]);
-        
+
         $this->assertDatabaseHas('roles', [
             'id' => $this->role->id,
             'deleted_at' => null,
@@ -49,10 +51,10 @@ class RestoreRoleTest extends TestCase
 
     #[Test]
     public function not_restore_non_existent_role(): void
-    {       
-        $response = $this->postJson(route('role.restore', ['role' =>829]));
+    {
+        $response = $this->postJson(route('role.restore', ['role' => 829]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo role",
+            'error' => 'No existe el recurso con ese id para el modelo role',
             'code' => 404,
         ]);
     }

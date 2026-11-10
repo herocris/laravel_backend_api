@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Admin\WeaponConfiscationController;
 
-use App\Models\Weapon;
-use App\Models\WeaponConfiscation;
 use App\Models\Confiscation;
 use App\Models\User;
+use App\Models\Weapon;
+use App\Models\WeaponConfiscation;
 use Illuminate\Support\Facades\Auth;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -13,8 +13,11 @@ use Tests\TestCase;
 class RestoreWeaponConfiscationTest extends TestCase
 {
     private User $user;
+
     private Confiscation $confiscation;
+
     private Weapon $weapon;
+
     private WeaponConfiscation $weaponConfiscation;
 
     protected function setUp(): void
@@ -22,6 +25,7 @@ class RestoreWeaponConfiscationTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['weaponConfiscation.update']);
         $this->confiscation = Confiscation::factory()->create();
         $this->weapon = Weapon::factory()->create();
         $this->weaponConfiscation = WeaponConfiscation::factory()->create();
@@ -29,7 +33,7 @@ class RestoreWeaponConfiscationTest extends TestCase
     }
 
     #[Test]
-    public function restore_recovers_weaponConfiscation_successfully()
+    public function restore_recovers_weapon_confiscation_successfully()
     {
         $this->assertSoftDeleted('weapon_confiscations', ['id' => $this->weaponConfiscation->id]);
 
@@ -49,19 +53,19 @@ class RestoreWeaponConfiscationTest extends TestCase
             ],
             'foto' => $this->weaponConfiscation->photo,
         ]);
-        
+
         $this->assertDatabaseHas('weapon_confiscations', [
             'id' => $this->weaponConfiscation->id,
             'deleted_at' => null,
         ]);
     }
 
-#[Test]
-    public function not_restore_non_existent_weaponConfiscation(): void
-    {       
-        $response = $this->postJson(route('weaponConfiscation.restore', ['weaponConfiscation' =>829]));
+    #[Test]
+    public function not_restore_non_existent_weapon_confiscation(): void
+    {
+        $response = $this->postJson(route('weaponConfiscation.restore', ['weaponConfiscation' => 829]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo weaponconfiscation",
+            'error' => 'No existe el recurso con ese id para el modelo weaponconfiscation',
             'code' => 404,
         ]);
     }

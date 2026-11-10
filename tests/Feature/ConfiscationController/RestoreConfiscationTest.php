@@ -11,6 +11,7 @@ use Tests\TestCase;
 class RestoreConfiscationTest extends TestCase
 {
     private User $user;
+
     private Confiscation $confiscation;
 
     protected function setUp(): void
@@ -18,6 +19,7 @@ class RestoreConfiscationTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['confiscation.update']);
         $this->confiscation = Confiscation::factory()->create();
         $this->confiscation->delete();
     }
@@ -52,7 +54,7 @@ class RestoreConfiscationTest extends TestCase
     {
         $response = $this->postJson(route('confiscation.restore', ['confiscation' => 829]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo confiscation",
+            'error' => 'No existe el recurso con ese id para el modelo confiscation',
             'code' => 404,
         ]);
     }

@@ -4,7 +4,6 @@ namespace Tests\Feature\Admin\PermissionController;
 
 use App\Models\Permission;
 use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Auth;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -13,6 +12,7 @@ use Tests\TestCase;
 class UpdatePermissionTest extends TestCase
 {
     private User $user;
+
     private Permission $permission;
 
     protected function setUp(): void
@@ -20,6 +20,7 @@ class UpdatePermissionTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['permission.update']);
         $this->permission = Permission::factory()->create(['name' => 'test_permission']);
     }
 
@@ -49,20 +50,22 @@ class UpdatePermissionTest extends TestCase
         $base = [
             'nombre' => 'Operator',
         ];
+
         return [
             'missing nombre' => [
                 array_diff_key($base, ['nombre' => '']),
                 'nombre',
-                'The nombre field is required.'
+                'The nombre field is required.',
             ],
         ];
     }
+
     #[Test]
     #[DataProvider('validationErrorsProvider')]
     public function status_422_to_update_permission(array $data, string $error_field, string $error_message)
     {
         $permission = Permission::factory()->create([
-            'name' => 'test.permission'
+            'name' => 'test.permission',
         ]);
 
         $response = $this->putJson(route('permission.update', ['permission' => $this->permission->id]), $data);
@@ -71,12 +74,12 @@ class UpdatePermissionTest extends TestCase
         $response->assertExactJson([
             'error' => [
                 $error_field => [
-                    $error_message
-                ]
+                    $error_message,
+                ],
             ],
-            'code' => 422
+            'code' => 422,
         ]);
-    
+
     }
 
     #[Test]
@@ -92,6 +95,4 @@ class UpdatePermissionTest extends TestCase
 
         $response->assertStatus(401);
     }
-
-    
 }

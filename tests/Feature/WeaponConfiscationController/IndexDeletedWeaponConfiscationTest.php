@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Admin\WeaponConfiscationController;
 
-use App\Models\Weapon;
-use App\Models\WeaponConfiscation;
 use App\Models\Confiscation;
 use App\Models\User;
+use App\Models\Weapon;
+use App\Models\WeaponConfiscation;
 use Illuminate\Support\Facades\Auth;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -19,14 +19,15 @@ class IndexDeletedWeaponConfiscationTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['weaponConfiscation.view']);
         Confiscation::factory()->create();
         Weapon::factory()->create();
         $weaponConfiscations = WeaponConfiscation::factory()->count(10)->create();
-        $weaponConfiscations->each->delete(); //para borrar los permisos creados
+        $weaponConfiscations->each->delete(); // para borrar los permisos creados
     }
 
     #[Test]
-    public function index_deleted_returns_only_soft_deleted_weaponConfiscations()
+    public function index_deleted_returns_only_soft_deleted_weapon_confiscations()
     {
         $response = $this->getJson(route('weaponConfiscation.indexDeleted'));
         $response->assertOk();
@@ -69,7 +70,7 @@ class IndexDeletedWeaponConfiscationTest extends TestCase
     }
 
     #[Test]
-    public function index_deleted_returns_empty_when_no_deleted_weaponConfiscations()
+    public function index_deleted_returns_empty_when_no_deleted_weapon_confiscations()
     {
         WeaponConfiscation::onlyTrashed()->get()->each->restore();
 

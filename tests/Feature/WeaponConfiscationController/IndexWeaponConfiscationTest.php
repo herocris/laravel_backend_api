@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Admin\WeaponConfiscationController;
 
-use App\Models\Weapon;
-use App\Models\WeaponConfiscation;
 use App\Models\Confiscation;
 use App\Models\User;
+use App\Models\Weapon;
+use App\Models\WeaponConfiscation;
 use Illuminate\Support\Facades\Auth;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -19,12 +19,13 @@ class IndexWeaponConfiscationTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['weaponConfiscation.view']);
         Confiscation::factory()->create();
         Weapon::factory()->create();
     }
 
     #[Test]
-    public function index_returns_all_weaponConfiscations()
+    public function index_returns_all_weapon_confiscations()
     {
         WeaponConfiscation::factory()->count(10)->create();
 
@@ -68,8 +69,9 @@ class IndexWeaponConfiscationTest extends TestCase
 
         $response->assertJsonCount(10, 'data');
     }
+
     #[Test]
-    public function empty_weaponConfiscation_collection(): void
+    public function empty_weapon_confiscation_collection(): void
     {
         $response = $this->getJson(route('weaponConfiscation.index'));
         $response->assertOk();

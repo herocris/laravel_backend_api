@@ -11,6 +11,7 @@ use Tests\TestCase;
 class DeleteDrugPresentationTest extends TestCase
 {
     private User $user;
+
     private DrugPresentation $drugPresentation;
 
     protected function setUp(): void
@@ -18,14 +19,15 @@ class DeleteDrugPresentationTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['drugPresentation.delete']);
         $this->drugPresentation = DrugPresentation::factory()->create([
             'description' => 'drugPresentation_test',
-            'logo' => 'drugPresentation_logo.png'
+            'logo' => 'drugPresentation_logo.png',
         ]);
     }
 
     #[Test]
-    public function delete_drugPresentation()
+    public function delete_drug_presentation()
     {
         $response = $this->deleteJson(route('drugPresentation.destroy', $this->drugPresentation->id));
         $response->assertOk();
@@ -38,13 +40,13 @@ class DeleteDrugPresentationTest extends TestCase
     }
 
     #[Test]
-    public function delete_deleted_drugPresentation(): void
+    public function delete_deleted_drug_presentation(): void
     {
         $response = $this->deleteJson(route('drugPresentation.destroy', ['drugPresentation' => $this->drugPresentation->id]));
         $response->assertOk();
         $response = $this->deleteJson(route('drugPresentation.destroy', ['drugPresentation' => $this->drugPresentation->id]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo drugpresentation",
+            'error' => 'No existe el recurso con ese id para el modelo drugpresentation',
             'code' => 404,
         ]);
     }

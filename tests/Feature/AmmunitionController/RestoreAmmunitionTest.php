@@ -11,6 +11,7 @@ use Tests\TestCase;
 class RestoreAmmunitionTest extends TestCase
 {
     private User $user;
+
     private Ammunition $ammunition;
 
     protected function setUp(): void
@@ -18,6 +19,7 @@ class RestoreAmmunitionTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['ammunition.update']);
         $this->ammunition = Ammunition::factory()->create([
             'description' => 'ammunition_test',
             'logo' => 'logo_test.png',
@@ -38,19 +40,19 @@ class RestoreAmmunitionTest extends TestCase
             'descripcion' => $this->ammunition->description,
             'logo' => $this->ammunition->logo,
         ]);
-        
+
         $this->assertDatabaseHas('ammunitions', [
             'id' => $this->ammunition->id,
             'deleted_at' => null,
         ]);
     }
 
-#[Test]
+    #[Test]
     public function not_restore_non_existent_ammunition(): void
-    {       
-        $response = $this->postJson(route('ammunition.restore', ['ammunition' =>829]));
+    {
+        $response = $this->postJson(route('ammunition.restore', ['ammunition' => 829]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo ammunition",
+            'error' => 'No existe el recurso con ese id para el modelo ammunition',
             'code' => 404,
         ]);
     }

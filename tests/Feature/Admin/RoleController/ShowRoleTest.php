@@ -14,6 +14,7 @@ use Tests\TestCase;
 class ShowRoleTest extends TestCase
 {
     private User $admin;
+
     private Role $role;
 
     protected function setUp(): void
@@ -21,7 +22,8 @@ class ShowRoleTest extends TestCase
         parent::setUp();
         $this->admin = $this->superAdminLogin();
         Auth::login($this->admin);
-        
+        $this->grantPermissions($this->admin, ['role.delete', 'role.view']);
+
         $this->role = Role::factory()->create(['name' => 'Editor']);
         $perm = Permission::factory()->create(['name' => 'edit.posts']);
         $this->role->givePermissionTo($perm);
@@ -31,7 +33,7 @@ class ShowRoleTest extends TestCase
     public function show_returns_role_with_permissions(): void
     {
         $response = $this->getJson(route('role.show', ['role' => $this->role->id]));
-        
+
         $response->assertOk();
         $response->assertExactJson([
             'identificador' => $this->role->id,
@@ -47,7 +49,7 @@ class ShowRoleTest extends TestCase
         $response->assertOk();
         $response = $this->getJson(route('role.show', ['role' => $this->role->id]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo role",
+            'error' => 'No existe el recurso con ese id para el modelo role',
             'code' => 404,
         ]);
     }

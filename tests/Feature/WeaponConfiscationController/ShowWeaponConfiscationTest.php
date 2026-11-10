@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Admin\WeaponConfiscationController;
 
-use App\Models\Weapon;
-use App\Models\WeaponConfiscation;
 use App\Models\Confiscation;
 use App\Models\User;
+use App\Models\Weapon;
+use App\Models\WeaponConfiscation;
 use Illuminate\Support\Facades\Auth;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -13,8 +13,11 @@ use Tests\TestCase;
 class ShowWeaponConfiscationTest extends TestCase
 {
     private User $user;
+
     private Confiscation $confiscation;
+
     private Weapon $weapon;
+
     private WeaponConfiscation $weaponConfiscation;
 
     protected function setUp(): void
@@ -22,6 +25,7 @@ class ShowWeaponConfiscationTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['weaponConfiscation.delete', 'weaponConfiscation.view']);
         $this->confiscation = Confiscation::factory()->create();
         $this->weapon = Weapon::factory()->create();
         $this->weaponConfiscation = WeaponConfiscation::factory()->create();
@@ -55,7 +59,7 @@ class ShowWeaponConfiscationTest extends TestCase
         $response->assertOk();
         $response = $this->getJson(route('weaponConfiscation.show', ['weaponConfiscation' => $this->weaponConfiscation->id]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo weaponconfiscation",
+            'error' => 'No existe el recurso con ese id para el modelo weaponconfiscation',
             'code' => 404,
         ]);
     }

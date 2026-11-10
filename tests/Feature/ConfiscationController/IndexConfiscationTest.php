@@ -17,6 +17,7 @@ class IndexConfiscationTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['confiscation.view']);
     }
 
     #[Test]
@@ -61,6 +62,7 @@ class IndexConfiscationTest extends TestCase
 
         $response->assertJsonCount(10, 'data');
     }
+
     #[Test]
     public function empty_confiscation_collection(): void
     {

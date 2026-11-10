@@ -11,6 +11,7 @@ use Tests\TestCase;
 class ShowDrugTest extends TestCase
 {
     private User $user;
+
     private Drug $drug;
 
     protected function setUp(): void
@@ -18,6 +19,7 @@ class ShowDrugTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['drug.delete', 'drug.view']);
         $this->drug = Drug::factory()->create(['description' => 'test_drug', 'logo' => 'test_logo.png']);
     }
 
@@ -41,7 +43,7 @@ class ShowDrugTest extends TestCase
         $response->assertOk();
         $response = $this->getJson(route('drug.show', ['drug' => $this->drug->id]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo drug",
+            'error' => 'No existe el recurso con ese id para el modelo drug',
             'code' => 404,
         ]);
     }

@@ -13,6 +13,7 @@ use Tests\TestCase;
 class DeleteUserTest extends TestCase
 {
     private User $admin;
+
     private User $user;
 
     protected function setUp(): void
@@ -20,6 +21,7 @@ class DeleteUserTest extends TestCase
         parent::setUp();
         $this->admin = $this->superAdminLogin();
         Auth::login($this->admin);
+        $this->grantPermissions($this->admin, ['user.delete']);
         $this->user = User::factory()->create([
             'name' => 'Original Name',
             'email' => 'original@example.com',
@@ -42,6 +44,7 @@ class DeleteUserTest extends TestCase
 
         $this->assertSoftDeleted('users', ['id' => $this->user->id]);
     }
+
     #[Test]
     public function delete_deleted_user(): void
     {
@@ -49,7 +52,7 @@ class DeleteUserTest extends TestCase
         $response->assertOk();
         $response = $this->deleteJson(route('user.destroy', ['user' => $this->user->id]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo user",
+            'error' => 'No existe el recurso con ese id para el modelo user',
             'code' => 404,
         ]);
     }

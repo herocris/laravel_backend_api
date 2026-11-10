@@ -71,8 +71,10 @@ class HttpExceptionResponseTest extends TestCase
     public function returns_404_for_a_missing_bound_model(): void
     {
         $user = User::factory()->create();
+        $this->actingAs($user, 'api');
+        $this->grantPermissions($user, ['drug.view']);
 
-        $response = $this->actingAs($user, 'api')->getJson(route('drug.show', ['drug' => 999999]));
+        $response = $this->getJson(route('drug.show', ['drug' => 999999]));
 
         $response->assertNotFound()->assertExactJson([
             'error' => 'No existe el recurso con ese id para el modelo drug',

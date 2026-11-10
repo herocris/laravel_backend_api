@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Admin\WeaponController;
 
-use App\Models\Weapon;
 use App\Models\User;
+use App\Models\Weapon;
 use Illuminate\Support\Facades\Auth;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -11,6 +11,7 @@ use Tests\TestCase;
 class DeleteWeaponTest extends TestCase
 {
     private User $user;
+
     private Weapon $weapon;
 
     protected function setUp(): void
@@ -18,9 +19,10 @@ class DeleteWeaponTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['weapon.delete']);
         $this->weapon = Weapon::factory()->create([
             'description' => 'weapon_test',
-            'logo' => 'weapon_logo.png'
+            'logo' => 'weapon_logo.png',
         ]);
     }
 
@@ -44,7 +46,7 @@ class DeleteWeaponTest extends TestCase
         $response->assertOk();
         $response = $this->deleteJson(route('weapon.destroy', ['weapon' => $this->weapon->id]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo weapon",
+            'error' => 'No existe el recurso con ese id para el modelo weapon',
             'code' => 404,
         ]);
     }

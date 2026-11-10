@@ -17,8 +17,9 @@ class IndexDeletedAmmunitionTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['ammunition.view']);
         $ammunitions = Ammunition::factory()->count(10)->create();
-        $ammunitions->each->delete(); //para borrar los permisos creados
+        $ammunitions->each->delete(); // para borrar los permisos creados
     }
 
     #[Test]

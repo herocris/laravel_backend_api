@@ -4,7 +4,6 @@ namespace Tests\Feature\Admin\PermissionController;
 
 use App\Models\Permission;
 use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Auth;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -12,6 +11,7 @@ use Tests\TestCase;
 class ShowPermissionTest extends TestCase
 {
     private User $user;
+
     private Permission $permission;
 
     protected function setUp(): void
@@ -19,6 +19,7 @@ class ShowPermissionTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['permission.delete', 'permission.view']);
         $this->permission = Permission::factory()->create(['name' => 'test_permission']);
     }
 
@@ -41,7 +42,7 @@ class ShowPermissionTest extends TestCase
         $response->assertOk();
         $response = $this->getJson(route('permission.show', ['permission' => $this->permission->id]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo permission",
+            'error' => 'No existe el recurso con ese id para el modelo permission',
             'code' => 404,
         ]);
     }

@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Confiscation\GetRequest;
 use App\Http\Requests\Confiscation\StorePostRequest;
 use App\Http\Requests\Confiscation\UpdatePutRequest;
-use App\Http\Requests\Confiscation\GetRequest;
 use App\Http\Resources\Confiscation\ConfiscationResource;
 use App\Models\Ammunition;
 use App\Models\Confiscation;
 use App\Models\Drug;
 use App\Models\Weapon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
-use Illuminate\Support\Facades\DB;
+
 class ConfiscationController extends ApiController implements HasMiddleware
 {
     /**
@@ -24,7 +25,12 @@ class ConfiscationController extends ApiController implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware("transformInput:" . ConfiscationResource::class . "", only: ['store', 'update']),
+            new Middleware('permission:confiscation.view,api', only: ['index', 'show', 'indexDeleted']),
+            new Middleware('permission:confiscation.create,api', only: ['store']),
+            new Middleware('permission:confiscation.update,api', only: ['update', 'restore']),
+            new Middleware('permission:confiscation.delete,api', only: ['destroy']),
+            new Middleware('permission:map.view,api', only: ['mapConfiscations']),
+            new Middleware('transformInput:'.ConfiscationResource::class.'', only: ['store', 'update']),
         ];
     }
 
@@ -32,11 +38,12 @@ class ConfiscationController extends ApiController implements HasMiddleware
      * Lista todos los decomisos (sin paginación). A futuro puede incluir filtros
      * por fecha o tipo para reducir carga.
      *
-     * @return \Illuminate\Http\JsonResponse Colección de decomisos.
+     * @return JsonResponse Colección de decomisos.
      */
     public function index()
     {
         $confiscations = Confiscation::all();
+
         return $this->showAll($confiscations);
     }
 
@@ -45,8 +52,8 @@ class ConfiscationController extends ApiController implements HasMiddleware
      * de fechas y subconjuntos de droga/arma/munición. Optimiza la carga usando
      * relaciones condicionales y `whereIn`. Filtra decomisos sin contenido útil.
      *
-     * @param GetRequest $request Parámetros: start_date, end_date, drugs[], weapons[], ammunitions[].
-     * @return \Illuminate\Http\JsonResponse Arreglo 'mapItems' listo para representación en mapa.
+     * @param  GetRequest  $request  Parámetros: start_date, end_date, drugs[], weapons[], ammunitions[].
+     * @return JsonResponse Arreglo 'mapItems' listo para representación en mapa.
      */
     public function mapConfiscations(GetRequest $request)
     {
@@ -101,21 +108,22 @@ class ConfiscationController extends ApiController implements HasMiddleware
     /**
      * Crea un nuevo decomiso con datos validados.
      *
-     * @param StorePostRequest $request Datos validados (fecha, coordenadas, etc.).
-     * @return \Illuminate\Http\JsonResponse Recurso creado.
+     * @param  StorePostRequest  $request  Datos validados (fecha, coordenadas, etc.).
+     * @return JsonResponse Recurso creado.
      */
     public function store(StorePostRequest $request)
     {
         $validated = $request->validated();
         $confiscation = Confiscation::create($validated);
+
         return $this->showOne($confiscation);
     }
 
     /**
      * Muestra un decomiso específico.
      *
-     * @param Confiscation $confiscation Instancia objetivo.
-     * @return \Illuminate\Http\JsonResponse Recurso solicitado.
+     * @param  Confiscation  $confiscation  Instancia objetivo.
+     * @return JsonResponse Recurso solicitado.
      */
     public function show(Confiscation $confiscation)
     {
@@ -125,49 +133,53 @@ class ConfiscationController extends ApiController implements HasMiddleware
     /**
      * Actualiza datos del decomiso.
      *
-     * @param UpdatePutRequest $request Datos validados.
-     * @param Confiscation $confiscation Recurso a actualizar.
-     * @return \Illuminate\Http\JsonResponse Recurso actualizado.
+     * @param  UpdatePutRequest  $request  Datos validados.
+     * @param  Confiscation  $confiscation  Recurso a actualizar.
+     * @return JsonResponse Recurso actualizado.
      */
     public function update(UpdatePutRequest $request, Confiscation $confiscation)
     {
         $validated = $request->validated();
         $confiscation->update($validated);
+
         return $this->showOne($confiscation);
     }
 
     /**
      * Soft delete del decomiso.
      *
-     * @param Confiscation $confiscation Recurso a eliminar lógicamente.
-     * @return \Illuminate\Http\JsonResponse Recurso eliminado.
+     * @param  Confiscation  $confiscation  Recurso a eliminar lógicamente.
+     * @return JsonResponse Recurso eliminado.
      */
     public function destroy(Confiscation $confiscation)
     {
         $confiscation->delete();
+
         return $this->showOne($confiscation);
     }
 
     /**
      * Lista decomisos soft-deleted para recuperación.
      *
-     * @return \Illuminate\Http\JsonResponse Colección en papelera.
+     * @return JsonResponse Colección en papelera.
      */
     public function indexDeleted()
     {
         $confiscations = Confiscation::onlyTrashed()->get();
+
         return $this->showAll($confiscations);
     }
 
     /**
      * Restaura un decomiso eliminado previamente.
      *
-     * @param Confiscation $confiscation Recurso a restaurar.
-     * @return \Illuminate\Http\JsonResponse Recurso restaurado.
+     * @param  Confiscation  $confiscation  Recurso a restaurar.
+     * @return JsonResponse Recurso restaurado.
      */
     public function restore(Confiscation $confiscation)
     {
         $confiscation->restore();
+
         return $this->showOne($confiscation);
     }
 }

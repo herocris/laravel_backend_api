@@ -22,6 +22,11 @@ class WeaponConfiscationController extends ApiController implements HasMiddlewar
     public static function middleware(): array
     {
         return [
+            new Middleware('permission:weaponConfiscation.view,api', only: ['index', 'show', 'indexDeleted', 'indexByConfiscation']),
+            new Middleware('permission:weaponConfiscation.create,api', only: ['store']),
+            new Middleware('permission:weaponConfiscation.update,api', only: ['update', 'restore']),
+            new Middleware('permission:weaponConfiscation.delete,api', only: ['destroy']),
+            new Middleware('permission:graph.view,api', only: ['graphIndex']),
             new Middleware('transformInput:'.WeaponConfiscationResource::class.'', only: ['store', 'update']),
         ];
     }

@@ -11,6 +11,7 @@ use Tests\TestCase;
 class RestoreDrugTest extends TestCase
 {
     private User $user;
+
     private Drug $drug;
 
     protected function setUp(): void
@@ -18,6 +19,7 @@ class RestoreDrugTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['drug.update']);
         $this->drug = Drug::factory()->create([
             'description' => 'drug_test',
             'logo' => 'logo_test.png',
@@ -38,19 +40,19 @@ class RestoreDrugTest extends TestCase
             'descripcion' => $this->drug->description,
             'logo' => $this->drug->logo,
         ]);
-        
+
         $this->assertDatabaseHas('drugs', [
             'id' => $this->drug->id,
             'deleted_at' => null,
         ]);
     }
 
-#[Test]
+    #[Test]
     public function not_restore_non_existent_drug(): void
-    {       
-        $response = $this->postJson(route('drug.restore', ['drug' =>829]));
+    {
+        $response = $this->postJson(route('drug.restore', ['drug' => 829]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo drug",
+            'error' => 'No existe el recurso con ese id para el modelo drug',
             'code' => 404,
         ]);
     }

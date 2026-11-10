@@ -11,6 +11,7 @@ use Tests\TestCase;
 class DeleteDrugTest extends TestCase
 {
     private User $user;
+
     private Drug $drug;
 
     protected function setUp(): void
@@ -18,9 +19,10 @@ class DeleteDrugTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['drug.delete']);
         $this->drug = Drug::factory()->create([
             'description' => 'drug_test',
-            'logo' => 'drug_logo.png'
+            'logo' => 'drug_logo.png',
         ]);
     }
 
@@ -44,7 +46,7 @@ class DeleteDrugTest extends TestCase
         $response->assertOk();
         $response = $this->deleteJson(route('drug.destroy', ['drug' => $this->drug->id]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo drug",
+            'error' => 'No existe el recurso con ese id para el modelo drug',
             'code' => 404,
         ]);
     }

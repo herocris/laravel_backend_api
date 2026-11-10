@@ -13,6 +13,7 @@ use Tests\TestCase;
 class DeleteRoleTest extends TestCase
 {
     private User $admin;
+
     private Role $role;
 
     protected function setUp(): void
@@ -20,6 +21,7 @@ class DeleteRoleTest extends TestCase
         parent::setUp();
         $this->admin = $this->superAdminLogin();
         Auth::login($this->admin);
+        $this->grantPermissions($this->admin, ['role.delete']);
         $this->role = Role::factory()->create(['name' => 'TempRole']);
     }
 
@@ -43,7 +45,7 @@ class DeleteRoleTest extends TestCase
         $response->assertOk();
         $response = $this->deleteJson(route('role.destroy', ['role' => $this->role->id]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo role",
+            'error' => 'No existe el recurso con ese id para el modelo role',
             'code' => 404,
         ]);
     }

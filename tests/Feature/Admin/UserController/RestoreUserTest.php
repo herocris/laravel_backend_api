@@ -13,6 +13,7 @@ use Tests\TestCase;
 class RestoreUserTest extends TestCase
 {
     private User $admin;
+
     private User $user;
 
     protected function setUp(): void
@@ -20,6 +21,7 @@ class RestoreUserTest extends TestCase
         parent::setUp();
         $this->admin = $this->superAdminLogin();
         Auth::login($this->admin);
+        $this->grantPermissions($this->admin, ['user.delete', 'user.update']);
         $this->user = User::factory()->create([
             'name' => 'Original Name',
             'email' => 'original@example.com',
@@ -50,12 +52,13 @@ class RestoreUserTest extends TestCase
             'deleted_at' => null,
         ]);
     }
+
     #[Test]
     public function restore_non_existent_user(): void
     {
         $response = $this->postJson(route('user.restore', ['user' => 4567]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo user",
+            'error' => 'No existe el recurso con ese id para el modelo user',
             'code' => 404,
         ]);
     }

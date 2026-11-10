@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Admin\DrugConfiscationController;
 
+use App\Models\Confiscation;
 use App\Models\Drug;
 use App\Models\DrugConfiscation;
-use App\Models\Confiscation;
 use App\Models\DrugPresentation;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -14,9 +14,13 @@ use Tests\TestCase;
 class RestoreDrugConfiscationTest extends TestCase
 {
     private User $user;
+
     private Confiscation $confiscation;
+
     private Drug $drug;
+
     private DrugPresentation $drugPresentation;
+
     private DrugConfiscation $drugConfiscation;
 
     protected function setUp(): void
@@ -24,6 +28,7 @@ class RestoreDrugConfiscationTest extends TestCase
         parent::setUp();
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
+        $this->grantPermissions($this->user, ['drugConfiscation.update']);
         $this->confiscation = Confiscation::factory()->create();
         $this->drug = Drug::factory()->create();
         $this->drugPresentation = DrugPresentation::factory()->create();
@@ -32,7 +37,7 @@ class RestoreDrugConfiscationTest extends TestCase
     }
 
     #[Test]
-    public function restore_recovers_drugConfiscation_successfully()
+    public function restore_recovers_drug_confiscation_successfully()
     {
         $this->assertSoftDeleted('drug_confiscations', ['id' => $this->drugConfiscation->id]);
 
@@ -57,19 +62,19 @@ class RestoreDrugConfiscationTest extends TestCase
             ],
             'foto' => $this->drugConfiscation->photo,
         ]);
-        
+
         $this->assertDatabaseHas('drug_confiscations', [
             'id' => $this->drugConfiscation->id,
             'deleted_at' => null,
         ]);
     }
 
-#[Test]
-    public function not_restore_non_existent_drugConfiscation(): void
-    {       
-        $response = $this->postJson(route('drugConfiscation.restore', ['drugConfiscation' =>829]));
+    #[Test]
+    public function not_restore_non_existent_drug_confiscation(): void
+    {
+        $response = $this->postJson(route('drugConfiscation.restore', ['drugConfiscation' => 829]));
         $response->assertStatus(404)->assertJson([
-            'error' => "No existe el recurso con ese id para el modelo drugconfiscation",
+            'error' => 'No existe el recurso con ese id para el modelo drugconfiscation',
             'code' => 404,
         ]);
     }
