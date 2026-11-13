@@ -41,14 +41,14 @@ class DatabaseSeeder extends Seeder
         Role::truncate();
         User::truncate();
 
-        User::factory()->create([
+        $crisUser = User::factory()->create([
             'name' => 'cris',
             'email' => 'cris_itg@yahoo.es',
         ]);
-        User::factory()->create([
+        $analystUser = User::factory()->create([
             'name' => 'analista',
         ]);
-        User::factory()->create([
+        $operatorUser = User::factory()->create([
             'name' => 'operador',
         ]);
         User::factory()->create([
@@ -123,6 +123,12 @@ class DatabaseSeeder extends Seeder
             Role::factory()->create(['name' => $roleName]);
         }
 
+        $crisUser->assignRole('administrador');
+        $analystUser->assignRole('analista');
+        $operatorUser->assignRole('operador');
+
+        $this->call(RolePermissionsSeeder::class);
+
         Role::factory(4)->givePermissionsToRole()->create();
         User::factory(30)->giveRolesToUser()->create();
         Ammunition::factory(5)->create();
@@ -134,7 +140,7 @@ class DatabaseSeeder extends Seeder
         DrugConfiscation::factory(1000)->create();
         WeaponConfiscation::factory(1000)->create();
 
-        //$this->call(ConfiscationGraphViewsSeeder::class);
+        // $this->call(ConfiscationGraphViewsSeeder::class);
 
     }
 }

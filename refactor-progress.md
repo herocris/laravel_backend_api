@@ -3,11 +3,11 @@
 ## Estado para retomar
 
 - Última actualización: 2026-11-10, zona Europe/Madrid.
-- Trabajo actual: solicitud directa de protección mediante middleware de Spatie completada; 85 rutas de módulos protegidas, suite 739 pruebas / 3.325 aserciones sin incidencias.
+- Trabajo actual: matriz de permisos por rol completada en seeders y aplicada mediante Tinker: administrador 73, operador 27 y analista 11; guard `api`.
 - Paso en curso: 05 parcialmente adelantado por solicitud directa; su aceptación integral sigue pendiente de los prerrequisitos 03–04. No se han iniciado automáticamente otros pasos.
 - Siguiente paso: 03, crear permisos y roles estables.
 - Próxima acción: completar 03 con el catálogo singular actual y posteriormente 04 para cerrar la escalada de asignaciones, conservando la protección añadida. Antes de integrar en `main`, preparar `15a` por el workflow de despliegue automático existente.
-- Base vigente: rama local `refactor/01-base-referencia`, HEAD `79d9827e32e861859319f5a7ec7d377523849016`; cambios locales en los 12 controladores de módulos/auditoría, `bootstrap/app.php`, pruebas afectadas, nuevo `ModuleAuthorizationTest` y esta bitácora. Árbol limpio al inicio de la solicitud actual. Suite final: 739 pruebas / 3.325 aserciones, todas pasan.
+- Base vigente: rama local `refactor/01-base-referencia`, HEAD `40f307b1ef9c514b9de9eddc95b8221f86b5063d`; se conservan los cambios previos de asignación de roles. Cambios actuales: `DatabaseSeeder`, nuevo `RolePermissionsSeeder`, nuevo `RolePermissionsSeederTest` y esta bitácora. Última suite completa: 739 pruebas / 3.325 aserciones en la sesión de protección. Verificación actual de roles y autorización: 296 pruebas / 650 aserciones, todas pasan; actualización real mediante Tinker verificada.
 - Referencia de preparación: rama `upgrade/laravel-13`, HEAD `ed718be`. Es una referencia histórica; comprobar rama, HEAD y estado actuales al retomar.
 - Alcance ejecutado en esta preparación: actualizar `AGENTS.md` y crear `refactor-plan.md` y este archivo. No se corrigió código de aplicación.
 - Verificaciones de esta preparación: revisión de los tres documentos y correspondencia de los 16 prompts con el tablero; comprobaciones de whitespace sin incidencias. No se ejecutaron tests ni Pint porque solo se modificó documentación.
@@ -20,7 +20,7 @@ Estados: `pendiente`, `en_curso`, `bloqueado`, `completado`. `no_aplica` se usa 
 | --- | --- | --- | --- |
 | 01 | Base de referencia | completado | SQLite aislado; 433 pruebas / 2.790 aserciones; Composer válido y sin advisories; contratos y riesgos registrados |
 | 02 | Errores HTTP | completado | 15 regresiones HTTP; suite completa 448 pruebas / 2.834 aserciones; Pint y whitespace correctos |
-| 03 | Catálogo de permisos | pendiente | Matriz determinista y seeder idempotente |
+| 03 | Catálogo de permisos | en_curso | Matriz de roles y sincronización repetible implementadas por solicitud directa; catálogo idempotente y bootstrap completos aún pendientes |
 | 04 | Asignación de privilegios | pendiente | Cerrar escalada y evitar pérdida de asignaciones |
 | 05 | Protección de endpoints | en_curso | 85 rutas con auth + permission, 291 regresiones nuevas; aceptación integral pendiente de 03–04 |
 | 06 | Policies contextuales | pendiente | Revisar reglas confirmadas; creación condicional |
@@ -75,6 +75,7 @@ Hallazgos que deben contrastarse con el código al entrar en cada paso:
 | D05 | Preservar contrato existente salvo correcciones expresas | Registrar impacto y adaptación del cliente |
 | D06 | No usar seeders destructivos ni cuentas elegidas por suposición | Configuración nueva idempotente y pruebas aisladas |
 | D07 | Usar `permission:<permiso>,api` de Spatie en los módulos, conservando Gate mediante `canAny()` | Solicitud directa del usuario, 2026-11-10; sustituye el alias `can` previsto en D01 para estas acciones |
+| D08 | Administrador recibe todos los permisos activos api; analista consulta negocio y estadísticas; operador añade crear/actualizar negocio; administración, auditoría y bajas reservadas al administrador | Usuario delega la matriz y autoriza aplicarla en seeders y base actual por Tinker, 2026-11-10; detalle y evidencia abajo |
 
 Agregar decisiones confirmadas con identificador, fecha, motivo e impacto. Distinguir propuestas de decisiones; conservar el historial si se sustituye alguna.
 
@@ -82,8 +83,8 @@ Agregar decisiones confirmadas con identificador, fecha, motivo e impacto. Disti
 
 | Tema | Resolver al llegar a | Información necesaria |
 | --- | --- | --- |
-| Roles y permisos exactos | 03 | Operaciones que corresponden a cada rol; catálogo final y asignaciones iniciales |
-| Acceso administrativo real | 03–05 | Identidad explícitamente autorizada y mecanismo de bootstrap, sin guardar credenciales |
+| Catálogo y bootstrap idempotentes completos | 03 | Matriz funcional de roles elegida en D08; falta separar también la creación del catálogo de los seeders destructivos |
+| Acceso administrativo real | 03–05 | Usuario designó `cris` con rol `administrador` y autorizó asignaciones por Tinker; falta formalizar bootstrap sin seeders destructivos |
 | Registro y autenticación | 04 / 07 | Política de registro, consumidores, dominios, necesidad de JWT y compatibilidad con cliente |
 | Reglas contextuales | 06 | Restricciones concretas sobre registros; policies pueden no ser necesarias todavía |
 | Invariantes de datos | 08 | Unidades y precisión de pesos, límites del dominio y asociaciones eliminadas |
@@ -96,7 +97,7 @@ No solicitar todas estas respuestas al iniciar: resolver en su paso y continuar 
 
 ## Matriz de autorización
 
-Matriz vigente del 2026-11-10, contrastada con `route:list --except-vendor --json`: 91 rutas totales, de las que 85 corresponden a módulos y todas tienen `auth` y `PermissionMiddleware`. Guard `api` en todos los permisos; ninguno depende del nombre del rol. Permisos directos y heredados de roles son válidos. No se asignaron permisos a cuentas reales ni se decidió la distribución entre roles.
+Matriz vigente del 2026-11-10, contrastada con `route:list --except-vendor --json`: 91 rutas totales, de las que 85 corresponden a módulos y todas tienen `auth` y `PermissionMiddleware`. Guard `api` en todos los permisos; ninguno depende del nombre del rol. Permisos directos y heredados de roles son válidos. La distribución por rol y su aplicación real fueron autorizadas después, en la sesión D08 documentada a continuación.
 
 `<recurso>` corresponde exactamente a `user`, `role`, `permission`, `drug`, `drugPresentation`, `weapon`, `ammunition`, `confiscation`, `drugConfiscation`, `weaponConfiscation` y `ammunitionConfiscation`. Todos conservan sus URLs y nombres de rutas.
 
@@ -116,7 +117,41 @@ Matriz vigente del 2026-11-10, contrastada con `route:list --except-vendor --jso
 
 El catálogo incluye `dashboard.view`, sin endpoint equivalente actual: no se inventa uno ni se impone ese permiso al resto de módulos. `login/register` siguen públicos y con throttle; `me/logout/refresh` siguen con auth y throttle, sin permiso administrativo. La raíz web no pertenece a estos módulos. Se usan 47 permisos distintos del catálogo de 48; la preparación idempotente y asignación inicial de 03 continúan pendientes. Cambio de contrato: un usuario autenticado sin permiso ahora recibe 403 antes de validar entrada o resolver modelos; invitados reciben 401, y usuarios autorizados conservan sus respuestas anteriores. El cliente debe gestionar 403 y disponer de asignaciones explícitas; el nombre `administrador` por sí solo no concede nada.
 
+Distribución de roles autorizada en D08, aplicada mediante `RolePermissionsSeeder` (requiere que existan roles y permisos; no crea ni trunca datos):
+
+| Rol / usuario designado | Permisos | Alcance |
+| --- | --- | --- |
+| administrador / cris | Todos los activos de guard api; 73 actuales | 48 explícitos del catálogo más 25 permisos aleatorios existentes de demo; sin wildcard ni Gate especial |
+| operador / operador | 27 | view/create/update de los ocho módulos de negocio más dashboard.view, graph.view y map.view |
+| analista / analista | 11 | view de los ocho módulos de negocio más dashboard.view, graph.view y map.view |
+
+Módulos de negocio: `drug`, `drugPresentation`, `weapon`, `ammunition`, `confiscation`, `drugConfiscation`, `weaponConfiscation`, `ammunitionConfiscation`. Operador puede restaurar porque esa acción usa `.update`; ninguno de los dos roles de negocio puede borrar, gestionar usuarios/roles/permisos ni ver auditoría. Sincronizar estas tres listas reemplaza únicamente sus permisos de rol; conserva usuarios–roles, permisos directos y demás roles. Un permiso futuro no se asigna automáticamente: administrador lo recibe la próxima vez que se ejecute el seeder específico.
+
 ## Registro de sesiones y verificaciones
+
+### Permisos por rol en seeders y Tinker — 2026-11-10, Europe/Madrid — completado (alcance directo)
+
+- Inicio: rama `refactor/01-base-referencia`, HEAD `40f307b1ef9c514b9de9eddc95b8221f86b5063d`, cambios previos en `DatabaseSeeder` y esta bitácora conservados. Leídos apartado 03, skills aplicables y configuración de pruebas; `.ai/rules` ausente.
+- Autorización explícita: todos los permisos del seeder para `administrador`; el usuario delega elegir los de `operador` y `analista` y aplicar las asignaciones tanto en código como en la base actual mediante Tinker. Esta solicitud autoriza esa actualización concreta de datos; no ejecutar el seeder destructivo ni completar otros pasos automáticamente.
+- Lectura inicial mediante Tinker, código 0: 73 permisos activos de guard `api`, tres roles estables sin permisos. Son 48 permisos explícitos más 25 aleatorios; administrador recibirá todos los activos de `api`, sin wildcard ni bypass para permisos futuros.
+- Matriz elegida: analista puede consultar los ocho catálogos/decomisos y dashboard/gráficas/mapa (11 permisos). Operador suma crear y actualizar esos ocho módulos (27 permisos; restaurar usa `.update` según la matriz HTTP). Gestión de usuarios/roles/permisos, auditoría y eliminaciones quedan para administrador. La actualización sincronizará solo estos tres roles, conservando las asignaciones usuario–rol, permisos directos y los demás roles.
+- Pendiente: seeder específico sin truncados llamado desde `DatabaseSeeder`, pruebas de matriz/repetibilidad/guard/atomicidad, Pint y aplicación del mismo seeder mediante Tinker con verificación posterior. No se amplía `TestingSeeder`, que conserva sus datos de prueba aleatorios sin estos tres roles estables.
+- Hito local: añadido `database/seeders/RolePermissionsSeeder.php`, llamado tras crear los tres roles y asignarlos en `DatabaseSeeder`. `syncPermissions` dentro de una transacción fija la matriz únicamente para esos tres roles; utiliza roles/permisos existentes de guard `api`. Los roles y permisos deben estar creados antes de ejecutar este seeder. Se mantienen los cambios previos de asignación a usuarios.
+- Pruebas nuevas `tests/Feature/RolePermissionsSeederTest.php`, generadas con Artisan: primera ejecución `vendor/bin/sail bin phpunit --display-warnings --no-progress tests/Feature/RolePermissionsSeederTest.php`, código 0, **5 tests / 164 assertions**, 0,902 s. Cubren permisos efectivos mediante Gate para los tres roles, administrador sin wildcard ni permisos de otro guard/eliminados, restricciones de negocio, repetibilidad, preservación de usuarios/asignaciones/permisos directos/otros roles y rollback de todas las asignaciones si falta un permiso requerido. La base actual aún no ha sido modificada en esta solicitud; pendiente formato, regresiones afectadas y aplicación por Tinker.
+- Verificaciones locales finales: `vendor/bin/sail bin pint --dirty --format agent`, código 0, passed. `vendor/bin/sail bin phpunit --display-warnings --no-progress tests/Feature/RolePermissionsSeederTest.php tests/Feature/ModuleAuthorizationTest.php`, código 0: **296 tests / 650 assertions**, 5,893 s, sin advertencias; SQLite `:memory:` según configuración inspeccionada. `git diff --check` sin diagnósticos. No se repitió la suite completa porque el cambio queda cubierto por estas pruebas de seeder y autorización; las 739 pruebas de la sesión anterior son evidencia histórica.
+- Aplicación real autorizada: `vendor/bin/sail artisan tinker --execute 'app(Database\\Seeders\\RolePermissionsSeeder::class)->run(); ...'`, código 0. Ejecutado solo el seeder específico transaccional, después invalidada la caché de Spatie y consultadas asignaciones nuevas. Resultado: administrador 73 permisos, operador 27, analista 11, todos guard api. Usuarios confirmados: cris(id 1)/administrador/73, analista(id 2)/analista/11, operador(id 3)/operador/27.
+- Verificación efectiva mediante Gate en Tinker: cris puede consultar/crear/borrar decomisos y actualizar usuarios; analista solo consultar en esa muestra; operador consultar y crear, sin borrar decomisos ni actualizar usuarios. Se conservan los roles usuario–rol asignados en la solicitud anterior. No se ejecutaron `DatabaseSeeder`, `TestingSeeder`, migraciones, truncados ni regeneración de datos de demo. No se crean credenciales ni cuentas.
+- Cierre: cambios revisados en `database/seeders/DatabaseSeeder.php`, nuevo `database/seeders/RolePermissionsSeeder.php`, nuevo `tests/Feature/RolePermissionsSeederTest.php` y bitácora; cambios previos conservados. Sin commits, push ni despliegue. Solicitud completada; 03 sigue en_curso porque falta el catálogo/bootstrapping idempotente completo. Siguiente acción: completar ese alcance de 03 y después 04, sin iniciarlos automáticamente. La vulnerabilidad previa de registro/asignaciones de 04 sigue pendiente.
+
+### Asignación de roles iniciales solicitada — 2026-11-10, Europe/Madrid — completado (alcance directo)
+
+- Inicio: rama `refactor/01-base-referencia`, árbol limpio. Leídos bitácora, sección 03 del plan y skills de Laravel/pruebas. `.ai/rules` ausente. Spatie Permission 6.25.0 confirmado con `vendor/bin/sail composer show spatie/laravel-permission` (código 0).
+- Identidades autorizadas explícitamente por el usuario para datos de demo: `cris` → `administrador`, `analista` → `analista`, `operador` → `operador`. No se concederán permisos adicionales ni privilegios implícitos por nombre de rol. No se ejecutará el seeder destructivo.
+- Alcance: conservar las instancias de los tres usuarios en `DatabaseSeeder` y asignar sus roles después de crearlos. `TestingSeeder` no contiene los otros dos usuarios ni estos roles y mantiene sus datos aleatorios actuales; no se amplía su contenido. Esto no completa el seeder idempotente ni el bootstrap de 03.
+- Implementación: conservadas las instancias `$crisUser`, `$analystUser` y `$operatorUser`; añadido `assignRole()` con el nombre exacto después de crear los tres roles. Se respeta el guard `api` de las factories. No se asignan permisos adicionales a los roles. Boost no aportó documentación pertinente de Spatie; API contrastada en `vendor/spatie/laravel-permission/src/Traits/HasRoles.php` de la versión instalada.
+- Verificaciones observadas: `vendor/bin/sail bin pint --dirty --format agent`, código 0 (solo normaliza además el espacio de un comentario previo); `vendor/bin/sail php -l database/seeders/DatabaseSeeder.php`, código 0, sin errores de sintaxis; `vendor/bin/sail bin phpunit --display-warnings --no-progress tests/Feature/ModuleAuthorizationTest.php --filter='test_permissions_inherited_from_a_role_authorize_access|test_an_administrator_role_without_permissions_is_denied'`, código 0, **2 tests / 2 assertions**, 0,365 s, sin advertencias. `git diff --check` sin diagnósticos.
+- Alcance de la evidencia: las dos pruebas existentes comprueban herencia de permisos y ausencia de privilegios implícitos del rol administrador; no ejecutan ni prueban integralmente este seeder destructivo. No se añade una prueba que replique solo las asignaciones literales. No se ha modificado la base real ni se ha ejecutado el seeder. La asignación solicitada se aplicará al ejecutar `DatabaseSeeder`.
+- Cierre: solicitud local completada, sin commits, push ni despliegue. Próxima acción del refactor: 03 idempotente y después 04; la matriz de permisos por rol sigue pendiente y no se deduce de sus nombres. No se inician otros pasos.
 
 ### Protección de acciones solicitada — 2026-11-10, Europe/Madrid — completado (alcance directo)
 
