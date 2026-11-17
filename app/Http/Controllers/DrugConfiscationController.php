@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ConfiscationReadCache;
 use App\Helpers\ConfiscationStatisticsQuery;
 use App\Helpers\PersistUploadedImage;
 use App\Http\Requests\DrugConfiscation\GetRequest;
@@ -164,14 +165,19 @@ class DrugConfiscationController extends ApiController implements HasMiddleware
      * @param  GetRequest  $request  Parámetros: period, start_date, end_date, drugs[].
      * @return JsonResponse lineBarData y pieData formateados.
      */
-    public function graphIndex(GetRequest $request, ConfiscationStatisticsQuery $statistics): JsonResponse
+    public function graphIndex(GetRequest $request, ConfiscationStatisticsQuery $statistics, ConfiscationReadCache $cache): JsonResponse
     {
-        return response()->json($statistics->get(
-            'drug',
-            $request->validated('period'),
-            $request->validated('start_date'),
-            $request->validated('end_date'),
-            $request->validated('drugs'),
+        return response()->json($cache->remember(
+            'graph:drug',
+            $request->user('api')->getAuthIdentifier(),
+            $request->validated(),
+            fn (): array => $statistics->get(
+                'drug',
+                $request->validated('period'),
+                $request->validated('start_date'),
+                $request->validated('end_date'),
+                $request->validated('drugs'),
+            ),
         ));
     }
 }

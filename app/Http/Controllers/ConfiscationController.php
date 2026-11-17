@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ConfiscationMapQuery;
+use App\Helpers\ConfiscationReadCache;
 use App\Http\Requests\Confiscation\GetRequest;
 use App\Http\Requests\Confiscation\StorePostRequest;
 use App\Http\Requests\Confiscation\UpdatePutRequest;
@@ -61,15 +62,20 @@ class ConfiscationController extends ApiController implements HasMiddleware
      * @param  GetRequest  $request  Parámetros: start_date, end_date, drugs[], weapons[], ammunitions[].
      * @return JsonResponse Arreglo 'mapItems' listo para representación en mapa.
      */
-    public function mapConfiscations(GetRequest $request, ConfiscationMapQuery $map): JsonResponse
+    public function mapConfiscations(GetRequest $request, ConfiscationMapQuery $map, ConfiscationReadCache $cache): JsonResponse
     {
-        return response()->json(['mapItems' => $map->get(
-            $request->validated('start_date'),
-            $request->validated('end_date'),
-            $request->validated('drugs', []),
-            $request->validated('weapons', []),
-            $request->validated('ammunitions', []),
-        )]);
+        return response()->json($cache->remember(
+            'map',
+            $request->user('api')->getAuthIdentifier(),
+            $request->validated(),
+            fn (): array => ['mapItems' => $map->get(
+                $request->validated('start_date'),
+                $request->validated('end_date'),
+                $request->validated('drugs', []),
+                $request->validated('weapons', []),
+                $request->validated('ammunitions', []),
+            )->toArray()],
+        ));
     }
 
     /**

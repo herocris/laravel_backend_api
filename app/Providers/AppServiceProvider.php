@@ -2,6 +2,14 @@
 
 namespace App\Providers;
 
+use App\Helpers\ConfiscationReadCache;
+use App\Models\Ammunition;
+use App\Models\AmmunitionConfiscation;
+use App\Models\Confiscation;
+use App\Models\Drug;
+use App\Models\DrugConfiscation;
+use App\Models\Weapon;
+use App\Models\WeaponConfiscation;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -23,8 +31,14 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
+    public function boot(ConfiscationReadCache $cache): void
     {
+        foreach ([Confiscation::class, Drug::class, Weapon::class, Ammunition::class,
+            DrugConfiscation::class, WeaponConfiscation::class, AmmunitionConfiscation::class] as $model) {
+            $model::saved($cache->invalidate(...));
+            $model::deleted($cache->invalidate(...));
+        }
+
         $this->app->make('tymon.jwt.parser')->setChain([new AuthHeaders, new Cookies(false)]);
 
         RateLimiter::for('login', fn (Request $request): array => [

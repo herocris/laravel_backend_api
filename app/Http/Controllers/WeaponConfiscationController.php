@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ConfiscationReadCache;
 use App\Helpers\ConfiscationStatisticsQuery;
 use App\Helpers\PersistUploadedImage;
 use App\Http\Requests\WeaponConfiscation\GetRequest;
@@ -163,14 +164,19 @@ class WeaponConfiscationController extends ApiController implements HasMiddlewar
      * @param  GetRequest  $request  Parámetros: period, start_date, end_date, weapons[].
      * @return JsonResponse lineBarData y pieData.
      */
-    public function graphIndex(GetRequest $request, ConfiscationStatisticsQuery $statistics): JsonResponse
+    public function graphIndex(GetRequest $request, ConfiscationStatisticsQuery $statistics, ConfiscationReadCache $cache): JsonResponse
     {
-        return response()->json($statistics->get(
-            'weapon',
-            $request->validated('period'),
-            $request->validated('start_date'),
-            $request->validated('end_date'),
-            $request->validated('weapons'),
+        return response()->json($cache->remember(
+            'graph:weapon',
+            $request->user('api')->getAuthIdentifier(),
+            $request->validated(),
+            fn (): array => $statistics->get(
+                'weapon',
+                $request->validated('period'),
+                $request->validated('start_date'),
+                $request->validated('end_date'),
+                $request->validated('weapons'),
+            ),
         ));
     }
 }

@@ -51,11 +51,6 @@ class ApiResponserProxy
         return $this->paginate($collection);
     }
 
-    public function callCache($data)
-    {
-        return $this->cacheResponse($data);
-    }
-
     public function callError($msg, $code)
     {
         return $this->errorResponse($msg, $code);

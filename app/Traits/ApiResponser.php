@@ -7,7 +7,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -19,7 +18,6 @@ use Illuminate\Validation\Rule;
  * - Respuestas de éxito y error estandarizadas
  * - Transformación de datos mediante Resources
  * - Paginación, ordenamiento, búsqueda y filtrado de colecciones
- * - Caché de respuestas basado en URL y parámetros
  * - Formateo específico para gráficas de barras, líneas y pastel
  *
  * Uso: incluir este trait en controladores de API para estandarizar respuestas.
@@ -185,7 +183,7 @@ trait ApiResponser
         $paginated->appends(request()->query());
         $paginated->setCollection($this->transformData($paginated->getCollection(), $resource));
 
-        return $this->successResponse($this->cacheResponse($paginated), $code);
+        return $this->successResponse($paginated, $code);
     }
 
     protected function sortData(Collection $collection)
@@ -246,29 +244,5 @@ trait ApiResponser
         $paginated->appends(request()->all());
 
         return $paginated;
-    }
-
-    protected function cacheResponse($data)
-    {
-        // se obtienen la URL sin parámetros, por ejemplo: http://localhost/test
-        $url = request()->url();
-        // se obtienen los parámetros de la URL en forma de arreglo asociativo
-        // ejemplo: ['sort_by' => 'name', 'type' => 'asc']
-        $queryParams = request()->query();
-        // se ordenan las claves alfabéticamente para generar una clave consistente
-        // ejemplo: ['sort_by' => 'name', 'type' => 'asc']
-        // en lugar de: ['type' => 'asc', 'sort_by' => 'name']
-        ksort($queryParams);
-        // se construye la cadena de consulta a partir del arreglo ordenado
-        // ejemplo: sort_by=name&type=asc
-        $queryString = http_build_query($queryParams);
-        // se combina la URL base con la cadena de consulta para formar la clave completa
-        // ejemplo: http://localhost/test?sort_by=name&type=asc
-        $fullUrl = "{$url}?{$queryString}";
-
-        // se utiliza la fachada Cache para almacenar y recuperar la respuesta en caché
-        return Cache::remember($fullUrl, 30 / 60, function () use ($data) {
-            return $data;
-        });
     }
 }
