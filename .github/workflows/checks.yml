@@ -1,0 +1,91 @@
+name: Backend checks
+
+on:
+  push:
+  pull_request:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: refactor_statistics_test
+          MYSQL_USER: statistics_ci
+          MYSQL_PASSWORD: isolated-ci-password
+          MYSQL_ROOT_PASSWORD: isolated-ci-root-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      APP_ENV: testing
+      APP_DEBUG: 'false'
+      DB_URL: ''
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ':memory:'
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: array
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, dom, curl, fileinfo, pdo_sqlite, pdo_mysql, intl, zip, bcmath
+          coverage: none
+          tools: composer:v2
+      - name: Prepare isolated test configuration
+        run: |
+          printf '127.0.0.1 mysql\n' | sudo tee -a /etc/hosts > /dev/null
+          php -r 'echo "APP_KEY=base64:".base64_encode(random_bytes(32)).PHP_EOL; echo "JWT_SECRET=".bin2hex(random_bytes(32)).PHP_EOL;' >> "$GITHUB_ENV"
+          test ! -f bootstrap/cache/config.php
+      - name: Validate and install locked dependencies
+        run: |
+          composer validate --strict --no-interaction
+          composer install --prefer-dist --no-interaction --no-progress
+          composer check-platform-reqs
+          composer audit --locked --no-interaction
+      - name: Check formatting of changed PHP files
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          if [[ -n "$BASE_SHA" && ! "$BASE_SHA" =~ ^0+$ ]] && git cat-file -e "$BASE_SHA^{commit}"; then
+            vendor/bin/pint --diff="$BASE_SHA" --repair --format agent
+          elif [[ "$BASE_SHA" =~ ^0+$ ]]; then
+            vendor/bin/pint --diff="$(git merge-base HEAD "origin/$DEFAULT_BRANCH")" --repair --format agent
+          elif git rev-parse --verify HEAD^ > /dev/null 2>&1; then
+            vendor/bin/pint --diff=HEAD^ --repair --format agent
+          else
+            vendor/bin/pint --repair --format agent
+          fi
+      - name: Check PHP syntax
+        run: |
+          git ls-files -z -- '*.php' | xargs -0 -r -n1 php -l > "$RUNNER_TEMP/php-lint.log" || {
+            cat "$RUNNER_TEMP/php-lint.log"
+            exit 1
+          }
+      - name: Run SQLite suite
+        run: vendor/bin/phpunit --no-progress --display-warnings --fail-on-warning
+      - name: Run statistics and views against isolated MySQL
+        env:
+          DB_USERNAME: statistics_ci
+          DB_PASSWORD: isolated-ci-password
+        run: vendor/bin/phpunit --configuration phpunit.mysql.xml --no-progress --display-warnings --fail-on-warning
+      - name: Verify release filesystem lifecycle
+        run: bash .github/deployment/test-release.sh
