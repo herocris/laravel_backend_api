@@ -11,7 +11,7 @@ class PermissionDocs
         type: 'object',
         properties: [
             new OA\Property(property: 'identificador', type: 'integer', example: 1),
-            new OA\Property(property: 'nombre', type: 'string', example: 'edit-users'),
+            new OA\Property(property: 'nombre', type: 'string', example: 'confiscation.view'),
         ]
     )]
     #[OA\Schema(
@@ -19,7 +19,7 @@ class PermissionDocs
         type: 'object',
         required: ['nombre'],
         properties: [
-            new OA\Property(property: 'nombre', type: 'string', example: 'edit-users')
+            new OA\Property(property: 'nombre', type: 'string', example: 'confiscation.view'),
         ]
     )]
     #[OA\Schema(
@@ -27,93 +27,193 @@ class PermissionDocs
         type: 'object',
         required: ['nombre'],
         properties: [
-            new OA\Property(property: 'nombre', type: 'string', example: 'edit-users')
+            new OA\Property(property: 'nombre', type: 'string', example: 'confiscation.view'),
         ]
     )]
     #[OA\Get(
-        path: "/api/permission",
-        tags: ["Permisos"],
-        summary: "Mostrar permisos",
-        security: [["bearerAuth" => []]],
+        path: '/api/permission',
+        operationId: 'Permission_index',
+        tags: ['Permission'],
+        summary: 'Listar registros',
+        description: 'Requiere permission.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.',
+        x: ['permission' => 'permission.view'],
+        security: [['bearerAuth' => []], ['authCookie' => []]],
+        parameters: [
+            new OA\Parameter(name: 'page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', minimum: 1, default: 1)),
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', minimum: 2, maximum: 100, default: 10)),
+            new OA\Parameter(name: 'sort_by', in: 'query', required: false, schema: new OA\Schema(type: 'string', description: 'Campo público escalar permitido; ver LIST_FIELDS del controlador')),
+            new OA\Parameter(name: 'type', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['asc', 'desc'], description: 'desc por defecto al indicar sort_by; desempate por ID')),
+        ],
         responses: [
-            new OA\Response(response: 200, description: "OK", content: new OA\JsonContent(type: "array", items: new OA\Items(ref: "#/components/schemas/Permission"))),
-            new OA\Response(response: 401, description: "No autenticado", content: new OA\JsonContent(ref: "#/components/schemas/UnauthorizedResponse")),
-            new OA\Response(response: 404, description: "No encontrado", content: new OA\JsonContent(ref: "#/components/schemas/NotFoundResponse")),
-            new OA\Response(response: 405, description: "Método no permitido", content: new OA\JsonContent(ref: "#/components/schemas/MethodNotAllowedResponse")),
-            new OA\Response(response: 429, description: "Demasiadas solicitudes", content: new OA\JsonContent(ref: "#/components/schemas/TooManyRequestsResponse")),
-            new OA\Response(response: 500, description: "Error interno", content: new OA\JsonContent(ref: "#/components/schemas/ServerErrorResponse"))
+            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(allOf: [new OA\Schema(ref: '#/components/schemas/Pagination'), new OA\Schema(properties: [new OA\Property(property: 'data', type: 'array', items: new OA\Items(ref: '#/components/schemas/Permission'))])])),
+            new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
+            new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
+            new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
+            new OA\Response(response: 422, description: 'ValidationResponse', content: new OA\JsonContent(ref: '#/components/schemas/ValidationResponse')),
+            new OA\Response(response: 429, description: 'TooManyRequestsResponse', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
         ]
     )]
-    public function index() {}
+    public function index(): void {}
+
+    #[OA\Get(
+        path: '/api/permission/deleted',
+        operationId: 'Permission_indexDeleted',
+        tags: ['Permission'],
+        summary: 'Listar eliminados',
+        description: 'Requiere permission.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.',
+        x: ['permission' => 'permission.view'],
+        security: [['bearerAuth' => []], ['authCookie' => []]],
+        parameters: [
+            new OA\Parameter(name: 'page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', minimum: 1, default: 1)),
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', minimum: 2, maximum: 100, default: 10)),
+            new OA\Parameter(name: 'sort_by', in: 'query', required: false, schema: new OA\Schema(type: 'string', description: 'Campo público escalar permitido; ver LIST_FIELDS del controlador')),
+            new OA\Parameter(name: 'type', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['asc', 'desc'], description: 'desc por defecto al indicar sort_by; desempate por ID')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(allOf: [new OA\Schema(ref: '#/components/schemas/Pagination'), new OA\Schema(properties: [new OA\Property(property: 'data', type: 'array', items: new OA\Items(ref: '#/components/schemas/Permission'))])])),
+            new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
+            new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
+            new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
+            new OA\Response(response: 422, description: 'ValidationResponse', content: new OA\JsonContent(ref: '#/components/schemas/ValidationResponse')),
+            new OA\Response(response: 429, description: 'TooManyRequestsResponse', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
+        ]
+    )]
+    public function indexDeleted(): void {}
 
     #[OA\Post(
-        path: "/api/permission",
-        tags: ["Permisos"],
-        summary: "Crear permiso",
-        security: [["bearerAuth" => []]],
-        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: "#/components/schemas/PermissionCreateRequest")),
+        path: '/api/permission',
+        operationId: 'Permission_store',
+        tags: ['Permission'],
+        summary: 'Crear registro',
+        description: 'Requiere permission.create. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.',
+        x: ['permission' => 'permission.create'],
+        security: [['bearerAuth' => []], ['authCookie' => [], 'csrfHeader' => []]],
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/PermissionCreateRequest')),
         responses: [
-            new OA\Response(response: 201, description: "Creado", content: new OA\JsonContent(ref: "#/components/schemas/Permission")),
-            new OA\Response(response: 401, description: "No autenticado", content: new OA\JsonContent(ref: "#/components/schemas/UnauthorizedResponse")),
-            new OA\Response(response: 404, description: "No encontrado", content: new OA\JsonContent(ref: "#/components/schemas/NotFoundResponse")),
-            new OA\Response(response: 405, description: "Método no permitido", content: new OA\JsonContent(ref: "#/components/schemas/MethodNotAllowedResponse")),
-            new OA\Response(response: 422, description: "Validación fallida", content: new OA\JsonContent(ref: "#/components/schemas/ValidationResponse")),
-            new OA\Response(response: 429, description: "Demasiadas solicitudes", content: new OA\JsonContent(ref: "#/components/schemas/TooManyRequestsResponse")),
-            new OA\Response(response: 500, description: "Error interno", content: new OA\JsonContent(ref: "#/components/schemas/ServerErrorResponse"))
+            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/Permission')),
+            new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
+            new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
+            new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
+            new OA\Response(response: 422, description: 'ValidationResponse', content: new OA\JsonContent(ref: '#/components/schemas/ValidationResponse')),
+            new OA\Response(response: 429, description: 'TooManyRequestsResponse', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
+            new OA\Response(response: 419, description: 'CsrfResponse', content: new OA\JsonContent(ref: '#/components/schemas/CsrfResponse')),
         ]
     )]
-    public function store() {}
+    public function store(): void {}
 
     #[OA\Get(
-        path: "/api/permission/{permission}",
-        tags: ["Permisos"],
-        summary: "Mostrar permiso",
-        security: [["bearerAuth" => []]],
-        parameters: [new OA\Parameter(name: "permission", in: "path", required: true, schema: new OA\Schema(type: "integer"))],
+        path: '/api/permission/{permission}',
+        operationId: 'Permission_show',
+        tags: ['Permission'],
+        summary: 'Consultar registro',
+        description: 'Requiere permission.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.',
+        x: ['permission' => 'permission.view'],
+        security: [['bearerAuth' => []], ['authCookie' => []]],
+        parameters: [
+            new OA\Parameter(name: 'permission', in: 'path', required: true, schema: new OA\Schema(type: 'integer', minimum: 1)),
+        ],
         responses: [
-            new OA\Response(response: 200, description: "OK", content: new OA\JsonContent(ref: "#/components/schemas/Permission")),
-            new OA\Response(response: 401, description: "No autenticado", content: new OA\JsonContent(ref: "#/components/schemas/UnauthorizedResponse")),
-            new OA\Response(response: 404, description: "No encontrado", content: new OA\JsonContent(ref: "#/components/schemas/NotFoundResponse")),
-            new OA\Response(response: 405, description: "Método no permitido", content: new OA\JsonContent(ref: "#/components/schemas/MethodNotAllowedResponse")),
-            new OA\Response(response: 429, description: "Demasiadas solicitudes", content: new OA\JsonContent(ref: "#/components/schemas/TooManyRequestsResponse")),
-            new OA\Response(response: 500, description: "Error interno", content: new OA\JsonContent(ref: "#/components/schemas/ServerErrorResponse"))
+            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/Permission')),
+            new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
+            new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
+            new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
+            new OA\Response(response: 422, description: 'ValidationResponse', content: new OA\JsonContent(ref: '#/components/schemas/ValidationResponse')),
+            new OA\Response(response: 429, description: 'TooManyRequestsResponse', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
         ]
     )]
-    public function show() {}
+    public function show(): void {}
 
     #[OA\Put(
-        path: "/api/permission/{permission}",
-        tags: ["Permisos"],
-        summary: "Actualizar permiso",
-        security: [["bearerAuth" => []]],
-        parameters: [new OA\Parameter(name: "permission", in: "path", required: true, schema: new OA\Schema(type: "integer"))],
-        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: "#/components/schemas/PermissionUpdateRequest")),
+        path: '/api/permission/{permission}',
+        operationId: 'Permission_update',
+        tags: ['Permission'],
+        summary: 'Actualizar registro (PUT)',
+        description: 'Requiere permission.update. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.',
+        x: ['permission' => 'permission.update'],
+        security: [['bearerAuth' => []], ['authCookie' => [], 'csrfHeader' => []]],
+        parameters: [
+            new OA\Parameter(name: 'permission', in: 'path', required: true, schema: new OA\Schema(type: 'integer', minimum: 1)),
+        ],
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/PermissionUpdateRequest')),
         responses: [
-            new OA\Response(response: 200, description: "OK", content: new OA\JsonContent(ref: "#/components/schemas/Permission")),
-            new OA\Response(response: 401, description: "No autenticado", content: new OA\JsonContent(ref: "#/components/schemas/UnauthorizedResponse")),
-            new OA\Response(response: 404, description: "No encontrado", content: new OA\JsonContent(ref: "#/components/schemas/NotFoundResponse")),
-            new OA\Response(response: 422, description: "Validación fallida", content: new OA\JsonContent(ref: "#/components/schemas/ValidationResponse")),
-            new OA\Response(response: 405, description: "Método no permitido", content: new OA\JsonContent(ref: "#/components/schemas/MethodNotAllowedResponse")),
-            new OA\Response(response: 429, description: "Demasiadas solicitudes", content: new OA\JsonContent(ref: "#/components/schemas/TooManyRequestsResponse")),
-            new OA\Response(response: 500, description: "Error interno", content: new OA\JsonContent(ref: "#/components/schemas/ServerErrorResponse"))
+            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/Permission')),
+            new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
+            new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
+            new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
+            new OA\Response(response: 422, description: 'ValidationResponse', content: new OA\JsonContent(ref: '#/components/schemas/ValidationResponse')),
+            new OA\Response(response: 429, description: 'TooManyRequestsResponse', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
+            new OA\Response(response: 419, description: 'CsrfResponse', content: new OA\JsonContent(ref: '#/components/schemas/CsrfResponse')),
         ]
     )]
-    public function update() {}
+    public function update(): void {}
+
+    #[OA\Patch(
+        path: '/api/permission/{permission}',
+        operationId: 'Permission_patch',
+        tags: ['Permission'],
+        summary: 'Actualizar registro (PATCH)',
+        description: 'Requiere permission.update. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.',
+        x: ['permission' => 'permission.update'],
+        security: [['bearerAuth' => []], ['authCookie' => [], 'csrfHeader' => []]],
+        parameters: [
+            new OA\Parameter(name: 'permission', in: 'path', required: true, schema: new OA\Schema(type: 'integer', minimum: 1)),
+        ],
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/PermissionUpdateRequest')),
+        responses: [
+            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/Permission')),
+            new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
+            new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
+            new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
+            new OA\Response(response: 422, description: 'ValidationResponse', content: new OA\JsonContent(ref: '#/components/schemas/ValidationResponse')),
+            new OA\Response(response: 429, description: 'TooManyRequestsResponse', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
+            new OA\Response(response: 419, description: 'CsrfResponse', content: new OA\JsonContent(ref: '#/components/schemas/CsrfResponse')),
+        ]
+    )]
+    public function patch(): void {}
 
     #[OA\Delete(
-        path: "/api/permission/{permission}",
-        tags: ["Permisos"],
-        summary: "Eliminar permiso",
-        security: [["bearerAuth" => []]],
-        parameters: [new OA\Parameter(name: "permission", in: "path", required: true, schema: new OA\Schema(type: "integer"))],
+        path: '/api/permission/{permission}',
+        operationId: 'Permission_destroy',
+        tags: ['Permission'],
+        summary: 'Eliminar lógicamente',
+        description: 'Requiere permission.delete. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.',
+        x: ['permission' => 'permission.delete'],
+        security: [['bearerAuth' => []], ['authCookie' => [], 'csrfHeader' => []]],
+        parameters: [
+            new OA\Parameter(name: 'permission', in: 'path', required: true, schema: new OA\Schema(type: 'integer', minimum: 1)),
+        ],
         responses: [
-            new OA\Response(response: 200, description: "Eliminado", content: new OA\JsonContent(ref: "#/components/schemas/Permission")),
-            new OA\Response(response: 401, description: "No autenticado", content: new OA\JsonContent(ref: "#/components/schemas/UnauthorizedResponse")),
-            new OA\Response(response: 404, description: "No encontrado", content: new OA\JsonContent(ref: "#/components/schemas/NotFoundResponse")),
-            new OA\Response(response: 405, description: "Método no permitido", content: new OA\JsonContent(ref: "#/components/schemas/MethodNotAllowedResponse")),
-            new OA\Response(response: 429, description: "Demasiadas solicitudes", content: new OA\JsonContent(ref: "#/components/schemas/TooManyRequestsResponse")),
-            new OA\Response(response: 500, description: "Error interno", content: new OA\JsonContent(ref: "#/components/schemas/ServerErrorResponse"))
+            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/Permission')),
+            new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
+            new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
+            new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
+            new OA\Response(response: 422, description: 'ValidationResponse', content: new OA\JsonContent(ref: '#/components/schemas/ValidationResponse')),
+            new OA\Response(response: 429, description: 'TooManyRequestsResponse', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
+            new OA\Response(response: 419, description: 'CsrfResponse', content: new OA\JsonContent(ref: '#/components/schemas/CsrfResponse')),
         ]
     )]
-    public function destroy() {}
+    public function destroy(): void {}
+
+    #[OA\Post(
+        path: '/api/permission/restore/{permission}',
+        operationId: 'Permission_restore',
+        tags: ['Permission'],
+        summary: 'Restaurar registro',
+        description: 'Requiere permission.update. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.',
+        x: ['permission' => 'permission.update'],
+        security: [['bearerAuth' => []], ['authCookie' => [], 'csrfHeader' => []]],
+        parameters: [
+            new OA\Parameter(name: 'permission', in: 'path', required: true, schema: new OA\Schema(type: 'integer', minimum: 1)),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/Permission')),
+            new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
+            new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
+            new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
+            new OA\Response(response: 422, description: 'ValidationResponse', content: new OA\JsonContent(ref: '#/components/schemas/ValidationResponse')),
+            new OA\Response(response: 429, description: 'TooManyRequestsResponse', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
+            new OA\Response(response: 419, description: 'CsrfResponse', content: new OA\JsonContent(ref: '#/components/schemas/CsrfResponse')),
+        ]
+    )]
+    public function restore(): void {}
 }

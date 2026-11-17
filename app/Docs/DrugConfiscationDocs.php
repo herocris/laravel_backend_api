@@ -13,15 +13,15 @@ class DrugConfiscationDocs
         type: 'object',
         properties: [
             new OA\Property(property: 'identificador', type: 'integer', example: 10),
-            new OA\Property(property: 'cantidad', type: 'integer', example: 5),
-            new OA\Property(property: 'peso', type: 'number', format: 'float', example: 12.5),
+            new OA\Property(property: 'cantidad', type: 'integer', minimum: 1, maximum: 2147483647, example: 5),
+            new OA\Property(property: 'peso', type: 'number', minimum: 0, exclusiveMinimum: true, description: 'Gramos; positivo, hasta dos decimales; almacenamiento DOUBLE sin conversión histórica', format: 'float', example: 12.5),
             new OA\Property(property: 'foto', type: 'string', nullable: true, example: 'imagen.png'),
             new OA\Property(
                 property: 'decomiso',
                 type: 'object',
                 properties: [
                     new OA\Property(property: 'identificador', type: 'integer', example: 3),
-                    new OA\Property(property: 'descripcion', type: 'string', example: 'Operativo zona norte'),
+                    new OA\Property(property: 'observacion', type: 'string', example: 'DEMO sintética 1'),
                 ]
             ),
             new OA\Property(
@@ -47,8 +47,8 @@ class DrugConfiscationDocs
         type: 'object',
         required: ['cantidad', 'peso', 'foto', 'decomiso', 'droga', 'presentacion'],
         properties: [
-            new OA\Property(property: 'cantidad', type: 'integer', example: 5),
-            new OA\Property(property: 'peso', type: 'number', format: 'float', example: 12.5),
+            new OA\Property(property: 'cantidad', type: 'integer', minimum: 1, maximum: 2147483647, example: 5),
+            new OA\Property(property: 'peso', type: 'number', minimum: 0, exclusiveMinimum: true, description: 'Gramos; positivo, hasta dos decimales; almacenamiento DOUBLE sin conversión histórica', format: 'float', example: 12.5),
             new OA\Property(property: 'foto', type: 'string', format: 'binary'),
             new OA\Property(property: 'decomiso', type: 'integer', example: 3, description: 'ID del decomiso'),
             new OA\Property(property: 'droga', type: 'integer', example: 7, description: 'ID de la droga'),
@@ -60,8 +60,8 @@ class DrugConfiscationDocs
         type: 'object',
         required: ['cantidad', 'peso', 'decomiso', 'droga', 'presentacion'],
         properties: [
-            new OA\Property(property: 'cantidad', type: 'integer', example: 6),
-            new OA\Property(property: 'peso', type: 'number', format: 'float', example: 10.0),
+            new OA\Property(property: 'cantidad', type: 'integer', minimum: 1, maximum: 2147483647, example: 6),
+            new OA\Property(property: 'peso', type: 'number', minimum: 0, exclusiveMinimum: true, description: 'Gramos; positivo, hasta dos decimales; almacenamiento DOUBLE sin conversión histórica', format: 'float', example: 10.0),
             new OA\Property(property: 'foto', type: 'string', format: 'binary', nullable: true),
             new OA\Property(property: 'decomiso', type: 'integer', example: 3),
             new OA\Property(property: 'droga', type: 'integer', example: 7),
@@ -70,164 +70,262 @@ class DrugConfiscationDocs
     )]
     #[OA\Get(
         path: '/api/drugConfiscation',
-        tags: ['Decomisos Drogas'],
-        summary: 'Listar decomisos de drogas',
-        security: [['bearerAuth' => []]],
+        operationId: 'DrugConfiscation_index',
+        tags: ['DrugConfiscation'],
+        summary: 'Listar registros',
+        description: 'Requiere drugConfiscation.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.',
+        x: ['permission' => 'drugConfiscation.view'],
+        security: [['bearerAuth' => []], ['authCookie' => []]],
+        parameters: [
+            new OA\Parameter(name: 'page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', minimum: 1, default: 1)),
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', minimum: 2, maximum: 100, default: 10)),
+            new OA\Parameter(name: 'sort_by', in: 'query', required: false, schema: new OA\Schema(type: 'string', description: 'Campo público escalar permitido; ver LIST_FIELDS del controlador')),
+            new OA\Parameter(name: 'type', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['asc', 'desc'], description: 'desc por defecto al indicar sort_by; desempate por ID')),
+        ],
         responses: [
-            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: '#/components/schemas/DrugConfiscation'))),
-            new OA\Response(response: 401, description: 'No autenticado', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
-            new OA\Response(response: 404, description: 'No encontrado', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
-            new OA\Response(response: 405, description: 'Método no permitido', content: new OA\JsonContent(ref: '#/components/schemas/MethodNotAllowedResponse')),
-            new OA\Response(response: 429, description: 'Demasiadas solicitudes', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
-            new OA\Response(response: 500, description: 'Error interno', content: new OA\JsonContent(ref: '#/components/schemas/ServerErrorResponse')),
+            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(allOf: [new OA\Schema(ref: '#/components/schemas/Pagination'), new OA\Schema(properties: [new OA\Property(property: 'data', type: 'array', items: new OA\Items(ref: '#/components/schemas/DrugConfiscation'))])])),
+            new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
+            new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
+            new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
+            new OA\Response(response: 422, description: 'ValidationResponse', content: new OA\JsonContent(ref: '#/components/schemas/ValidationResponse')),
+            new OA\Response(response: 429, description: 'TooManyRequestsResponse', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
         ]
     )]
-    public function index() {}
-
-    #[OA\Get(
-        path: '/api/drugConfiscation/{idConfiscation}/confiscation',
-        tags: ['Decomisos Drogas'],
-        summary: 'Listar decomisos de drogas por decomiso',
-        security: [['bearerAuth' => []]],
-        parameters: [new OA\Parameter(name: 'idConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
-        responses: [
-            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: '#/components/schemas/DrugConfiscation'))),
-            new OA\Response(response: 401, description: 'No autenticado', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
-            new OA\Response(response: 404, description: 'No encontrado', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
-            new OA\Response(response: 405, description: 'Método no permitido', content: new OA\JsonContent(ref: '#/components/schemas/MethodNotAllowedResponse')),
-            new OA\Response(response: 429, description: 'Demasiadas solicitudes', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
-            new OA\Response(response: 500, description: 'Error interno', content: new OA\JsonContent(ref: '#/components/schemas/ServerErrorResponse')),
-        ]
-    )]
-    public function indexByConfiscation() {}
-
-    #[OA\Post(
-        path: '/api/drugConfiscation',
-        tags: ['Decomisos Drogas'],
-        summary: 'Crear decomiso de droga',
-        security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscationCreateRequest')),
-        responses: [
-            new OA\Response(response: 201, description: 'Creado', content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscation')),
-            new OA\Response(response: 401, description: 'No autenticado', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
-            new OA\Response(response: 404, description: 'No encontrado', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
-            new OA\Response(response: 405, description: 'Método no permitido', content: new OA\JsonContent(ref: '#/components/schemas/MethodNotAllowedResponse')),
-            new OA\Response(response: 422, description: 'Validación fallida', content: new OA\JsonContent(ref: '#/components/schemas/ValidationResponse')),
-            new OA\Response(response: 429, description: 'Demasiadas solicitudes', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
-            new OA\Response(response: 500, description: 'Error interno', content: new OA\JsonContent(ref: '#/components/schemas/ServerErrorResponse')),
-        ]
-    )]
-    public function store() {}
-
-    #[OA\Get(
-        path: '/api/drugConfiscation/{drugConfiscation}',
-        tags: ['Decomisos Drogas'],
-        summary: 'Mostrar decomiso de droga',
-        security: [['bearerAuth' => []]],
-        parameters: [new OA\Parameter(name: 'drugConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
-        responses: [
-            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscation')),
-            new OA\Response(response: 401, description: 'No autenticado', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
-            new OA\Response(response: 404, description: 'No encontrado', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
-            new OA\Response(response: 405, description: 'Método no permitido', content: new OA\JsonContent(ref: '#/components/schemas/MethodNotAllowedResponse')),
-            new OA\Response(response: 429, description: 'Demasiadas solicitudes', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
-            new OA\Response(response: 500, description: 'Error interno', content: new OA\JsonContent(ref: '#/components/schemas/ServerErrorResponse')),
-        ]
-    )]
-    public function show() {}
-
-    #[OA\Put(
-        path: '/api/drugConfiscation/{drugConfiscation}',
-        tags: ['Decomisos Drogas'],
-        summary: 'Actualizar decomiso de droga',
-        security: [['bearerAuth' => []]],
-        parameters: [new OA\Parameter(name: 'drugConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
-        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscationUpdateRequest')),
-        responses: [
-            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscation')),
-            new OA\Response(response: 401, description: 'No autenticado', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
-            new OA\Response(response: 404, description: 'No encontrado', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
-            new OA\Response(response: 422, description: 'Validación fallida', content: new OA\JsonContent(ref: '#/components/schemas/ValidationResponse')),
-            new OA\Response(response: 405, description: 'Método no permitido', content: new OA\JsonContent(ref: '#/components/schemas/MethodNotAllowedResponse')),
-            new OA\Response(response: 429, description: 'Demasiadas solicitudes', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
-            new OA\Response(response: 500, description: 'Error interno', content: new OA\JsonContent(ref: '#/components/schemas/ServerErrorResponse')),
-        ]
-    )]
-    public function update() {}
-
-    #[OA\Delete(
-        path: '/api/drugConfiscation/{drugConfiscation}',
-        tags: ['Decomisos Drogas'],
-        summary: 'Eliminar decomiso de droga',
-        security: [['bearerAuth' => []]],
-        parameters: [new OA\Parameter(name: 'drugConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
-        responses: [
-            new OA\Response(response: 200, description: 'Eliminado', content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscation')),
-            new OA\Response(response: 401, description: 'No autenticado', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
-            new OA\Response(response: 404, description: 'No encontrado', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
-            new OA\Response(response: 405, description: 'Método no permitido', content: new OA\JsonContent(ref: '#/components/schemas/MethodNotAllowedResponse')),
-            new OA\Response(response: 429, description: 'Demasiadas solicitudes', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
-            new OA\Response(response: 500, description: 'Error interno', content: new OA\JsonContent(ref: '#/components/schemas/ServerErrorResponse')),
-        ]
-    )]
-    public function destroy() {}
+    public function index(): void {}
 
     #[OA\Get(
         path: '/api/drugConfiscation/deleted',
-        tags: ['Decomisos Drogas'],
-        summary: 'Listar decomisos de drogas eliminados',
-        security: [['bearerAuth' => []]],
+        operationId: 'DrugConfiscation_indexDeleted',
+        tags: ['DrugConfiscation'],
+        summary: 'Listar eliminados',
+        description: 'Requiere drugConfiscation.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.',
+        x: ['permission' => 'drugConfiscation.view'],
+        security: [['bearerAuth' => []], ['authCookie' => []]],
+        parameters: [
+            new OA\Parameter(name: 'page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', minimum: 1, default: 1)),
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', minimum: 2, maximum: 100, default: 10)),
+            new OA\Parameter(name: 'sort_by', in: 'query', required: false, schema: new OA\Schema(type: 'string', description: 'Campo público escalar permitido; ver LIST_FIELDS del controlador')),
+            new OA\Parameter(name: 'type', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['asc', 'desc'], description: 'desc por defecto al indicar sort_by; desempate por ID')),
+        ],
         responses: [
-            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: '#/components/schemas/DrugConfiscation'))),
-            new OA\Response(response: 401, description: 'No autenticado', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
-            new OA\Response(response: 404, description: 'No encontrado', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
-            new OA\Response(response: 405, description: 'Método no permitido', content: new OA\JsonContent(ref: '#/components/schemas/MethodNotAllowedResponse')),
-            new OA\Response(response: 429, description: 'Demasiadas solicitudes', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
-            new OA\Response(response: 500, description: 'Error interno', content: new OA\JsonContent(ref: '#/components/schemas/ServerErrorResponse')),
+            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(allOf: [new OA\Schema(ref: '#/components/schemas/Pagination'), new OA\Schema(properties: [new OA\Property(property: 'data', type: 'array', items: new OA\Items(ref: '#/components/schemas/DrugConfiscation'))])])),
+            new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
+            new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
+            new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
+            new OA\Response(response: 422, description: 'ValidationResponse', content: new OA\JsonContent(ref: '#/components/schemas/ValidationResponse')),
+            new OA\Response(response: 429, description: 'TooManyRequestsResponse', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
         ]
     )]
-    public function indexDeleted() {}
+    public function indexDeleted(): void {}
+
+    #[OA\Post(
+        path: '/api/drugConfiscation',
+        operationId: 'DrugConfiscation_store',
+        tags: ['DrugConfiscation'],
+        summary: 'Crear registro',
+        description: 'Requiere drugConfiscation.create. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.',
+        x: ['permission' => 'drugConfiscation.create'],
+        security: [['bearerAuth' => []], ['authCookie' => [], 'csrfHeader' => []]],
+        requestBody: new OA\RequestBody(required: true, content: new OA\MediaType(mediaType: 'multipart/form-data', schema: new OA\Schema(ref: '#/components/schemas/DrugConfiscationCreateRequest'))),
+        responses: [
+            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscation')),
+            new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
+            new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
+            new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
+            new OA\Response(response: 422, description: 'ValidationResponse', content: new OA\JsonContent(ref: '#/components/schemas/ValidationResponse')),
+            new OA\Response(response: 429, description: 'TooManyRequestsResponse', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
+            new OA\Response(response: 419, description: 'CsrfResponse', content: new OA\JsonContent(ref: '#/components/schemas/CsrfResponse')),
+        ]
+    )]
+    public function store(): void {}
+
+    #[OA\Get(
+        path: '/api/drugConfiscation/{drugConfiscation}',
+        operationId: 'DrugConfiscation_show',
+        tags: ['DrugConfiscation'],
+        summary: 'Consultar registro',
+        description: 'Requiere drugConfiscation.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.',
+        x: ['permission' => 'drugConfiscation.view'],
+        security: [['bearerAuth' => []], ['authCookie' => []]],
+        parameters: [
+            new OA\Parameter(name: 'drugConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer', minimum: 1)),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscation')),
+            new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
+            new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
+            new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
+            new OA\Response(response: 422, description: 'ValidationResponse', content: new OA\JsonContent(ref: '#/components/schemas/ValidationResponse')),
+            new OA\Response(response: 429, description: 'TooManyRequestsResponse', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
+        ]
+    )]
+    public function show(): void {}
+
+    #[OA\Put(
+        path: '/api/drugConfiscation/{drugConfiscation}',
+        operationId: 'DrugConfiscation_update',
+        tags: ['DrugConfiscation'],
+        summary: 'Actualizar registro (PUT)',
+        description: 'Requiere drugConfiscation.update. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.',
+        x: ['permission' => 'drugConfiscation.update'],
+        security: [['bearerAuth' => []], ['authCookie' => [], 'csrfHeader' => []]],
+        parameters: [
+            new OA\Parameter(name: 'drugConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer', minimum: 1)),
+        ],
+        requestBody: new OA\RequestBody(required: true, content: new OA\MediaType(mediaType: 'multipart/form-data', schema: new OA\Schema(ref: '#/components/schemas/DrugConfiscationUpdateRequest'))),
+        responses: [
+            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscation')),
+            new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
+            new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
+            new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
+            new OA\Response(response: 422, description: 'ValidationResponse', content: new OA\JsonContent(ref: '#/components/schemas/ValidationResponse')),
+            new OA\Response(response: 429, description: 'TooManyRequestsResponse', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
+            new OA\Response(response: 419, description: 'CsrfResponse', content: new OA\JsonContent(ref: '#/components/schemas/CsrfResponse')),
+        ]
+    )]
+    public function update(): void {}
+
+    #[OA\Patch(
+        path: '/api/drugConfiscation/{drugConfiscation}',
+        operationId: 'DrugConfiscation_patch',
+        tags: ['DrugConfiscation'],
+        summary: 'Actualizar registro (PATCH)',
+        description: 'Requiere drugConfiscation.update. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.',
+        x: ['permission' => 'drugConfiscation.update'],
+        security: [['bearerAuth' => []], ['authCookie' => [], 'csrfHeader' => []]],
+        parameters: [
+            new OA\Parameter(name: 'drugConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer', minimum: 1)),
+        ],
+        requestBody: new OA\RequestBody(required: true, content: new OA\MediaType(mediaType: 'multipart/form-data', schema: new OA\Schema(ref: '#/components/schemas/DrugConfiscationUpdateRequest'))),
+        responses: [
+            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscation')),
+            new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
+            new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
+            new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
+            new OA\Response(response: 422, description: 'ValidationResponse', content: new OA\JsonContent(ref: '#/components/schemas/ValidationResponse')),
+            new OA\Response(response: 429, description: 'TooManyRequestsResponse', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
+            new OA\Response(response: 419, description: 'CsrfResponse', content: new OA\JsonContent(ref: '#/components/schemas/CsrfResponse')),
+        ]
+    )]
+    public function patch(): void {}
+
+    #[OA\Delete(
+        path: '/api/drugConfiscation/{drugConfiscation}',
+        operationId: 'DrugConfiscation_destroy',
+        tags: ['DrugConfiscation'],
+        summary: 'Eliminar lógicamente',
+        description: 'Requiere drugConfiscation.delete. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.',
+        x: ['permission' => 'drugConfiscation.delete'],
+        security: [['bearerAuth' => []], ['authCookie' => [], 'csrfHeader' => []]],
+        parameters: [
+            new OA\Parameter(name: 'drugConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer', minimum: 1)),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscation')),
+            new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
+            new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
+            new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
+            new OA\Response(response: 422, description: 'ValidationResponse', content: new OA\JsonContent(ref: '#/components/schemas/ValidationResponse')),
+            new OA\Response(response: 429, description: 'TooManyRequestsResponse', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
+            new OA\Response(response: 419, description: 'CsrfResponse', content: new OA\JsonContent(ref: '#/components/schemas/CsrfResponse')),
+        ]
+    )]
+    public function destroy(): void {}
 
     #[OA\Post(
         path: '/api/drugConfiscation/restore/{drugConfiscation}',
-        tags: ['Decomisos Drogas'],
-        summary: 'Restaurar decomiso de droga',
-        security: [['bearerAuth' => []]],
-        parameters: [new OA\Parameter(name: 'drugConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
+        operationId: 'DrugConfiscation_restore',
+        tags: ['DrugConfiscation'],
+        summary: 'Restaurar registro',
+        description: 'Requiere drugConfiscation.update. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.',
+        x: ['permission' => 'drugConfiscation.update'],
+        security: [['bearerAuth' => []], ['authCookie' => [], 'csrfHeader' => []]],
+        parameters: [
+            new OA\Parameter(name: 'drugConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer', minimum: 1)),
+        ],
         responses: [
-            new OA\Response(response: 200, description: 'Restaurado', content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscation')),
-            new OA\Response(response: 401, description: 'No autenticado', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
-            new OA\Response(response: 404, description: 'No encontrado', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
-            new OA\Response(response: 405, description: 'Método no permitido', content: new OA\JsonContent(ref: '#/components/schemas/MethodNotAllowedResponse')),
-            new OA\Response(response: 429, description: 'Demasiadas solicitudes', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
-            new OA\Response(response: 500, description: 'Error interno', content: new OA\JsonContent(ref: '#/components/schemas/ServerErrorResponse')),
+            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscation')),
+            new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
+            new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
+            new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
+            new OA\Response(response: 422, description: 'ValidationResponse', content: new OA\JsonContent(ref: '#/components/schemas/ValidationResponse')),
+            new OA\Response(response: 429, description: 'TooManyRequestsResponse', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
+            new OA\Response(response: 419, description: 'CsrfResponse', content: new OA\JsonContent(ref: '#/components/schemas/CsrfResponse')),
         ]
     )]
-    public function restore() {}
+    public function restore(): void {}
+
+    #[OA\Get(
+        path: '/api/drugConfiscation/{idConfiscation}/confiscation',
+        operationId: 'DrugConfiscation_indexByConfiscation',
+        tags: ['DrugConfiscation'],
+        summary: 'Listar detalles de un decomiso',
+        description: 'Requiere drugConfiscation.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.',
+        x: ['permission' => 'drugConfiscation.view'],
+        security: [['bearerAuth' => []], ['authCookie' => []]],
+        parameters: [
+            new OA\Parameter(name: 'idConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer', minimum: 1)),
+            new OA\Parameter(name: 'page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', minimum: 1, default: 1)),
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', minimum: 2, maximum: 100, default: 10)),
+            new OA\Parameter(name: 'sort_by', in: 'query', required: false, schema: new OA\Schema(type: 'string', description: 'Campo público escalar permitido; ver LIST_FIELDS del controlador')),
+            new OA\Parameter(name: 'type', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['asc', 'desc'], description: 'desc por defecto al indicar sort_by; desempate por ID')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(allOf: [new OA\Schema(ref: '#/components/schemas/Pagination'), new OA\Schema(properties: [new OA\Property(property: 'data', type: 'array', items: new OA\Items(ref: '#/components/schemas/DrugConfiscation'))])])),
+            new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
+            new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
+            new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
+            new OA\Response(response: 422, description: 'ValidationResponse', content: new OA\JsonContent(ref: '#/components/schemas/ValidationResponse')),
+            new OA\Response(response: 429, description: 'TooManyRequestsResponse', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
+        ]
+    )]
+    public function indexByConfiscation(): void {}
+
+    #[OA\Get(
+        path: '/api/drugConfiscation/{drugConfiscation}/photo',
+        operationId: 'DrugConfiscation_photo',
+        tags: ['DrugConfiscation'],
+        summary: 'Descargar evidencia privada PNG',
+        description: 'Requiere drugConfiscation.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.',
+        x: ['permission' => 'drugConfiscation.view'],
+        security: [['bearerAuth' => []], ['authCookie' => []]],
+        parameters: [
+            new OA\Parameter(name: 'drugConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer', minimum: 1)),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'OK', content: new OA\MediaType(mediaType: 'image/png', schema: new OA\Schema(type: 'string', format: 'binary'))),
+            new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
+            new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
+            new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
+            new OA\Response(response: 422, description: 'ValidationResponse', content: new OA\JsonContent(ref: '#/components/schemas/ValidationResponse')),
+            new OA\Response(response: 429, description: 'TooManyRequestsResponse', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
+        ]
+    )]
+    public function photo(): void {}
 
     #[OA\Get(
         path: '/api/drugGraphIndex',
-        tags: ['Decomisos Drogas'],
-        summary: 'Datos gráficos decomisos de drogas',
-        security: [['bearerAuth' => []]],
+        operationId: 'DrugConfiscation_graphIndex',
+        tags: ['GraphResponse'],
+        summary: 'Consultar estadísticas de calendario',
+        description: 'Requiere graph.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.',
+        x: ['permission' => 'graph.view'],
+        security: [['bearerAuth' => []], ['authCookie' => []]],
         parameters: [
-            new OA\Parameter(name: 'period', in: 'query', required: true, schema: new OA\Schema(type: 'string', enum: ['month', 'quarter', 'semester', 'year'], example: 'month', description: 'Períodos de calendario: YYYY-MM, YYYY-Q1…Q4, YYYY-S1…S2 o YYYY. Cantidades enteras; etiquetas homónimas incluyen ID. Pie suma el rango completo.')),
-            new OA\Parameter(name: 'typeGraph', in: 'query', required: true, schema: new OA\Schema(type: 'string', enum: ['bar', 'line', 'pie'], example: 'bar')),
-            new OA\Parameter(name: 'start_date', in: 'query', required: true, schema: new OA\Schema(type: 'string', format: 'date', example: '2025-01-01')),
-            new OA\Parameter(name: 'end_date', in: 'query', required: true, schema: new OA\Schema(type: 'string', format: 'date', example: '2025-01-31')),
-            new OA\Parameter(name: 'drugs', in: 'query', required: true, schema: new OA\Schema(type: 'string', example: '[1,2]'), description: 'JSON array de IDs de drogas'),
+            new OA\Parameter(name: 'period', in: 'query', required: true, schema: new OA\Schema(type: 'string', enum: ['month', 'quarter', 'semester', 'year'], description: 'Calendario: YYYY-MM, YYYY-Q1…Q4, YYYY-S1…S2, YYYY')),
+            new OA\Parameter(name: 'typeGraph', in: 'query', required: true, schema: new OA\Schema(type: 'string', enum: ['bar', 'line', 'pie'])),
+            new OA\Parameter(name: 'start_date', in: 'query', required: true, schema: new OA\Schema(type: 'string', format: 'date')),
+            new OA\Parameter(name: 'end_date', in: 'query', required: true, schema: new OA\Schema(type: 'string', format: 'date', description: 'Inclusiva; mayor o igual a start_date')),
+            new OA\Parameter(name: 'drugs', in: 'query', required: true, schema: new OA\Schema(type: 'string', description: 'Array JSON de IDs únicos positivos existentes; [] devuelve series vacías. También admite array nativo', example: '[1]')),
         ],
         responses: [
-            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(type: 'object', properties: [
-                new OA\Property(property: 'lineBarData', type: 'array', items: new OA\Items(type: 'object')),
-                new OA\Property(property: 'pieData', type: 'array', items: new OA\Items(type: 'object')),
-            ])),
-            new OA\Response(response: 401, description: 'No autenticado', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
-            new OA\Response(response: 404, description: 'No encontrado', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
-            new OA\Response(response: 405, description: 'Método no permitido', content: new OA\JsonContent(ref: '#/components/schemas/MethodNotAllowedResponse')),
-            new OA\Response(response: 429, description: 'Demasiadas solicitudes', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
-            new OA\Response(response: 500, description: 'Error interno', content: new OA\JsonContent(ref: '#/components/schemas/ServerErrorResponse')),
+            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/GraphResponse')),
+            new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
+            new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
+            new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
+            new OA\Response(response: 422, description: 'ValidationResponse', content: new OA\JsonContent(ref: '#/components/schemas/ValidationResponse')),
+            new OA\Response(response: 429, description: 'TooManyRequestsResponse', content: new OA\JsonContent(ref: '#/components/schemas/TooManyRequestsResponse')),
         ]
     )]
-    public function graphIndex() {}
+    public function graphIndex(): void {}
 }

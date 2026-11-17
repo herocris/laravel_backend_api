@@ -53,4 +53,33 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'code', type: 'integer', example: 500),
     ]
 )]
+#[OA\Schema(schema: 'ForbiddenResponse', type: 'object', properties: [
+    new OA\Property(property: 'error', type: 'string', example: 'This action is unauthorized.'),
+    new OA\Property(property: 'code', type: 'integer', example: 403),
+])]
+#[OA\Schema(schema: 'CsrfResponse', type: 'object', properties: [
+    new OA\Property(property: 'error', type: 'string', example: 'CSRF token mismatch.'),
+    new OA\Property(property: 'code', type: 'integer', example: 419),
+])]
+#[OA\Schema(schema: 'Pagination', type: 'object', required: ['data', 'current_page', 'per_page', 'total'], properties: [
+    new OA\Property(property: 'current_page', type: 'integer'),
+    new OA\Property(property: 'per_page', type: 'integer'),
+    new OA\Property(property: 'total', type: 'integer'),
+    new OA\Property(property: 'last_page', type: 'integer'),
+    new OA\Property(property: 'from', type: 'integer', nullable: true),
+    new OA\Property(property: 'to', type: 'integer', nullable: true),
+    new OA\Property(property: 'path', type: 'string'),
+    new OA\Property(property: 'first_page_url', type: 'string'),
+    new OA\Property(property: 'last_page_url', type: 'string'),
+    new OA\Property(property: 'next_page_url', type: 'string', nullable: true),
+    new OA\Property(property: 'prev_page_url', type: 'string', nullable: true),
+    new OA\Property(property: 'links', type: 'array', items: new OA\Items(type: 'object')),
+], description: 'Paginador Laravel, también cuando data está vacío. Filtrado parcial literal por campos escalares de LIST_FIELDS; arrays y objetos no son filtros.')]
+#[OA\Schema(schema: 'GraphResponse', type: 'object', properties: [
+    new OA\Property(property: 'lineBarData', type: 'array', items: new OA\Items(type: 'object'), description: 'Cada fila tiene name (período) y claves dinámicas de catálogo con cantidades enteras; homónimos incluyen (#ID).'),
+    new OA\Property(property: 'pieData', type: 'array', items: new OA\Items(type: 'object', properties: [
+        new OA\Property(property: 'name', type: 'string'),
+        new OA\Property(property: 'value', type: 'integer'),
+    ]), description: 'Suma del rango inclusivo; sin rellenar períodos ausentes. Excluye ítems y decomisos eliminados; conserva nombres históricos de catálogos eliminados.'),
+])]
 class CommonSchemas {}

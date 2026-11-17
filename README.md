@@ -1,629 +1,248 @@
-# Sistema de Gestión de Sucesos
+# GraphMapApp · API de decomisos
 
-API REST desarrollada con **Laravel 13** para la gestión y visualización de sucesos de drogas, armas y municiones. Incluye autenticación JWT, auditoría completa de operaciones, generación de estadísticas agregadas y visualización geográfica de sucesos.
+Backend de portafolio para registrar decomisos, sus cantidades de drogas, armas y municiones, consultar estadísticas y obtener datos geográficos. Es un monolito Laravel con contratos JSON en español, permisos por operación, auditoría y evidencias privadas. Este repositorio contiene la API y Swagger UI; el mapa y las gráficas se entregan como datos, sin un cliente visual propio.
 
----
+El refactor de 16 pasos está documentado en [el plan](refactor-plan.md) y [la bitácora](refactor-progress.md). CI y releases se prepararon y ensayaron localmente. La infraestructura, la ejecución remota y la publicación de la demo están pendientes; no hay un servidor de producción acreditado por esta documentación.
 
-## 📋 Tabla de Contenidos
+## Entorno comprobado
 
-- [Características](#-características)
-- [Tecnologías](#-tecnologías)
-- [Requisitos Previos](#-requisitos-previos)
-- [Instalación](#-instalación)
-- [Configuración](#-configuración)
-- [Base de Datos](#-base-de-datos)
-- [Autenticación JWT](#-autenticación-jwt)
-- [Documentación de API](#-documentación-de-api)
-- [Estructura del Proyecto](#-estructura-del-proyecto)
-- [Testing](#-testing)
-- [Deployment](#-deployment)
-- [Problemas Conocidos](#-problemas-conocidos)
-- [Contribución](#-contribución)
-- [Licencia](#-licencia)
+Versiones instaladas verificadas el 17 de noviembre de 2026; `composer.lock` fija las dependencias PHP.
 
----
+| Componente | Versión / alcance |
+| --- | --- |
+| PHP | 8.4.27 en Sail; runtime y CI configurados para 8.4 |
+| Laravel | 13.40.0 |
+| JWT Auth | 2.3.1, guard `api` |
+| Spatie Permission / Activitylog | 6.25.0 / 4.12.3 |
+| L5-Swagger | 11.3.0; fuentes en `app/Docs`, JSON en `storage/api-docs` |
+| PHPUnit / Pint / Sail | 12.5.43 / 1.32.1 / 1.69.0 |
+| MySQL | 8.0 en Compose; estadísticas y vistas contrastadas en esquema exclusivo de pruebas |
+| SQLite | Suite en memoria y demo local en archivo exclusivo |
 
-## ✨ Características
+MySQL 8.0 y SQLite son los motores verificados. Las funciones de agrupación temporal tienen implementaciones específicas para ambos; la presencia de otros drivers en `config/database.php` no acredita su soporte. La restricción PHP del manifiesto (`^8.3`) y su plataforma Composer (`8.3.0`) no sustituyen el runtime 8.4 comprobado ni `composer check-platform-reqs`.
 
-### Funcionalidades Principales
+## Instalación local con Sail
 
-- **Autenticación JWT**: Sistema de autenticación basado en tokens JWT almacenados en cookies HttpOnly seguras
-- **Gestión de Usuarios**: CRUD completo con sistema de roles y permisos (Spatie Permission)
-- **Catálogos**: Gestión de drogas, armas, municiones y presentaciones de drogas
-- **Sucesos**: Registro de sucesos con ubicación geográfica (coordenadas, departamento, municipio)
-- **Items de Sucesos**: Gestión detallada de drogas, armas y municiones decomisadas por evento
-- **Auditoría**: Registro automático de todas las operaciones CRUD (Spatie Activity Log)
-- **Soft Deletes**: Eliminación lógica con restauración para todas las entidades
-- **Estadísticas**: Endpoints para generación de gráficas con agregación por períodos (día, mes, trimestre, semestre, año)
-- **Visualización Geográfica**: Endpoint especializado para visualizar sucesos en mapa
-- **API en Español**: Todos los atributos de respuesta transformados al español
-- **Documentación Swagger**: Documentación interactiva completa de la API
-
-### Características Técnicas
-
-- **API Resources**: Transformación bidireccional de atributos (inglés ↔ español)
-- **Middleware de Transformación**: Conversión automática de requests entrantes
-- **Rate Limiting**: Protección contra abuso con throttling global
-- **Paginación**: Respuestas paginadas con ordenamiento y búsqueda
-- **Caching**: Caché automático de respuestas basado en URL y parámetros
-- **Validación**: FormRequests personalizados con reglas detalladas
-- **Observers**: Gestión automática de archivos (logos, fotos) mediante eventos de modelo
-- **Factory & Seeders**: Datos de prueba completos para desarrollo
-
----
-
-## 🛠 Tecnologías
-
-- **Framework**: Laravel 13.x
-- **PHP**: ^8.3 (Sail utiliza PHP 8.4)
-- **Base de Datos**: MySQL 8.0+ / PostgreSQL 13+
-- **Autenticación**: Tymon JWT Auth 2.x
-- **Permisos**: Spatie Laravel Permission 6.x
-- **Auditoría**: Spatie Activity Log 4.x
-- **Documentación API**: DarkaOnLine L5-Swagger 8.x
-- **Frontend Assets**: Vite, TailwindCSS (para potenciales vistas)
-
----
-
-## 📦 Requisitos Previos
-
-- PHP >= 8.3
-- Extensiones PHP GD (pruebas de imágenes), PDO SQLite (pruebas en memoria) y PDO MySQL (base de datos de la aplicación).
-- Composer >= 2.5
-- MySQL >= 8.0 o PostgreSQL >= 13
-- Node.js >= 18.x y npm >= 9.x (opcional, para assets)
-- Git
-
----
-
-## 🚀 Instalación
-
-### 1. Clonar el Repositorio
+Requisitos: Git, Bash, Docker con Compose y acceso a las imágenes/dependencias. Usar un checkout nuevo para la instalación o demo. No copiar `.env`, bases, archivos ni credenciales de otro entorno.
 
 ```bash
-git clone <repository-url>
-cd example-app
-```
-
-### 2. Instalar Dependencias PHP
-
-```bash
-composer install
-```
-
-### 3. Instalar Dependencias Node (Opcional)
-
-```bash
-npm install
-```
-
-### 4. Configurar Variables de Entorno
-
-Copiar el archivo de ejemplo y configurar:
-
-```bash
+git clone https://github.com/herocris/laravel_backend_api.git
+cd laravel_backend_api
+umask 077
 cp .env.example .env
 ```
 
-Editar `.env` con tus credenciales:
+Seleccionar la revisión revisada que incluya el refactor antes de continuar; cambios locales sin commit/push todavía no estarán disponibles al clonar la rama remota.
 
-```env
-APP_NAME="Sistema de Sucesos"
-APP_ENV=local
-APP_DEBUG=true
-APP_URL=http://localhost:8000
+En ese `.env` nuevo, completar la conexión de desarrollo y un secreto local de MySQL antes de iniciar Compose:
 
+```dotenv
 DB_CONNECTION=mysql
 DB_HOST=mysql
 DB_PORT=3306
-DB_DATABASE=sucesos_db
+DB_DATABASE=sucesos_local
 DB_USERNAME=sail
-DB_PASSWORD=password
-
-# Configuración JWT
-JWT_SECRET=
-JWT_TTL=60
-JWT_REFRESH_TTL=20160
-JWT_ALGO=HS256
-JWT_SHOW_BLACKLIST_EXCEPTION=true
-
-# Configuración de Sesión (para cookies JWT)
-SESSION_DRIVER=file
-SESSION_LIFETIME=120
-SESSION_DOMAIN=localhost
-SESSION_SECURE_COOKIE=false
+DB_PASSWORD=REEMPLAZAR_POR_UN_SECRETO_LOCAL
 ```
 
-### 5. Generar Clave de Aplicación
+Si aún no existe `vendor`, instalar el lock con el contenedor de Composer de Sail (arranque previo a disponer de `vendor/bin/sail`):
 
 ```bash
-php artisan key:generate
+docker run --rm -u "$(id -u):$(id -g)" \
+  -v "$PWD:/var/www/html" -w /var/www/html \
+  laravelsail/php84-composer:latest composer install --no-interaction --prefer-dist
 ```
 
-### 6. Generar Clave Secreta JWT
+Después, ejecutar PHP, Composer y Artisan mediante Sail:
 
 ```bash
-php artisan jwt:secret
+vendor/bin/sail up -d laravel.test mysql
+vendor/bin/sail composer validate --strict
+vendor/bin/sail composer check-platform-reqs
+vendor/bin/sail artisan key:generate --no-interaction
+vendor/bin/sail artisan jwt:secret --no-interaction
+vendor/bin/sail artisan migrate --no-interaction
+vendor/bin/sail artisan db:seed --class=PermissionCatalogSeeder --no-interaction
+vendor/bin/sail artisan l5-swagger:generate --no-interaction
+vendor/bin/sail artisan route:list --except-vendor -v --no-interaction
 ```
 
-Esto generará automáticamente `JWT_SECRET` en tu archivo `.env`.
+Esperar a que MySQL esté saludable antes de migrar. Las migraciones anteriores son para una base nueva propia. `PermissionCatalogSeeder` añade 48 permisos `api` y tres roles sin truncar tablas; no crea usuarios. Si un nombre requerido está eliminado, aborta para exigir una decisión explícita. El registro público crea cuentas sin privilegios. Para otro entorno, designar un usuario existente por su ID exacto y usar `authorization:assign-administrator ID`; no se elige una identidad por nombre ni por ser el primer registro.
 
----
+No ejecutar `DatabaseSeeder`, `TestingSeeder`, `composer migrate:testing` ni `migrate:fresh` para instalar o demostrar el proyecto: contienen operaciones destructivas o reinicios que no necesita este recorrido. `RolePermissionsSeeder` reemplaza las listas de sus tres roles; reservarlo para una sincronización deliberada.
 
-## ⚙️ Configuración
+La API no necesita assets Node para este recorrido. `package.json` contiene herramientas de la portada; no hay lock JS que permita prometer un `npm ci` reproducible. MySQL, Redis, phpMyAdmin y Vite de Compose son servicios de desarrollo: esta configuración no es un despliegue de producción. Para detener los servicios sin borrar volúmenes: `vendor/bin/sail stop`.
 
-### Configuración JWT Personalizada
+## Autenticación y permisos
 
-El archivo `config/jwt.php` incluye configuraciones personalizadas para cookies HttpOnly:
+JWT permanece en el guard `api`; Sanctum está instalado pero no gobierna este flujo. Login, registro y refresh entregan el JWT en la cookie `token` HttpOnly. El JSON contiene `token_type`, `expires_in` (segundos), `user`, `roles` y `permissions`; no contiene `access_token`. La expiración de la cookie sigue `exp`. Refresh rota e invalida el JWT anterior; logout lo invalida y elimina la cookie.
 
-```php
-'required_claims' => [
-    'iss',
-    'iat',
-    'exp',
-    'nbf',
-    'jti',
-],
+1. Pedir `GET /api/csrf-cookie`, conservando las cookies de sesión y `XSRF-TOKEN`.
+2. Enviar `POST /api/login` con `email` y `password`, cookies y `X-XSRF-TOKEN` con el valor URL-decodificado de `XSRF-TOKEN`. Registro usa `name`, `email`, `password` y también exige CSRF; descarta privilegios enviados por el cliente.
+3. Con cookie JWT, enviar las mismas cookies y CSRF en todas las escrituras, incluidos refresh y logout. En el navegador usar credenciales y el origen permitido por `CORS_ALLOWED_ORIGINS`.
+4. Los clientes con `Authorization: Bearer <JWT>` pueden consultar/escribir sin CSRF, excepto login y registro, que siempre inicializan sesión y lo exigen. El cliente debe obtener su JWT mediante un flujo autorizado; Swagger no lo extrae de un campo JSON inexistente.
 
-'blacklist_enabled' => env('JWT_BLACKLIST_ENABLED', true),
-'providers' => [
-    'jwt' => Tymon\JWTAuth\Providers\JWT\Lcobucci::class,
-    'auth' => Tymon\JWTAuth\Providers\Auth\Illuminate::class,
-    'storage' => Tymon\JWTAuth\Providers\Storage\Illuminate::class,
-],
-```
+`GET /api/me` serializa el modelo con `id`, `name`, `email` y fechas; el CRUD administrativo de usuarios usa `identificador`, `nombre`, `correo`, `roles` y `permisos`. Contraseñas y `remember_token` se ocultan.
 
-### Configuración de CORS
+Los módulos usan `auth` + `can:<permiso>` y la integración de Spatie con Gate. No hay privilegios universales por nombre de rol. Las reglas actuales son generales: no se han inventado propiedad por usuario, multitenencia ni aprobación de decomisos.
 
-Editar `config/cors.php` si necesitas acceso desde frontend:
+| Acción | Permiso |
+| --- | --- |
+| Listar, ver, listar eliminados | `<recurso>.view` |
+| Crear | `<recurso>.create` |
+| Actualizar o restaurar | `<recurso>.update` |
+| Eliminar lógicamente | `<recurso>.delete` |
+| Descargar evidencia | `<tipo>Confiscation.view` |
+| Gráficas / mapa / auditoría | `graph.view` / `map.view` / `activity.view` |
 
-```php
-'paths' => ['api/*'],
-'allowed_methods' => ['*'],
-'allowed_origins' => ['http://localhost:3000'],
-'allowed_headers' => ['*'],
-'exposed_headers' => [],
-'max_age' => 0,
-'supports_credentials' => true, // IMPORTANTE para cookies HttpOnly
-```
+Recursos: `user`, `role`, `permission`, `drug`, `drugPresentation`, `weapon`, `ammunition`, `confiscation`, `drugConfiscation`, `weaponConfiscation`, `ammunitionConfiscation`. `dashboard.view` existe en el catálogo sin endpoint propio.
 
-### Configuración de Almacenamiento
+| Rol configurado | Permisos en una base nueva |
+| --- | --- |
+| analista | 11: lectura de los ocho módulos de negocio y dashboard/gráficas/mapa |
+| operador | 27: lo anterior y crear/actualizar negocio; restaurar usa actualizar |
+| administrador | 48: catálogo completo; recibe los permisos activos `api` al inicializar/sincronizar |
 
-Los archivos (logos de catálogos, fotos de sucesos) se almacenan en:
+Analista y operador no borran, administran usuarios/roles/permisos ni consultan auditoría. Las asignaciones administrativas usan IDs activos del guard `api`; omitir una lista conserva asignaciones, `[]` las revoca; `null`, duplicados, nombres, otro guard y eliminados se rechazan. Un permiso creado posteriormente no se concede por un bypass implícito.
 
-```
-storage/app/public/
-├── drug/
-├── weapon/
-├── ammunition/
-├── drugPresentation/
-├── drugConfiscation/
-├── weaponConfiscation/
-└── ammunitionConfiscation/
-```
+Límites por minuto: login 5 por cuenta/IP y 30 por IP; registro 5 por IP; CSRF 30 por IP; sesión 30 por usuario; API 60 por usuario; estadísticas/mapa 10 por usuario. El 429 conserva `Retry-After`.
 
-Crear symlink público:
+## Contratos API
+
+Las rutas conservan `/api`, nombres singulares y mayúsculas existentes; no se ha añadido un prefijo de versión. Consultar [OpenAPI](storage/api-docs/api-docs.json), sus [fuentes](app/Docs) y el inventario de Artisan. Swagger UI se configura en `api/documentation`; volver a generar el JSON tras editar atributos. El servidor OpenAPI es relativo al origen actual, sin dominios publicados supuestos. Los navegadores administran la cookie HttpOnly; el botón Authorize no permite establecerla manualmente.
+
+- CRUD: `GET/POST /api/<recurso>`, `GET/PUT/PATCH/DELETE /api/<recurso>/{id}`, `GET /api/<recurso>/deleted`, `POST /api/<recurso>/restore/{id}`. Las actualizaciones conservan sus campos obligatorios, también con PATCH.
+- Altas, actualizaciones, bajas y restauraciones devuelven el objeto directamente con HTTP **200**, sin wrapper `data`. Los listados devuelven el paginator con `data`, `total`, `current_page`, `per_page`, enlaces y demás metadatos, también cuando están vacíos.
+- Listados: `page>=1`, `per_page` entre 2 y 100 (10 por defecto), `sort_by` público permitido por `LIST_FIELDS`, `type=asc|desc` (desc si se indica orden sin dirección). Desempate por ID y, sin orden solicitado, ID ascendente. Filtros parciales por campos escalares públicos permitidos; `%` y `_` son literales. Objetos y arrays de relaciones no son filtros escalares.
+- Escrituras de negocio usan atributos españoles: decomiso `fecha`, `observacion`, `direccion`, `departamento`, `municipalidad`, `latitud`, `longitud`; detalle de droga `cantidad`, `peso`, `foto`, `decomiso`, `droga`, `presentacion`. En salida, las relaciones de detalle son objetos anidados. Los nombres internos (`amount`, `confiscation_id`, etc.) producen 422, también junto al nombre público. Campos desconocidos o de solo lectura no se persisten.
+- Cantidad: entero positivo hasta 2.147.483.647. Peso: gramos positivos con hasta dos decimales, almacenados en DOUBLE sin migrar ni redondear datos históricos. Coordenadas: latitud −90…90 y longitud −180…180. Las escrituras exigen asociaciones activas; las lecturas históricas admiten catálogos eliminados.
+- Gráficas: `GET /api/{drug,weapon,ammunition}GraphIndex`, `period=month|quarter|semester|year`, `typeGraph=bar|line|pie`, fechas inclusivas `start_date/end_date` en `YYYY-MM-DD` e IDs en `drugs/weapons/ammunitions` según el tipo. Admiten lista JSON o array nativo; lista vacía devuelve series vacías. Se rechazan `day`, `total`, fechas invertidas, IDs inexistentes o duplicados. Respuesta: `lineBarData` y `pieData`, cantidades enteras, períodos de calendario y etiquetas homónimas con `(#ID)`.
+- Mapa: `GET /api/confiscation/map` con fechas e IDs por tipo. Omitir un tipo o enviar `[]` selecciona ninguno de ese tipo; los tipos combinan con OR. Salida `mapItems` con `id`, `fecha`, `observacion`, coordenadas y relaciones `drug_confiscations`, `weapon_confiscations`, `ammunition_confiscations`. Conserva claves internas de proyección como `confiscation_id`, además de alias; no usa el Resource del CRUD. Sin selecciones devuelve `mapItems: []`.
+- Logos: disco público. Evidencias: PNG hasta 2 MiB en `storage/app/private/evidence`; `foto` es una ruta relativa opaca, no una URL pública. Descargar por `GET /api/{drug,weapon,ammunition}Confiscation/{id}/photo`, autenticado y con permiso de lectura; admite soft-deleted. Responde attachment PNG, `private, no-store` y `nosniff`; ausente/no migrada devuelve 404. La demo no necesita ni crea imágenes. Para subir archivos usar multipart; para actualizar con archivos usar POST multipart con `_method=PUT` por el procesamiento de PHP.
+- Los errores compartidos usan `{"error": mensaje_o_errores, "code": estado}`: 401 sin autenticación, 403 sin permiso, 404 ausente, 405 método, 419 CSRF, 422 validación y 429 límite. Login con credenciales incorrectas conserva `{"error":"Credenciales incorrectas"}` sin `code`. La autorización precede al binding y validación; los 5xx ocultan detalles con debug desactivado.
+
+## Demo sintética aislada
+
+Preparar la demo en el checkout local con Sail operativo. No cambia `.env` ni utiliza MySQL. `.env.demo` y `database/portfolio-demo.sqlite*` están ignorados por Git. La plantilla no contiene secretos. Comprobar que no hay configuración cacheada ni variables externas `APP_*`, `DB_*`, `SESSION_*` o `CACHE_*` que sustituyan estos valores.
 
 ```bash
-php artisan storage:link
+umask 077
+test ! -f bootstrap/cache/config.php
+test ! -e .env.demo && cp .env.demo.example .env.demo
+test ! -e database/portfolio-demo.sqlite && touch database/portfolio-demo.sqlite
+vendor/bin/sail artisan key:generate --env=demo --no-interaction
+vendor/bin/sail artisan jwt:secret --env=demo --no-interaction
+vendor/bin/sail artisan config:show database.default --env=demo --no-interaction
+vendor/bin/sail artisan config:show database.connections.sqlite.database --env=demo --no-interaction
+vendor/bin/sail artisan config:show activitylog.database_connection --env=demo --no-interaction
 ```
 
----
+No volver a generar claves si `.env.demo` ya existe; retomar con sus claves y datos actuales. Artisan selecciona `APP_ENV=demo` al usar `--env=demo`.
 
-## 🗄️ Base de Datos
-
-### 1. Crear la Base de Datos
-
-```sql
-CREATE DATABASE sucesos_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-
-### 2. Ejecutar Migraciones
+**Continuar solo si se observa `sqlite`, `/var/www/html/database/portfolio-demo.sqlite` y auditoría `null`.** La ruta corresponde al montaje de Sail. Después:
 
 ```bash
-php artisan migrate
+vendor/bin/sail artisan migrate --env=demo --no-interaction
+vendor/bin/sail artisan db:seed --class=PortfolioDemoSeeder --env=demo --no-interaction
 ```
 
-Esto creará todas las tablas necesarias:
-- `users`, `roles`, `permissions` (autenticación y permisos)
-- `activity_log` (auditoría)
-- `drugs`, `weapons`, `ammunitions`, `drug_presentations` (catálogos)
-- `confiscations` (sucesos principales)
-- `drug_confiscations`, `weapon_confiscations`, `ammunition_confiscations` (items)
+El seeder comprueba entorno local/demo, motor SQLite, archivo exclusivo y auditoría en la conexión por defecto antes de escribir. Solo permite memoria durante testing. Rechaza usuarios, catálogos, permisos o auditoría preexistentes; una segunda ejecución falla sin reiniciar ni cambiar contraseñas. No forma parte de `DatabaseSeeder` ni del despliegue.
 
-### 3. Poblar Base de Datos (Desarrollo)
+Crea tres cuentas `@demo.invalid` con roles explícitos y contraseñas aleatorias distintas, mostradas únicamente en la consola local; no hay contraseña compartida en el repositorio. Incluye un catálogo ficticio de cada tipo y tres decomisos en enero/abril/julio de 2026, con nueve detalles. Cantidades de droga 1/2/3 (total 6), pesos 12,50/25/37,50 g; armas 1/2/3 y municiones 10/20/30. Textos y coordenadas son inventados. No importa archivos ni datos reales; la auditoría de carga es `Sistema` sin actor.
+
+Iniciar un servidor exclusivo en otra terminal; escucha **solo en el loopback del contenedor**, sin publicar otro puerto ni alterar el servicio principal:
 
 ```bash
-php artisan db:seed
+vendor/bin/sail artisan serve --env=demo --host=127.0.0.1 --port=8016 --no-reload --no-interaction
 ```
 
-Esto creará:
-- Usuario administrador por defecto
-- Roles y permisos básicos
-- Datos de ejemplo de catálogos
-- Sucesos de prueba con items asociados
-
-**Credenciales por defecto**:
-- Email: `admin@example.com`
-- Password: `password`
-
-### 4. Refrescar Base de Datos (Desarrollo)
-
-Para resetear completamente la base de datos:
+En la terminal del recorrido:
 
 ```bash
-php artisan migrate:fresh --seed
-```
-
----
-
-## 🔐 Autenticación JWT
-
-### Flujo de Autenticación
-
-1. **Login**: `POST /api/login`
-   - Enviar `correo` y `password`
-   - Recibe token JWT en cookie HttpOnly `token`
-   - Respuesta incluye datos del usuario y token en JSON
-
-2. **Requests Autenticados**:
-   - El middleware `AuthenticateJWT` extrae automáticamente el token de la cookie
-   - No es necesario enviar header `Authorization`
-
-3. **Refresh Token**: `POST /api/refresh`
-   - Renueva el token actual
-   - Actualiza cookie `token`
-
-4. **Logout**: `POST /api/logout`
-   - Invalida el token (blacklist)
-   - Elimina cookie `token`
-
-### Uso con Swagger UI
-
-Para probar endpoints autenticados en Swagger:
-
-1. Hacer login en `/api/login`
-2. Copiar el token del campo `token` en la respuesta
-3. Hacer clic en "Authorize" en Swagger UI
-4. Ingresar: `Bearer {token_copiado}`
-5. Ahora todos los requests incluirán el header de autorización
-
-### Configuración de Cookies
-
-Las cookies JWT tienen las siguientes características de seguridad:
-
-```php
-// En AuthController
-Cookie::make('token', $token, 
-    config('jwt.ttl'),           // TTL: 60 minutos
-    '/',                          // Path
-    null,                         // Domain
-    false,                        // Secure (true en producción)
-    true,                         // HttpOnly
-    false,                        // Raw
-    'strict'                      // SameSite
-)
-```
-
-**IMPORTANTE**: En producción, cambiar `SESSION_SECURE_COOKIE=true` en `.env` para forzar HTTPS.
-
----
-
-## 📚 Documentación de API
-
-### Generar Documentación Swagger
-
-```bash
-php artisan l5-swagger:generate
-```
-
-### Acceder a Swagger UI
-
-Una vez generada, acceder en:
-
-```
-http://localhost:8000/api/documentation
-```
-
-### Estructura de la Documentación
-
-La documentación Swagger incluye:
-
-- **Schemas**: Definiciones de modelos con todos sus campos
-- **Endpoints**: Todas las rutas con ejemplos de request/response
-- **Autenticación**: Configuración de bearer token JWT
-- **Validación**: Reglas de validación para cada endpoint
-- **Errores**: Respuestas de error estándar (400, 401, 404, 422, 500)
-
-### Archivos de Documentación
-
-Los archivos Swagger Docs están en:
-
-```
-app/Docs/
-├── AuthDocs.php
-├── UserDocs.php
-├── RoleDocs.php
-├── PermissionDocs.php
-├── ActivityLogDocs.php
-├── DrugDocs.php
-├── WeaponDocs.php
-├── AmmunitionDocs.php
-├── DrugPresentationDocs.php
-├── ConfiscationDocs.php
-├── DrugConfiscationDocs.php
-├── WeaponConfiscationDocs.php
-└── AmmunitionConfiscationDocs.php
-```
-
----
-
-## 📁 Estructura del Proyecto
-
-```
-example-app/
-├── app/
-│   ├── Docs/                          # Anotaciones Swagger para cada entidad
-│   ├── Helpers/                       # Funciones auxiliares (nameEvent.php)
-│   ├── Http/
-│   │   ├── Controllers/               # Controladores de API
-│   │   │   ├── Admin/                 # Auth, User, Role, Permission, LogActivity
-│   │   │   └── ...                    # Drug, Weapon, Confiscation, etc.
-│   │   ├── Middleware/                # AuthenticateJWT, TransformInput
-│   │   ├── Requests/                  # FormRequests con validación
-│   │   │   ├── Admin/
-│   │   │   ├── Drug/, Weapon/, ...
-│   │   │   └── Confiscation/, DrugConfiscation/, ...
-│   │   └── Resources/                 # API Resources para transformación
-│   │       ├── Admin/
-│   │       ├── Drug/, Weapon/, ...
-│   │       └── Confiscation/, DrugConfiscation/, ...
-│   ├── Models/                        # Modelos Eloquent
-│   ├── Observers/                     # Observers para eventos de modelo
-│   ├── Providers/                     # Service Providers
-│   └── Traits/                        # Activitylog, ApiResponser
-├── config/                            # Configuraciones de Laravel
-│   ├── jwt.php                        # Configuración JWT
-│   ├── permission.php                 # Configuración Spatie Permission
-│   ├── activitylog.php                # Configuración Spatie Activity Log
-│   └── l5-swagger.php                 # Configuración Swagger
-├── database/
-│   ├── factories/                     # Factories para testing y seeding
-│   ├── migrations/                    # Migraciones de base de datos
-│   └── seeders/                       # Seeders de datos
-├── routes/
-│   ├── api.php                        # Rutas de API (documentadas)
-│   ├── web.php                        # Rutas web (vacío)
-│   └── console.php                    # Comandos Artisan personalizados
-├── storage/
-│   └── app/public/                    # Almacenamiento de archivos subidos
-├── tests/                             # Tests unitarios y de integración
-├── .env.example                       # Plantilla de variables de entorno
-├── composer.json                      # Dependencias PHP
-├── package.json                       # Dependencias Node
-└── README.md                          # Este archivo
-```
-
----
-
-## 🧪 Testing
-
-### Ejecutar Todos los Tests
-
-Con Sail, que incluye las extensiones necesarias:
-
-```bash
-./vendor/bin/sail artisan test
-```
-
-Con PHP local (requiere las extensiones indicadas en los requisitos):
-
-```bash
-php artisan test
-```
-
-### Ejecutar Tests Específicos
-
-```bash
-# Tests de Feature (integración)
-php artisan test --testsuite=Feature
-
-# Tests de Unit (unitarios)
-php artisan test --testsuite=Unit
-
-# Test específico
-php artisan test tests/Feature/AuthTest.php
-```
-
-### Cobertura de Tests
-
-```bash
-php artisan test --coverage
-```
-
-### Crear Nuevos Tests
-
-```bash
-# Test de Feature
-php artisan make:test NombreTest
-
-# Test de Unit
-php artisan make:test NombreTest --unit
-```
-
-### Base de Datos de Testing
-
-Los tests usan una base de datos SQLite en memoria por defecto (`phpunit.xml`):
-
-```xml
-<env name="DB_CONNECTION" value="sqlite"/>
-<env name="DB_DATABASE" value=":memory:"/>
-```
-
----
-
-## 🚢 Deployment
-
-### Preparación para Producción
-
-1. **Variables de Entorno**:
-
-```env
-APP_ENV=production
-APP_DEBUG=false
-SESSION_SECURE_COOKIE=true
-```
-
-2. **Optimizaciones**:
-
-```bash
-# Cachear configuraciones
-php artisan config:cache
-
-# Cachear rutas
-php artisan route:cache
-
-# Cachear vistas
-php artisan view:cache
-
-# Optimizar autoload de Composer
-composer install --optimize-autoloader --no-dev
-```
-
-3. **Permisos de Almacenamiento**:
-
-```bash
-chmod -R 775 storage bootstrap/cache
-chown -R www-data:www-data storage bootstrap/cache
-```
-
-4. **Configurar Web Server**:
-
-Apuntar document root a `/public` y configurar rewrite rules.
-
-**Nginx Example**:
-
-```nginx
-server {
-    listen 80;
-    server_name api.sucesos.com;
-    root /var/www/example-app/public;
-
-    add_header X-Frame-Options "SAMEORIGIN";
-    add_header X-Content-Type-Options "nosniff";
-
-    index index.php;
-
-    charset utf-8;
-
-    location / {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
-
-    location = /favicon.ico { access_log off; log_not_found off; }
-    location = /robots.txt  { access_log off; log_not_found off; }
-
-    error_page 404 /index.php;
-
-    location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.4-fpm.sock;
-        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
-        include fastcgi_params;
-    }
-
-    location ~ /\.(?!well-known).* {
-        deny all;
-    }
+demo_curl() {
+  vendor/bin/sail exec -T --user sail laravel.test sh -c 'umask 077; exec curl -sS "$@"' sh "$@"
 }
+DEMO_BASE=http://127.0.0.1:8016
+DEMO_JAR=/tmp/portfolio-demo-analista.cookies
+demo_xsrf() {
+  vendor/bin/sail php -r 'foreach (file($argv[1]) as $line) { $f = explode("\t", trim($line)); if (($f[5] ?? null) === "XSRF-TOKEN") { echo rawurldecode($f[6]); } }' "$DEMO_JAR"
+}
+demo_curl -c "$DEMO_JAR" "$DEMO_BASE/api/csrf-cookie"
+read -rsp 'Contraseña local del analista: ' DEMO_PASSWORD
+printf '\n'
+demo_curl -b "$DEMO_JAR" -c "$DEMO_JAR" -H 'Accept: application/json' \
+  -H "X-XSRF-TOKEN: $(demo_xsrf)" \
+  --data-urlencode 'email=analista@demo.invalid' --data-urlencode "password=$DEMO_PASSWORD" \
+  "$DEMO_BASE/api/login"
+unset DEMO_PASSWORD
 ```
 
-### Docker (Opcional)
+Mantener el cookie jar privado; no copiar tokens/contraseñas a capturas, incidencias o commits. Las llamadas de cURL se ejecutan dentro de Sail y apuntan al servidor demo; no al MySQL ni a la API principal. Detener el servidor con Ctrl+C al terminar.
 
-Existe un `docker-compose.yml` en el proyecto. Para usar:
+| Recorrido | Resultado esperado |
+| --- | --- |
+| Sin cookies: `GET /api/confiscation` | 401 |
+| Analista: `GET /api/confiscation?per_page=2` | 200, dos filas, total 3 |
+| Analista: mapa con fechas de 2026 y `drugs=[1]` | 200, tres ubicaciones y solo detalles de droga |
+| Analista: gráfica trimestral con `drugs=[1]` | Q1/Q2/Q3 con 1/2/3; pie total 6 |
+| Analista: crear decomiso o consultar usuarios/auditoría | 403, sin escritura |
+| Operador: crear decomiso válido | 200, objeto creado y evento con actor operador |
+| Operador: borrar o consultar auditoría | 403 |
+| Administrador: consultar auditoría ordenada por ID desc | Evento de creación con `id_usuario` del operador |
+
+Consultas de lectura listas para ejecutar con el jar del analista:
 
 ```bash
-docker-compose up -d
-docker-compose exec app php artisan migrate --seed
+demo_curl -b "$DEMO_JAR" "$DEMO_BASE/api/confiscation?per_page=2"
+demo_curl -b "$DEMO_JAR" --get "$DEMO_BASE/api/confiscation/map" \
+  --data-urlencode start_date=2026-01-01 --data-urlencode end_date=2026-12-31 \
+  --data-urlencode 'drugs=[1]'
+demo_curl -b "$DEMO_JAR" --get "$DEMO_BASE/api/drugGraphIndex" \
+  --data-urlencode period=quarter --data-urlencode typeGraph=bar \
+  --data-urlencode start_date=2026-01-01 --data-urlencode end_date=2026-12-31 \
+  --data-urlencode 'drugs=[1]'
+demo_curl -b "$DEMO_JAR" "$DEMO_BASE/api/activity"
 ```
 
----
+Para operador y administrador repetir CSRF/login con un jar nuevo (`/tmp/portfolio-demo-operador.cookies` o `/tmp/portfolio-demo-administrador.cookies`), cambiando el correo y la contraseña solicitada. No reutilizar el jar del analista para cambiar de identidad. Crear con el operador y repetir la misma petición con analista para mostrar 403:
 
-## ⚠️ Problemas Conocidos
+```bash
+demo_curl -b "$DEMO_JAR" -H 'Accept: application/json' \
+  -H 'Content-Type: application/json' -H "X-XSRF-TOKEN: $(demo_xsrf)" \
+  --data '{"fecha":"2026-10-15","observacion":"DEMO creada por operador","direccion":"Dirección ficticia","departamento":"Región DEMO","municipalidad":"Municipio ficticio","latitud":14.2,"longitud":-87.2}' \
+  "$DEMO_BASE/api/confiscation"
+# Con el jar del administrador:
+demo_curl -b "$DEMO_JAR" "$DEMO_BASE/api/activity?tipo_de_evento=created&sort_by=identificador&type=desc&per_page=2"
+```
 
-### Issues de Validación
+Los IDs 1 de los ejemplos corresponden exclusivamente a la demo recién creada. El recorrido altera solo la base sintética. No hay reset público ni endpoint privilegiado de demo. La protección frente a cambios abusivos consiste en mantenerla local y usar el analista para lectura; las cuentas de escritura quedan privadas. Una demo pública requiere otro alcance aprobado: destino, restricción de acceso, gestión de registro público, cuotas y reinicio aislado; no publicar estas cuentas ni esta configuración de desarrollo.
 
-Durante la documentación del código se identificaron algunos bugs menores en validaciones:
+## Verificación y resultados
 
-1. **Permission StorePostRequest** (línea 28):
-   - Valida unicidad de `name` contra tabla `roles` en lugar de `permissions`
-   - **Fix recomendado**: Cambiar `'unique:roles'` a `'unique:permissions'`
+Antes de tests, comprobar SQLite `:memory:`, auditoría `null`, ausencia de config cacheada y de variables externas que sobrescriban PHPUnit. `tests/TestCase.php` usa `RefreshDatabase` sobre esa base efímera; no se ejecutan seeders destructivos.
 
-2. **Weapon StorePostRequest** (línea 25):
-   - Valida unicidad de `description` contra tabla `ammunitions` en lugar de `weapons`
-   - **Fix recomendado**: Cambiar `'unique:ammunitions'` a `'unique:weapons'`
+```bash
+vendor/bin/sail artisan config:show database.default --env=testing --no-interaction
+vendor/bin/sail artisan config:show database.connections.sqlite.database --env=testing --no-interaction
+vendor/bin/sail artisan config:show activitylog.database_connection --env=testing --no-interaction
+vendor/bin/sail bin phpunit tests/Feature/PortfolioDemoTest.php tests/Feature/ApiDocumentationTest.php --no-progress
+vendor/bin/sail bin phpunit --no-progress --display-warnings --fail-on-warning
+vendor/bin/sail bin pint --dirty --format agent
+vendor/bin/sail composer audit --locked --no-interaction
+```
 
-3. **DrugPresentation StorePostRequest** (línea 25):
-   - Valida unicidad de `description` contra tabla `ammunitions` en lugar de `drug_presentations`
-   - **Fix recomendado**: Cambiar `'unique:ammunitions'` a `'unique:drug_presentations'`
+La prueba de documentación regenera en almacenamiento falso, contrasta el JSON versionado y las operaciones/métodos/permisos del router; la de demo recorre permisos, datos, mapa, gráficas y auditoría y prueba rechazos del seeder. El código no tiene un porcentaje de cobertura publicado.
 
-4. **WeaponConfiscation UpdatePutRequest** (línea 25):
-   - Valida `amount` como string en lugar de integer (inconsistente con StorePostRequest)
-   - **Fix recomendado**: Cambiar `'string'` a `'integer'`
+Resultado del paso 16 (17/11/2026): **1.418 pruebas / 8.867 aserciones en SQLite**, sin warnings del runner, y recorrido HTTP real en la demo aislada. OpenAPI se regenera y contrasta con el router. Evidencia MySQL del paso 15: **69 / 720**; no se repitió al no cambiar consultas ni migraciones. Consultar la bitácora para comandos y límites. MySQL se ejecuta con `phpunit.mysql.xml`, esquema dedicado `refactor_statistics_test` en el host de Sail `mysql`; `StatisticsTestCase` rechaza otro destino antes de migrar. El usuario de tests debe tener permiso solo para ese esquema. No sustituirlo por la base de aplicación.
 
-### Observaciones
+Medición del paso 11: página de 10 sobre 200 detalles sintéticos, SQLite en memoria, de **604 a 8 consultas** y de **800 a 13 modelos hidratados**, contando autorización. Muestras de 159,720 ms y 36,943 ms en dos procesos; son una observación local, no una garantía de latencia ni un benchmark de producción.
 
-- Endpoint `/weaponConfiscation/deleted` llama incorrectamente a `indexByConfiscation` en lugar de `indexDeleted`
-- Considerar agregar validación de tipo de archivo más estricta (además de extensión PNG, validar MIME type)
+Decisiones relevantes: paginar/filtrar en SQL y cargar relaciones antes de representar; Form Requests normalizan entrada y Resources representan salida; imágenes con compensación ante fallo SQL; archivos anteriores conservados para recuperación; gráficas/mapa con caché de 30 segundos por usuario/filtros e invalidación por dominio tras commit. Se mantuvo el monolito y las dependencias existentes. No se añadieron reglas de aprobación ni policies sin condiciones de negocio confirmadas.
 
----
+## CI, releases y pendientes externos
 
-## 🤝 Contribución
+[checks.yml](.github/workflows/checks.yml) prepara PHP 8.4, Composer/lock/auditoría, formato incremental, sintaxis, SQLite y MySQL aislado. [deploy.yml](.github/workflows/deploy.yml) es manual y prepara un artefacto tras checks; no contacta servidores. La configuración y sus comandos se validaron localmente; no se afirma una ejecución de GitHub Actions ni se muestran badges verdes.
 
-### Workflow de Contribución
+[package.sh](.github/deployment/package.sh) empaqueta código **committed de HEAD** y dependencias de producción, sin `.env`, datos de storage, Compose ni herramientas de desarrollo. Cambios locales sin commit no entran en el paquete. [release.sh](.github/deployment/release.sh) prepara releases conservadas, enlaces a persistencia, activación atómica y rollback de código. Los ensayos locales comprobaron archivos/persistencia y fallo de fases con runtime simulado; también hubo ensayo CLI del paquete con SQLite, migraciones y salud SQL/caché. No acreditan rollback de base de datos, HTTP externo ni recuperación de servidor.
 
-1. Fork del repositorio
-2. Crear branch de feature (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit cambios (`git commit -am 'Agregar nueva funcionalidad'`)
-4. Push al branch (`git push origin feature/nueva-funcionalidad`)
-5. Crear Pull Request
-
-### Estándares de Código
-
-- **PSR-12**: Seguir estándares PSR-12 para PHP
-- **PHPDoc**: Documentar todas las clases y métodos públicos en español
-- **Tests**: Incluir tests para nuevas funcionalidades
-- **Commits**: Mensajes descriptivos en español
-
-### Checklist de Pull Request
-
-- [ ] Tests pasando
-- [ ] PHPDoc agregado/actualizado
-- [ ] Swagger Docs actualizado si hay cambios en API
-- [ ] CHANGELOG.md actualizado
-- [ ] Sin conflictos con `main`
-
----
-
-## 📄 Licencia
-
-Este proyecto está bajo la licencia MIT. Ver archivo `LICENSE` para más detalles.
-
----
-
-## 📞 Contacto
-
-Para preguntas, sugerencias o reportar bugs, por favor abrir un issue en el repositorio.
-
----
-
-## 🙏 Agradecimientos
-
-- **Laravel**: Framework PHP excepcional
-- **Spatie**: Paquetes de alta calidad (Permission, Activity Log)
-- **Tymon**: JWT Auth para Laravel
-- **DarkaOnLine**: L5-Swagger para documentación
-
----
-
-**Versión**: 1.0.0  
-**Última Actualización**: Noviembre 2025
+El [procedimiento de 15](refactor-progress.md#procedimiento-operativo-preparado-en-15-y-pendiente-externo) detalla el contrato de runtime pendiente. Antes de desplegar quedan infraestructura y adaptador, secretos persistentes, backups/restauración, HTTPS/CORS/CSRF del cliente, acceso administrativo designado y transición de evidencias históricas públicas a almacenamiento privado (inventario, bloqueo público/CDN, copia y checksum). Publicar o ejecutar acciones remotas requiere autorización explícita. El cierre local del refactor no equivale a producción ni a demo publicada.

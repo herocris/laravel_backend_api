@@ -8,6 +8,8 @@
 /vendor
 .env
 .env.backup
+.env.demo
+/database/portfolio-demo.sqlite*
 .env.production
 .phpactor.json
 .phpunit.result.cache
