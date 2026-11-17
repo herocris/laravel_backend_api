@@ -26,6 +26,7 @@ class StoreWeaponConfiscationTest extends TestCase
     {
         parent::setUp();
         Storage::fake('public');
+        Storage::fake('evidence');
         $this->admin = $this->superAdminLogin();
         Auth::login($this->admin);
         $this->grantPermissions($this->admin, ['weaponConfiscation.create']);
@@ -88,22 +89,22 @@ class StoreWeaponConfiscationTest extends TestCase
             'missing decomiso' => [
                 array_diff_key($invalidData, ['decomiso' => '']),
                 'decomiso',
-                'The confiscation id field is required.',
+                'The decomiso field is required.',
             ],
             'invalid decomiso' => [
                 array_merge($invalidData, ['decomiso' => 861]),
                 'decomiso',
-                'The selected confiscation id is invalid.',
+                'The selected decomiso is invalid.',
             ],
             'missing arma' => [
                 array_diff_key($invalidData, ['arma' => '']),
                 'arma',
-                'The weapon id field is required.',
+                'The arma field is required.',
             ],
             'invalid arma' => [
                 array_merge($invalidData, ['arma' => 861]),
                 'arma',
-                'The selected weapon id is invalid.',
+                'The selected arma is invalid.',
             ],
 
             'missing foto' => [

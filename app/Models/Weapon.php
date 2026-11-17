@@ -2,22 +2,18 @@
 
 namespace App\Models;
 
+use App\Traits\Activitylog;
+use Database\Factories\ArmaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Observers\WeaponObserver;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use App\Http\Resources\Weapon\WeaponResource;
+/** Trait para invocar la funcion getActivitylogOptions */
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
-/** Trait para invocar la funcion getActivitylogOptions */
-use App\Traits\Activitylog;
 
-#[ObservedBy([WeaponObserver::class])]
 class Weapon extends Model
 {
-    /** @use HasFactory<\Database\Factories\ArmaFactory> */
-    use HasFactory, SoftDeletes, Activitylog;
-    public $resource = WeaponResource::class;
+    /** @use HasFactory<ArmaFactory> */
+    use Activitylog, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'description',
@@ -26,10 +22,11 @@ class Weapon extends Model
 
     public function getActivitylogOptions(): LogOptions
     {
-        return $this->RecordLog(['description','logo'],'weapon');
+        return $this->RecordLog(['description', 'logo'], 'weapon');
     }
 
-    public function weaponConfiscations(){
+    public function weaponConfiscations()
+    {
         return $this->hasMany('App\Models\WeaponConfiscation');
     }
 }

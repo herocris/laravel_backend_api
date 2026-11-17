@@ -6,12 +6,13 @@ namespace Tests;
 
 use App\Traits\Activitylog;
 use App\Traits\ApiResponser;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Collection;
-use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Spatie\Activitylog\LogOptions;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\JsonResponse;
 
 abstract class UnitTestCase extends BaseTestCase {}
 
@@ -20,20 +21,19 @@ class ApiResponserProxy
 {
     use ApiResponser;
 
-
     public function callShowOne(Model $instance, $code = 200): JsonResponse
     {
-        return $this->showOne($instance, $code);
+        return $this->showOne(new FakeResource($instance), $code);
     }
 
-    public function callShowAll($items, $code = 200)
+    public function callShowAll(Builder $items, int $code = 200): JsonResponse
     {
-        return $this->showAll($items, $code);
+        return $this->showAll($items, FakeResource::class, ['identificador' => 'id', 'nombre' => 'name'], $code);
     }
-    
+
     public function callTransformData(Collection $collection): Collection
     {
-        return $this->transformData($collection);
+        return $this->transformData($collection, FakeResource::class);
     }
 
     public function callSortData(Collection $collection): Collection
@@ -65,8 +65,6 @@ class ApiResponserProxy
     {
         return $this->successResponse($data, $code);
     }
-
-    
 }
 
 // Proxy para exponer métodos protegidos del trait Activitylog
@@ -86,7 +84,6 @@ class ActivitylogProxy
     }
 }
 
-
 // Recurso falso para comprobar transformaciones en tests unitarios
 class FakeResource extends JsonResource
 {
@@ -99,12 +96,12 @@ class FakeResource extends JsonResource
     }
 }
 
-// Modelo/entidad simple con la propiedad $resource como en los modelos reales
+// Modelo simple sin dependencia de la representación HTTP.
 class FakeModel extends Model
 {
     public int $id;
+
     public string $name;
-    public string $resource = FakeResource::class;
 
     public function __construct(int $id, string $name)
     {

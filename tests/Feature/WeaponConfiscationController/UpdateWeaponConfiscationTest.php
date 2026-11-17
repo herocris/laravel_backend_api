@@ -27,6 +27,7 @@ class UpdateWeaponConfiscationTest extends TestCase
     {
         parent::setUp();
         Storage::fake('public');
+        Storage::fake('evidence');
         $this->user = $this->superAdminLogin();
         Auth::login($this->user);
         $this->grantPermissions($this->user, ['weaponConfiscation.update']);
@@ -91,22 +92,22 @@ class UpdateWeaponConfiscationTest extends TestCase
             'missing decomiso' => [
                 array_diff_key($invalidData, ['decomiso' => '']),
                 'decomiso',
-                'The confiscation id field is required.',
+                'The decomiso field is required.',
             ],
             'invalid decomiso' => [
                 array_merge($invalidData, ['decomiso' => 861]),
                 'decomiso',
-                'The selected confiscation id is invalid.',
+                'The selected decomiso is invalid.',
             ],
             'missing arma' => [
                 array_diff_key($invalidData, ['arma' => '']),
                 'arma',
-                'The weapon id field is required.',
+                'The arma field is required.',
             ],
             'invalid arma' => [
                 array_merge($invalidData, ['arma' => 861]),
                 'arma',
-                'The selected weapon id is invalid.',
+                'The selected arma is invalid.',
             ],
             'invalid foto format' => [
                 array_merge($invalidData, ['foto' => UploadedFile::fake()->create('weapon_confiscation_photo.pdf')]),

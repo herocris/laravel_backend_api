@@ -4,10 +4,11 @@ namespace Database\Factories;
 
 use App\Models\Confiscation;
 use App\Models\Weapon;
+use App\Models\WeaponConfiscation;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\WeaponConfiscation>
+ * @extends Factory<WeaponConfiscation>
  */
 class WeaponConfiscationFactory extends Factory
 {
@@ -19,7 +20,7 @@ class WeaponConfiscationFactory extends Factory
     public function definition(): array
     {
         return [
-            'amount' => fake()->numberBetween(0, 100),
+            'amount' => fake()->numberBetween(1, 100),
             'confiscation_id' => Confiscation::all()->random()->id,
             'weapon_id' => Weapon::all()->random()->id,
             'photo' => 'https://picsum.photos/150/150',

@@ -25,11 +25,11 @@ class RefreshTest extends TestCase
     public function status_ok(): void
     {
         $token = Auth::login($this->user);
-        //echo $token;
+        // echo $token;
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson(route('auth.refresh'));
-         //$response->dd();   
+        // $response->dd();
         $response->assertOk();
     }
 
@@ -39,7 +39,7 @@ class RefreshTest extends TestCase
         $token = Auth::login($this->user);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson(route('auth.refresh'));
 
         $response->assertJsonStructure([
@@ -47,7 +47,7 @@ class RefreshTest extends TestCase
             'expires_in',
             'user' => [
                 'name',
-                'email'
+                'email',
             ],
             'roles',
             'permissions',
@@ -60,7 +60,7 @@ class RefreshTest extends TestCase
         $token = Auth::login($this->user);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson(route('auth.refresh'));
 
         $response->assertJson([
@@ -74,7 +74,7 @@ class RefreshTest extends TestCase
         $token = Auth::login($this->user);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson(route('auth.refresh'));
 
         $response->assertJson([
@@ -88,7 +88,7 @@ class RefreshTest extends TestCase
         $token = Auth::login($this->user);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson(route('auth.refresh'));
 
         $response->assertJson([
@@ -105,7 +105,7 @@ class RefreshTest extends TestCase
         $token = Auth::login($this->user);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson(route('auth.refresh'));
 
         $response->assertCookie('token');
@@ -136,7 +136,7 @@ class RefreshTest extends TestCase
         $token = Auth::login($this->user);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson(route('auth.refresh'));
 
         $response->assertJson([
@@ -158,7 +158,7 @@ class RefreshTest extends TestCase
         $token = Auth::login($this->user);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson(route('auth.refresh'));
 
         $response->assertJson([
@@ -177,7 +177,7 @@ class RefreshTest extends TestCase
         $token = Auth::login($this->user);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson(route('auth.refresh'));
 
         $response->assertJson([
@@ -191,18 +191,20 @@ class RefreshTest extends TestCase
         $originalToken = Auth::login($this->user);
 
         $firstResponse = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $originalToken,
+            'Authorization' => 'Bearer '.$originalToken,
         ])->postJson(route('auth.refresh'));
 
         $firstResponse->assertOk()->assertCookie('token');
+        $this->assertNotSame($originalToken, $firstResponse->getCookie('token', false)->getValue());
+        $this->resetJwtAuthentication();
 
         // El refresh invalida el token original (blacklist_enabled=true)
         // Intentar usar nuevamente el token original debe fallar con 401
         $secondAttempt = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $originalToken,
+            'Authorization' => 'Bearer '.$originalToken,
         ])->postJson(route('auth.refresh'));
 
-        $secondAttempt->assertStatus(500);
+        $secondAttempt->assertUnauthorized()->assertJsonPath('code', 401);
     }
 
     #[Test]
@@ -212,7 +214,7 @@ class RefreshTest extends TestCase
 
         // Primer refresh
         $firstRefresh = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson(route('auth.refresh'));
 
         $firstRefresh->assertOk();
@@ -221,7 +223,7 @@ class RefreshTest extends TestCase
         $newToken = Auth::login($this->user);
 
         $secondRefresh = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $newToken,
+            'Authorization' => 'Bearer '.$newToken,
         ])->postJson(route('auth.refresh'));
 
         $secondRefresh->assertOk();
@@ -233,7 +235,7 @@ class RefreshTest extends TestCase
         $token = Auth::login($this->user);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson(route('auth.refresh'));
 
         $response->assertJson([
@@ -247,7 +249,7 @@ class RefreshTest extends TestCase
         $token = Auth::login($this->user);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson(route('auth.refresh'));
 
         $response->assertJson([
@@ -262,7 +264,7 @@ class RefreshTest extends TestCase
         $expiredToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiaWF0IjoxNjAwMDAwMDAwLCJleHAiOjE2MDAwMDAwMDAsIm5iZiI6MTYwMDAwMDAwMCwianRpIjoiZXhwaXJlZCIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.invalid';
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $expiredToken,
+            'Authorization' => 'Bearer '.$expiredToken,
         ])->postJson(route('auth.refresh'));
 
         $response->assertStatus(401);
@@ -280,7 +282,7 @@ class RefreshTest extends TestCase
         $token = Auth::login($this->user);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson(route('auth.refresh'));
 
         $response->assertJson([
@@ -305,7 +307,7 @@ class RefreshTest extends TestCase
         $token = Auth::login($this->user);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson(route('auth.refresh'));
 
         $permissions = $response->json('permissions');

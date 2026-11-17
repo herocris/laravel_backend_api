@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests\Admin\Role;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiFormRequest;
+use App\Models\Permission;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Validation\Rule;
 
 /**
  * Request para creación de roles.
@@ -10,27 +13,37 @@ use Illuminate\Foundation\Http\FormRequest;
  * Valida:
  * - name: requerido, string, único en tabla roles.
  */
-class StorePostRequest extends FormRequest
+class StorePostRequest extends ApiFormRequest
 {
+    /** @return array<string, string> */
+    protected function inputAliases(): array
+    {
+        return [
+            'identificador' => 'id',
+            'nombre' => 'name',
+            'permisos' => 'permissions',
+        ];
+    }
+
     /**
-     * Autorización permitida por defecto.
-     *
-     * @return bool
+     * Autoriza la creación administrativa y sus permisos mediante Gate.
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->can('role.create') ?? false;
     }
 
     /**
      * Reglas de validación.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'name' => 'required|string|unique:roles',
+            'name' => 'required|string|max:255|unique:roles',
+            'permissions' => ['sometimes', 'array', 'list'],
+            'permissions.*' => ['bail', 'required', 'integer', 'distinct', Rule::exists(Permission::class, 'id')->where('guard_name', 'api')->withoutTrashed()],
         ];
     }
 }

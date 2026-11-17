@@ -2,49 +2,55 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ConfiscationMapQuery;
 use App\Http\Requests\Confiscation\GetRequest;
 use App\Http\Requests\Confiscation\StorePostRequest;
 use App\Http\Requests\Confiscation\UpdatePutRequest;
 use App\Http\Resources\Confiscation\ConfiscationResource;
-use App\Models\Ammunition;
 use App\Models\Confiscation;
-use App\Models\Drug;
-use App\Models\Weapon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
 class ConfiscationController extends ApiController implements HasMiddleware
 {
+    private const LIST_FIELDS = [
+        'identificador' => 'id',
+        'fecha' => 'date',
+        'observacion' => 'observation',
+        'direccion' => 'direction',
+        'departamento' => 'department',
+        'municipalidad' => 'municipality',
+        'latitud' => 'latitude',
+        'longitud' => 'length',
+    ];
+
     /**
      * Middlewares para el controlador de decomisos.
-     * `transformInput` asegura estructura uniforme de entrada con `ConfiscationResource`.
      *
      * @return array<Middleware> Lista de middlewares activos.
      */
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:confiscation.view,api', only: ['index', 'show', 'indexDeleted']),
-            new Middleware('permission:confiscation.create,api', only: ['store']),
-            new Middleware('permission:confiscation.update,api', only: ['update', 'restore']),
-            new Middleware('permission:confiscation.delete,api', only: ['destroy']),
-            new Middleware('permission:map.view,api', only: ['mapConfiscations']),
-            new Middleware('transformInput:'.ConfiscationResource::class.'', only: ['store', 'update']),
+            new Middleware('can:confiscation.view', only: ['index', 'show', 'indexDeleted']),
+            new Middleware('can:confiscation.create', only: ['store']),
+            new Middleware('can:confiscation.update', only: ['update', 'restore']),
+            new Middleware('can:confiscation.delete', only: ['destroy']),
+            new Middleware('can:map.view', only: ['mapConfiscations']),
         ];
     }
 
     /**
-     * Lista todos los decomisos (sin paginación). A futuro puede incluir filtros
-     * por fecha o tipo para reducir carga.
+     * Lista registros con filtros y paginación SQL.
      *
-     * @return JsonResponse Colección de decomisos.
+     * @return JsonResponse Página de recursos con metadatos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        $confiscations = Confiscation::all();
+        $confiscations = Confiscation::query();
 
-        return $this->showAll($confiscations);
+        return $this->showAll($confiscations, ConfiscationResource::class, self::LIST_FIELDS);
     }
 
     /**
@@ -55,54 +61,15 @@ class ConfiscationController extends ApiController implements HasMiddleware
      * @param  GetRequest  $request  Parámetros: start_date, end_date, drugs[], weapons[], ammunitions[].
      * @return JsonResponse Arreglo 'mapItems' listo para representación en mapa.
      */
-    public function mapConfiscations(GetRequest $request)
+    public function mapConfiscations(GetRequest $request, ConfiscationMapQuery $map): JsonResponse
     {
-        $startDate = $request->input('start_date');
-        $endDate = $request->input('end_date');
-        $drugs = json_decode($request->input('drugs') ?? '[]');
-        $weapons = json_decode($request->input('weapons') ?? '[]');
-        $ammunitions = json_decode($request->input('ammunitions') ?? '[]');
-
-        $confiscations = Confiscation::select('id', 'date as fecha', 'latitude as latitud', 'observation as observacion', 'length as longitud')
-            ->with([
-                'drugConfiscations' => function ($query) use ($drugs) {
-                    $query->select('id', 'confiscation_id', 'confiscation_id as decomiso', 'photo as foto', 'amount as cantidad', 'weight as peso', 'drug_id', 'drug_id as droga')
-                        ->addSelect([
-                            'droga_nombre' => Drug::select('description')
-                                ->whereColumn('drugs.id', 'drug_confiscations.drug_id')
-                                ->limit(1),
-                        ])
-                        ->whereIn('drug_id', $drugs);
-                },
-                'weaponConfiscations' => function ($query) use ($weapons) {
-                    $query->select('id', 'confiscation_id', 'confiscation_id as decomiso', 'photo as foto', 'amount as cantidad', 'weapon_id', 'weapon_id as arma')
-                        ->addSelect([
-                            'arma_nombre' => Weapon::select('description')
-                                ->whereColumn('weapons.id', 'weapon_confiscations.weapon_id')
-                                ->limit(1),
-                        ])
-                        ->whereIn('weapon_id', $weapons);
-                },
-                'ammunitionConfiscations' => function ($query) use ($ammunitions) {
-                    $query->select('id', 'confiscation_id', 'confiscation_id as decomiso', 'photo as foto', 'amount as cantidad', 'ammunition_id', 'ammunition_id as municion')
-                        ->addSelect([
-                            'municion_nombre' => Ammunition::select('description')
-                                ->whereColumn('ammunitions.id', 'ammunition_confiscations.ammunition_id')
-                                ->limit(1),
-                        ])
-                        ->whereIn('ammunition_id', $ammunitions);
-                },
-            ])
-            ->whereBetween('date', [$startDate, $endDate])
-            ->get();
-
-        $confiscations = $confiscations->filter(function ($c) {
-            return $c->drugConfiscations->isNotEmpty() ||
-                $c->weaponConfiscations->isNotEmpty() ||
-                $c->ammunitionConfiscations->isNotEmpty();
-        })->values()->toArray();
-
-        return response()->json(['mapItems' => $confiscations]);
+        return response()->json(['mapItems' => $map->get(
+            $request->validated('start_date'),
+            $request->validated('end_date'),
+            $request->validated('drugs', []),
+            $request->validated('weapons', []),
+            $request->validated('ammunitions', []),
+        )]);
     }
 
     /**
@@ -116,7 +83,7 @@ class ConfiscationController extends ApiController implements HasMiddleware
         $validated = $request->validated();
         $confiscation = Confiscation::create($validated);
 
-        return $this->showOne($confiscation);
+        return $this->showOne(new ConfiscationResource($confiscation));
     }
 
     /**
@@ -127,7 +94,7 @@ class ConfiscationController extends ApiController implements HasMiddleware
      */
     public function show(Confiscation $confiscation)
     {
-        return $this->showOne($confiscation);
+        return $this->showOne(new ConfiscationResource($confiscation));
     }
 
     /**
@@ -142,7 +109,7 @@ class ConfiscationController extends ApiController implements HasMiddleware
         $validated = $request->validated();
         $confiscation->update($validated);
 
-        return $this->showOne($confiscation);
+        return $this->showOne(new ConfiscationResource($confiscation));
     }
 
     /**
@@ -155,19 +122,19 @@ class ConfiscationController extends ApiController implements HasMiddleware
     {
         $confiscation->delete();
 
-        return $this->showOne($confiscation);
+        return $this->showOne(new ConfiscationResource($confiscation));
     }
 
     /**
-     * Lista decomisos soft-deleted para recuperación.
+     * Lista registros eliminados con filtros y paginación SQL.
      *
-     * @return JsonResponse Colección en papelera.
+     * @return JsonResponse Página de recursos con metadatos.
      */
-    public function indexDeleted()
+    public function indexDeleted(): JsonResponse
     {
-        $confiscations = Confiscation::onlyTrashed()->get();
+        $confiscations = Confiscation::onlyTrashed();
 
-        return $this->showAll($confiscations);
+        return $this->showAll($confiscations, ConfiscationResource::class, self::LIST_FIELDS);
     }
 
     /**
@@ -180,6 +147,6 @@ class ConfiscationController extends ApiController implements HasMiddleware
     {
         $confiscation->restore();
 
-        return $this->showOne($confiscation);
+        return $this->showOne(new ConfiscationResource($confiscation));
     }
 }

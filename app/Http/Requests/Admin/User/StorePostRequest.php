@@ -2,7 +2,11 @@
 
 namespace App\Http\Requests\Admin\User;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiFormRequest;
+use App\Models\Permission;
+use App\Models\Role;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 /**
@@ -13,28 +17,39 @@ use Illuminate\Validation\Rules\Password;
  * - email: requerido, email único en tabla users.
  * - password: mínimo 6 caracteres (se puede reforzar con Password::min(8) y reglas adicionales).
  */
-class StorePostRequest extends FormRequest
+class StorePostRequest extends ApiFormRequest
 {
+    /** @return array<string, string> */
+    protected function inputAliases(): array
+    {
+        return [
+            'identificador' => 'id',
+            'nombre' => 'name',
+            'correo' => 'email',
+            'password' => 'password',
+            'roles' => 'roles',
+            'permisos' => 'permissions',
+        ];
+    }
+
     /**
-     * Autorización: siempre permitido (lógica delegada a gates/policies si es necesario).
-     *
-     * @return bool
+     * Autoriza la creación administrativa y sus asignaciones mediante Gate.
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->can('user.create') ?? false;
     }
 
     /**
      * Reglas de validación para creación de usuario.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'name' => 'required|string',
-            'email' => 'required|string|email|unique:users',
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|max:255|email|unique:users',
             // 'password' => ['required',
             // Password::min(8)
             // ->letters()
@@ -42,6 +57,10 @@ class StorePostRequest extends FormRequest
             // ->numbers()
             // ->symbols()],
             'password' => 'required|string|min:6',
+            'roles' => ['sometimes', 'array', 'list'],
+            'roles.*' => ['bail', 'required', 'integer', 'distinct', Rule::exists(Role::class, 'id')->where('guard_name', 'api')->withoutTrashed()],
+            'permissions' => ['sometimes', 'array', 'list'],
+            'permissions.*' => ['bail', 'required', 'integer', 'distinct', Rule::exists(Permission::class, 'id')->where('guard_name', 'api')->withoutTrashed()],
         ];
     }
 }

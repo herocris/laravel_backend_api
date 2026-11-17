@@ -4,11 +4,12 @@ namespace Database\Factories;
 
 use App\Models\Confiscation;
 use App\Models\Drug;
+use App\Models\DrugConfiscation;
 use App\Models\DrugPresentation;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\DrugConfiscation>
+ * @extends Factory<DrugConfiscation>
  */
 class DrugConfiscationFactory extends Factory
 {
@@ -20,9 +21,9 @@ class DrugConfiscationFactory extends Factory
     public function definition(): array
     {
         return [
-            'amount' => fake()->numberBetween(0, 100),
+            'amount' => fake()->numberBetween(1, 100),
             'weight' => fake()->randomFloat(2, 0.01, 100.99),
-            'confiscation_id' =>  Confiscation::all()->random()->id,
+            'confiscation_id' => Confiscation::all()->random()->id,
             'drug_id' => Drug::all()->random()->id,
             'drug_presentation_id' => DrugPresentation::all()->random()->id,
             'photo' => 'https://picsum.photos/150/150',

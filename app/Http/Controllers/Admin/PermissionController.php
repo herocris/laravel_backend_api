@@ -13,6 +13,11 @@ use Illuminate\Routing\Controllers\Middleware;
 
 class PermissionController extends ApiController implements HasMiddleware
 {
+    private const LIST_FIELDS = [
+        'identificador' => 'id',
+        'nombre' => 'name',
+    ];
+
     /**
      * Registra el middleware de transformación de entrada para garantizar
      * que los datos de creación/actualización se alineen con `PermissionResource`.
@@ -23,25 +28,23 @@ class PermissionController extends ApiController implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:permission.view,api', only: ['index', 'show', 'indexDeleted']),
-            new Middleware('permission:permission.create,api', only: ['store']),
-            new Middleware('permission:permission.update,api', only: ['update', 'restore']),
-            new Middleware('permission:permission.delete,api', only: ['destroy']),
-            new Middleware('transformInput:'.PermissionResource::class.'', only: ['store', 'update']),
+            new Middleware('can:permission.view', only: ['index', 'show', 'indexDeleted']),
+            new Middleware('can:permission.create', only: ['store']),
+            new Middleware('can:permission.update', only: ['update', 'restore']),
+            new Middleware('can:permission.delete', only: ['destroy']),
         ];
     }
 
     /**
-     * Devuelve todos los permisos registrados. Útil para construcción de
-     * matrices de acceso o para poblar formularios. No incluye paginación.
+     * Lista registros con filtros y paginación SQL.
      *
-     * @return JsonResponse Colección completa de permisos.
+     * @return JsonResponse Página de recursos con metadatos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        $permissions = Permission::all();
+        $permissions = Permission::query();
 
-        return $this->showAll($permissions);
+        return $this->showAll($permissions, PermissionResource::class, self::LIST_FIELDS);
     }
 
     /**
@@ -57,7 +60,7 @@ class PermissionController extends ApiController implements HasMiddleware
         $validated = $request->validated();
         $permission = Permission::create($validated);
 
-        return $this->showOne($permission);
+        return $this->showOne(new PermissionResource($permission));
     }
 
     /**
@@ -69,7 +72,7 @@ class PermissionController extends ApiController implements HasMiddleware
      */
     public function show(Permission $permission)
     {
-        return $this->showOne($permission);
+        return $this->showOne(new PermissionResource($permission));
     }
 
     /**
@@ -85,7 +88,7 @@ class PermissionController extends ApiController implements HasMiddleware
         $validated = $request->validated();
         $permission->update($validated);
 
-        return $this->showOne($permission);
+        return $this->showOne(new PermissionResource($permission));
     }
 
     /**
@@ -99,20 +102,19 @@ class PermissionController extends ApiController implements HasMiddleware
     {
         $permission->delete();
 
-        return $this->showOne($permission);
+        return $this->showOne(new PermissionResource($permission));
     }
 
     /**
-     * Lista permisos soft-deleted para administración y posible restauración.
-     * Puede requerir paginación si la lista crece significativamente.
+     * Lista registros eliminados con filtros y paginación SQL.
      *
-     * @return JsonResponse Colección de permisos eliminados.
+     * @return JsonResponse Página de recursos con metadatos.
      */
-    public function indexDeleted()
+    public function indexDeleted(): JsonResponse
     {
-        $permissions = Permission::onlyTrashed()->get();
+        $permissions = Permission::onlyTrashed();
 
-        return $this->showAll($permissions);
+        return $this->showAll($permissions, PermissionResource::class, self::LIST_FIELDS);
     }
 
     /**
@@ -126,6 +128,6 @@ class PermissionController extends ApiController implements HasMiddleware
     {
         $permission->restore();
 
-        return $this->showOne($permission);
+        return $this->showOne(new PermissionResource($permission));
     }
 }

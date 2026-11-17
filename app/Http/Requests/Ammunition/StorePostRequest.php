@@ -2,7 +2,8 @@
 
 namespace App\Http\Requests\Ammunition;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiFormRequest;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rules\File;
 
 /**
@@ -12,12 +13,20 @@ use Illuminate\Validation\Rules\File;
  * - description: requerido, string, único en tabla ammunitions.
  * - logo: imagen PNG requerida, máximo 2048 KB.
  */
-class StorePostRequest extends FormRequest
+class StorePostRequest extends ApiFormRequest
 {
+    /** @return array<string, string> */
+    protected function inputAliases(): array
+    {
+        return [
+            'identificador' => 'id',
+            'descripcion' => 'description',
+            'logo' => 'logo',
+        ];
+    }
+
     /**
      * Autorización permitida.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -27,17 +36,17 @@ class StorePostRequest extends FormRequest
     /**
      * Reglas de validación.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'description' => 'required|string|unique:ammunitions',
+            'description' => 'required|string|max:255|unique:ammunitions',
             'logo' => [
                 'required',
                 'image',
                 'max:2048',
-                File::types(['png'])
+                File::types(['png']),
             ],
         ];
     }

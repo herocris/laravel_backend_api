@@ -3,9 +3,12 @@
 namespace App\Providers;
 
 use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
+use Tymon\JWTAuth\Http\Parser\AuthHeaders;
+use Tymon\JWTAuth\Http\Parser\Cookies;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,11 +25,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        /**
-         * Limitador de peticiones
-         */
-        RateLimiter::for('global', function (Request $request) {
-            return Limit::perMinute(60);
-        });
+        $this->app->make('tymon.jwt.parser')->setChain([new AuthHeaders, new Cookies(false)]);
+
+        RateLimiter::for('login', fn (Request $request): array => [
+            Limit::perMinute(30)->by('ip:'.$request->ip()),
+            Limit::perMinute(5)->by('account:'.hash('sha256', Str::lower(is_string($request->input('email')) ? $request->input('email') : '').'|'.$request->ip())),
+        ]);
+        RateLimiter::for('register', fn (Request $request): Limit => Limit::perMinute(5)->by($request->ip()));
+        RateLimiter::for('csrf', fn (Request $request): Limit => Limit::perMinute(30)->by($request->ip()));
+        RateLimiter::for('session', fn (Request $request): Limit => Limit::perMinute(30)->by('user:'.$request->user()->getAuthIdentifier()));
+        RateLimiter::for('api', fn (Request $request): Limit => Limit::perMinute(60)->by('user:'.$request->user()->getAuthIdentifier()));
+        RateLimiter::for('statistics', fn (Request $request): Limit => Limit::perMinute(10)->by('user:'.$request->user()->getAuthIdentifier()));
     }
 }

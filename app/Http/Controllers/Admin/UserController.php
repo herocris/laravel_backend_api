@@ -14,6 +14,12 @@ use Illuminate\Routing\Controllers\Middleware;
 
 class UserController extends ApiController implements HasMiddleware
 {
+    private const LIST_FIELDS = [
+        'identificador' => 'id',
+        'nombre' => 'name',
+        'correo' => 'email',
+    ];
+
     /**
      * Define los middlewares aplicados al controlador.
      * Se utiliza un middleware de transformación que convierte la entrada
@@ -25,27 +31,23 @@ class UserController extends ApiController implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:user.view,api', only: ['index', 'show', 'indexDeleted']),
-            new Middleware('permission:user.create,api', only: ['store']),
-            new Middleware('permission:user.update,api', only: ['update', 'restore']),
-            new Middleware('permission:user.delete,api', only: ['destroy']),
-            new Middleware('transformInput:'.UserResource::class.'', only: ['store', 'update']),
+            new Middleware('can:user.view', only: ['index', 'show', 'indexDeleted']),
+            new Middleware('can:user.create', only: ['store']),
+            new Middleware('can:user.update', only: ['update', 'restore']),
+            new Middleware('can:user.delete', only: ['destroy']),
         ];
     }
 
     /**
-     * Obtiene todos los usuarios activos (sin incluir los soft-deleted).
-     * No aplica paginación en este punto; si el volumen crece se recomienda
-     * sustituir por `paginate()` para evitar respuestas muy grandes.
-     * Devuelve colección JSON uniforme usando helper `showAll` (HTTP 200).
+     * Lista registros con filtros y paginación SQL.
      *
-     * @return JsonResponse Respuesta con arreglo de usuarios.
+     * @return JsonResponse Página de recursos con metadatos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        $users = User::all();
+        $users = User::query()->with(['roles:id', 'permissions:id']);
 
-        return $this->showAll($users);
+        return $this->showAll($users, UserResource::class, self::LIST_FIELDS);
     }
 
     /**
@@ -57,12 +59,12 @@ class UserController extends ApiController implements HasMiddleware
      * @param  StorePostRequest  $request  Request con reglas de validación (email único, etc.).
      * @return JsonResponse Usuario recién creado.
      */
-    public function store(StorePostRequest $request)
+    public function store(StorePostRequest $request): JsonResponse
     {
         $validated = $request->validated();
-        $user = User::create($validated);
+        $user = (new User)->saveWithAssignments($validated);
 
-        return $this->showOne($user);
+        return $this->showOne(new UserResource($user));
     }
 
     /**
@@ -74,7 +76,7 @@ class UserController extends ApiController implements HasMiddleware
      */
     public function show(User $user)
     {
-        return $this->showOne($user);
+        return $this->showOne(new UserResource($user));
     }
 
     /**
@@ -86,12 +88,12 @@ class UserController extends ApiController implements HasMiddleware
      * @param  User  $user  Usuario objetivo.
      * @return JsonResponse Usuario actualizado.
      */
-    public function update(UpdatePutRequest $request, User $user)
+    public function update(UpdatePutRequest $request, User $user): JsonResponse
     {
         $validated = $request->validated();
-        $user->update($validated);
+        $user->saveWithAssignments($validated);
 
-        return $this->showOne($user);
+        return $this->showOne(new UserResource($user));
     }
 
     /**
@@ -106,21 +108,19 @@ class UserController extends ApiController implements HasMiddleware
     {
         $user->delete();
 
-        return $this->showOne($user);
+        return $this->showOne(new UserResource($user));
     }
 
     /**
-     * Lista usuarios en papelera (soft-deleted). Útil para panel de recuperación.
-     * Considerar paginación futura si el volumen crece. HTTP 200 siempre que
-     * la consulta se ejecute correctamente.
+     * Lista registros eliminados con filtros y paginación SQL.
      *
-     * @return JsonResponse Colección de usuarios eliminados.
+     * @return JsonResponse Página de recursos con metadatos.
      */
-    public function indexDeleted()
+    public function indexDeleted(): JsonResponse
     {
-        $users = User::onlyTrashed()->get();
+        $users = User::onlyTrashed()->with(['roles:id', 'permissions:id']);
 
-        return $this->showAll($users);
+        return $this->showAll($users, UserResource::class, self::LIST_FIELDS);
     }
 
     /**
@@ -135,6 +135,6 @@ class UserController extends ApiController implements HasMiddleware
     {
         $user->restore();
 
-        return $this->showOne($user);
+        return $this->showOne(new UserResource($user));
     }
 }

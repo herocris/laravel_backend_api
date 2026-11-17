@@ -2,20 +2,28 @@
 
 namespace App\Http\Requests\Admin\Permission;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiFormRequest;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 /**
  * Request para creación de permisos.
  *
  * Valida:
- * - name: requerido, string, único en tabla permissions (nota: regla actual valida contra 'roles' por error, corregir si necesario).
+ * - name: requerido, string, único en tabla permissions.
  */
-class StorePostRequest extends FormRequest
+class StorePostRequest extends ApiFormRequest
 {
+    /** @return array<string, string> */
+    protected function inputAliases(): array
+    {
+        return [
+            'identificador' => 'id',
+            'nombre' => 'name',
+        ];
+    }
+
     /**
      * Autorización permitida.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -25,12 +33,12 @@ class StorePostRequest extends FormRequest
     /**
      * Reglas de validación.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'name' => 'required|string|unique:permissions',
+            'name' => 'required|string|max:255|unique:permissions',
         ];
     }
 }

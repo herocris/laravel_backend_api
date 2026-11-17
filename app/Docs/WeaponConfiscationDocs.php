@@ -34,7 +34,7 @@ class WeaponConfiscationDocs
     #[OA\Schema(
         schema: 'WeaponConfiscationCreateRequest',
         type: 'object',
-        required: ['cantidad','foto','decomiso','arma'],
+        required: ['cantidad', 'foto', 'decomiso', 'arma'],
         properties: [
             new OA\Property(property: 'cantidad', type: 'integer', example: 4),
             new OA\Property(property: 'foto', type: 'string', format: 'binary'),
@@ -45,7 +45,7 @@ class WeaponConfiscationDocs
     #[OA\Schema(
         schema: 'WeaponConfiscationUpdateRequest',
         type: 'object',
-        required: ['cantidad','decomiso','arma'],
+        required: ['cantidad', 'decomiso', 'arma'],
         properties: [
             new OA\Property(property: 'cantidad', type: 'integer', example: 5),
             new OA\Property(property: 'foto', type: 'string', format: 'binary', nullable: true),
@@ -53,7 +53,7 @@ class WeaponConfiscationDocs
             new OA\Property(property: 'arma', type: 'integer', example: 8),
         ]
     )]
-    #[OA\Get(path: '/api/weaponConfiscation', tags: ['Decomisos Armas'], summary: 'Listar decomisos de armas', security: [["bearerAuth" => []]], responses: [
+    #[OA\Get(path: '/api/weaponConfiscation', tags: ['Decomisos Armas'], summary: 'Listar decomisos de armas', security: [['bearerAuth' => []]], responses: [
         new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: '#/components/schemas/WeaponConfiscation'))),
         new OA\Response(response: 401, description: 'No autenticado', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
         new OA\Response(response: 404, description: 'No encontrado', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
@@ -63,7 +63,7 @@ class WeaponConfiscationDocs
     ])]
     public function index() {}
 
-    #[OA\Get(path: '/api/weaponConfiscation/{idConfiscation}/confiscation', tags: ['Decomisos Armas'], summary: 'Listar decomisos de armas por decomiso', security: [["bearerAuth" => []]], parameters: [new OA\Parameter(name: 'idConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))], responses: [
+    #[OA\Get(path: '/api/weaponConfiscation/{idConfiscation}/confiscation', tags: ['Decomisos Armas'], summary: 'Listar decomisos de armas por decomiso', security: [['bearerAuth' => []]], parameters: [new OA\Parameter(name: 'idConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))], responses: [
         new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: '#/components/schemas/WeaponConfiscation'))),
         new OA\Response(response: 401, description: 'No autenticado', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
         new OA\Response(response: 404, description: 'No encontrado', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
@@ -73,7 +73,7 @@ class WeaponConfiscationDocs
     ])]
     public function indexByConfiscation() {}
 
-    #[OA\Post(path: '/api/weaponConfiscation', tags: ['Decomisos Armas'], summary: 'Crear decomiso de arma', security: [["bearerAuth" => []]], requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/WeaponConfiscationCreateRequest')), responses: [
+    #[OA\Post(path: '/api/weaponConfiscation', tags: ['Decomisos Armas'], summary: 'Crear decomiso de arma', security: [['bearerAuth' => []]], requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/WeaponConfiscationCreateRequest')), responses: [
         new OA\Response(response: 201, description: 'Creado', content: new OA\JsonContent(ref: '#/components/schemas/WeaponConfiscation')),
         new OA\Response(response: 401, description: 'No autenticado', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
         new OA\Response(response: 404, description: 'No encontrado', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
@@ -84,7 +84,7 @@ class WeaponConfiscationDocs
     ])]
     public function store() {}
 
-    #[OA\Get(path: '/api/weaponConfiscation/{weaponConfiscation}', tags: ['Decomisos Armas'], summary: 'Mostrar decomiso de arma', security: [["bearerAuth" => []]], parameters: [new OA\Parameter(name: 'weaponConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))], responses: [
+    #[OA\Get(path: '/api/weaponConfiscation/{weaponConfiscation}', tags: ['Decomisos Armas'], summary: 'Mostrar decomiso de arma', security: [['bearerAuth' => []]], parameters: [new OA\Parameter(name: 'weaponConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))], responses: [
         new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/WeaponConfiscation')),
         new OA\Response(response: 401, description: 'No autenticado', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
         new OA\Response(response: 404, description: 'No encontrado', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
@@ -94,7 +94,7 @@ class WeaponConfiscationDocs
     ])]
     public function show() {}
 
-    #[OA\Put(path: '/api/weaponConfiscation/{weaponConfiscation}', tags: ['Decomisos Armas'], summary: 'Actualizar decomiso de arma', security: [["bearerAuth" => []]], parameters: [new OA\Parameter(name: 'weaponConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))], requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/WeaponConfiscationUpdateRequest')), responses: [
+    #[OA\Put(path: '/api/weaponConfiscation/{weaponConfiscation}', tags: ['Decomisos Armas'], summary: 'Actualizar decomiso de arma', security: [['bearerAuth' => []]], parameters: [new OA\Parameter(name: 'weaponConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))], requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/WeaponConfiscationUpdateRequest')), responses: [
         new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/WeaponConfiscation')),
         new OA\Response(response: 401, description: 'No autenticado', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
         new OA\Response(response: 404, description: 'No encontrado', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
@@ -105,7 +105,7 @@ class WeaponConfiscationDocs
     ])]
     public function update() {}
 
-    #[OA\Delete(path: '/api/weaponConfiscation/{weaponConfiscation}', tags: ['Decomisos Armas'], summary: 'Eliminar decomiso de arma', security: [["bearerAuth" => []]], parameters: [new OA\Parameter(name: 'weaponConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))], responses: [
+    #[OA\Delete(path: '/api/weaponConfiscation/{weaponConfiscation}', tags: ['Decomisos Armas'], summary: 'Eliminar decomiso de arma', security: [['bearerAuth' => []]], parameters: [new OA\Parameter(name: 'weaponConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))], responses: [
         new OA\Response(response: 200, description: 'Eliminado', content: new OA\JsonContent(ref: '#/components/schemas/WeaponConfiscation')),
         new OA\Response(response: 401, description: 'No autenticado', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
         new OA\Response(response: 404, description: 'No encontrado', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
@@ -115,7 +115,7 @@ class WeaponConfiscationDocs
     ])]
     public function destroy() {}
 
-    #[OA\Get(path: '/api/weaponConfiscation/deleted', tags: ['Decomisos Armas'], summary: 'Listar decomisos de armas eliminados', security: [["bearerAuth" => []]], responses: [
+    #[OA\Get(path: '/api/weaponConfiscation/deleted', tags: ['Decomisos Armas'], summary: 'Listar decomisos de armas eliminados', security: [['bearerAuth' => []]], responses: [
         new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: '#/components/schemas/WeaponConfiscation'))),
         new OA\Response(response: 401, description: 'No autenticado', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
         new OA\Response(response: 404, description: 'No encontrado', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
@@ -125,7 +125,7 @@ class WeaponConfiscationDocs
     ])]
     public function indexDeleted() {}
 
-    #[OA\Post(path: '/api/weaponConfiscation/restore/{weaponConfiscation}', tags: ['Decomisos Armas'], summary: 'Restaurar decomiso de arma', security: [["bearerAuth" => []]], parameters: [new OA\Parameter(name: 'weaponConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))], responses: [
+    #[OA\Post(path: '/api/weaponConfiscation/restore/{weaponConfiscation}', tags: ['Decomisos Armas'], summary: 'Restaurar decomiso de arma', security: [['bearerAuth' => []]], parameters: [new OA\Parameter(name: 'weaponConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))], responses: [
         new OA\Response(response: 200, description: 'Restaurado', content: new OA\JsonContent(ref: '#/components/schemas/WeaponConfiscation')),
         new OA\Response(response: 401, description: 'No autenticado', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
         new OA\Response(response: 404, description: 'No encontrado', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
@@ -135,8 +135,9 @@ class WeaponConfiscationDocs
     ])]
     public function restore() {}
 
-    #[OA\Get(path: '/api/weaponGraphIndex', tags: ['Decomisos Armas'], summary: 'Datos gráficos decomisos de armas', security: [["bearerAuth" => []]], parameters: [
-        new OA\Parameter(name: 'period', in: 'query', required: true, schema: new OA\Schema(type: 'string', example: 'day')),
+    #[OA\Get(path: '/api/weaponGraphIndex', tags: ['Decomisos Armas'], summary: 'Datos gráficos decomisos de armas', security: [['bearerAuth' => []]], parameters: [
+        new OA\Parameter(name: 'period', in: 'query', required: true, schema: new OA\Schema(type: 'string', enum: ['month', 'quarter', 'semester', 'year'], example: 'month', description: 'Períodos de calendario: YYYY-MM, YYYY-Q1…Q4, YYYY-S1…S2 o YYYY. Cantidades enteras; etiquetas homónimas incluyen ID. Pie suma el rango completo.')),
+        new OA\Parameter(name: 'typeGraph', in: 'query', required: true, schema: new OA\Schema(type: 'string', enum: ['bar', 'line', 'pie'], example: 'bar')),
         new OA\Parameter(name: 'start_date', in: 'query', required: true, schema: new OA\Schema(type: 'string', format: 'date', example: '2025-01-01')),
         new OA\Parameter(name: 'end_date', in: 'query', required: true, schema: new OA\Schema(type: 'string', format: 'date', example: '2025-02-01')),
         new OA\Parameter(name: 'weapons', in: 'query', required: true, schema: new OA\Schema(type: 'string', example: '[1,2]'), description: 'JSON array de IDs de armas'),

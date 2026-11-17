@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\AmmunitionConfiscation;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiFormRequest;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\File;
 
 /**
@@ -14,12 +16,22 @@ use Illuminate\Validation\Rules\File;
  * - ammunition_id: requerido, debe existir en ammunitions.
  * - photo: imagen PNG requerida, máximo 2048 KB.
  */
-class StorePostRequest extends FormRequest
+class StorePostRequest extends ApiFormRequest
 {
+    /** @return array<string, string> */
+    protected function inputAliases(): array
+    {
+        return [
+            'identificador' => 'id',
+            'cantidad' => 'amount',
+            'decomiso' => 'confiscation_id',
+            'municion' => 'ammunition_id',
+            'foto' => 'photo',
+        ];
+    }
+
     /**
      * Autorización permitida.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -29,19 +41,19 @@ class StorePostRequest extends FormRequest
     /**
      * Reglas de validación.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'amount' => 'required|integer',
-            'confiscation_id' => 'required|exists:confiscations,id',
-            'ammunition_id' => 'required|exists:ammunitions,id',
+            'amount' => 'required|integer|min:1|max:2147483647',
+            'confiscation_id' => ['bail', 'required', 'integer', Rule::exists('confiscations', 'id')->withoutTrashed()],
+            'ammunition_id' => ['bail', 'required', 'integer', Rule::exists('ammunitions', 'id')->withoutTrashed()],
             'photo' => [
                 'required',
                 'image',
                 'max:2048',
-                File::types(['png'])
+                File::types(['png']),
             ],
         ];
     }

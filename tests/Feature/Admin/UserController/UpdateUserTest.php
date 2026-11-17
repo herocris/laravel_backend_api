@@ -96,7 +96,7 @@ class UpdateUserTest extends TestCase
             'invalid correo format' => [
                 array_merge($invalidData, ['correo' => 'not-an-email']),
                 'correo',
-                'The correo field must be a valid correo address.',
+                'The correo field must be a valid email address.',
             ],
         ];
     }

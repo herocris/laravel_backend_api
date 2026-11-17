@@ -112,7 +112,7 @@ class StoreUserTest extends TestCase
             'invalid email' => [
                 array_merge($invalidData, ['correo' => 'invalid-email']), // array_merge sobre escribe el valor de una clave
                 'correo',
-                'The correo field must be a valid correo address.',
+                'The correo field must be a valid email address.',
             ],
             'missing password' => [
                 array_diff_key($invalidData, ['password' => '']),

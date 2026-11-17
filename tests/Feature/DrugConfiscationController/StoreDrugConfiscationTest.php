@@ -29,6 +29,7 @@ class StoreDrugConfiscationTest extends TestCase
     {
         parent::setUp();
         Storage::fake('public');
+        Storage::fake('evidence');
         $this->admin = $this->superAdminLogin();
         Auth::login($this->admin);
         $this->grantPermissions($this->admin, ['drugConfiscation.create']);
@@ -101,32 +102,32 @@ class StoreDrugConfiscationTest extends TestCase
             'missing decomiso' => [
                 array_diff_key($invalidData, ['decomiso' => '']),
                 'decomiso',
-                'The confiscation id field is required.',
+                'The decomiso field is required.',
             ],
             'invalid decomiso' => [
                 array_merge($invalidData, ['decomiso' => 861]),
                 'decomiso',
-                'The selected confiscation id is invalid.',
+                'The selected decomiso is invalid.',
             ],
             'missing droga' => [
                 array_diff_key($invalidData, ['droga' => '']),
                 'droga',
-                'The drug id field is required.',
+                'The droga field is required.',
             ],
             'invalid droga' => [
                 array_merge($invalidData, ['droga' => 861]),
                 'droga',
-                'The selected drug id is invalid.',
+                'The selected droga is invalid.',
             ],
             'missing presentacion' => [
                 array_diff_key($invalidData, ['presentacion' => '']),
                 'presentacion',
-                'The drug presentation id field is required.',
+                'The presentacion field is required.',
             ],
             'invalid presentacion' => [
                 array_merge($invalidData, ['presentacion' => 861]),
                 'presentacion',
-                'The selected drug presentation id is invalid.',
+                'The selected presentacion is invalid.',
             ],
 
             'missing foto' => [

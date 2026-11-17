@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ConfiscationStatisticsQuery;
+use App\Helpers\PersistUploadedImage;
 use App\Http\Requests\AmmunitionConfiscation\GetRequest;
 use App\Http\Requests\AmmunitionConfiscation\StorePostRequest;
 use App\Http\Requests\AmmunitionConfiscation\UpdatePutRequest;
@@ -10,10 +12,17 @@ use App\Models\AmmunitionConfiscation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AmmunitionConfiscationController extends ApiController implements HasMiddleware
 {
+    private const LIST_FIELDS = [
+        'identificador' => 'id',
+        'cantidad' => 'amount',
+        'foto' => 'photo',
+    ];
+
     /**
      * Middlewares para items de decomiso de municiones.
      *
@@ -22,25 +31,24 @@ class AmmunitionConfiscationController extends ApiController implements HasMiddl
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:ammunitionConfiscation.view,api', only: ['index', 'show', 'indexDeleted', 'indexByConfiscation']),
-            new Middleware('permission:ammunitionConfiscation.create,api', only: ['store']),
-            new Middleware('permission:ammunitionConfiscation.update,api', only: ['update', 'restore']),
-            new Middleware('permission:ammunitionConfiscation.delete,api', only: ['destroy']),
-            new Middleware('permission:graph.view,api', only: ['graphIndex']),
-            new Middleware('transformInput:'.AmmunitionConfiscationResource::class.'', only: ['store', 'update']),
+            new Middleware('can:ammunitionConfiscation.view', only: ['index', 'show', 'indexDeleted', 'indexByConfiscation', 'photo']),
+            new Middleware('can:ammunitionConfiscation.create', only: ['store']),
+            new Middleware('can:ammunitionConfiscation.update', only: ['update', 'restore']),
+            new Middleware('can:ammunitionConfiscation.delete', only: ['destroy']),
+            new Middleware('can:graph.view', only: ['graphIndex']),
         ];
     }
 
     /**
-     * Lista todos los registros de municiones decomisadas.
+     * Lista registros con filtros y paginación SQL.
      *
-     * @return JsonResponse Colección de registros.
+     * @return JsonResponse Página de recursos con metadatos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        $ammunitionConfiscations = AmmunitionConfiscation::all();
+        $ammunitionConfiscations = AmmunitionConfiscation::query()->with(['confiscation:id,observation', 'ammunition:id,description']);
 
-        return $this->showAll($ammunitionConfiscations);
+        return $this->showAll($ammunitionConfiscations, AmmunitionConfiscationResource::class, self::LIST_FIELDS);
     }
 
     /**
@@ -49,11 +57,11 @@ class AmmunitionConfiscationController extends ApiController implements HasMiddl
      * @param  int  $idConfiscation  ID del decomiso.
      * @return JsonResponse Colección filtrada.
      */
-    public function indexByConfiscation(int $idConfiscation)
+    public function indexByConfiscation(int $idConfiscation): JsonResponse
     {
-        $ammunitionConfiscations = AmmunitionConfiscation::where('confiscation_id', $idConfiscation);
+        $ammunitionConfiscations = AmmunitionConfiscation::where('confiscation_id', $idConfiscation)->with(['confiscation:id,observation', 'ammunition:id,description']);
 
-        return $this->showAll($ammunitionConfiscations->get());
+        return $this->showAll($ammunitionConfiscations, AmmunitionConfiscationResource::class, self::LIST_FIELDS);
     }
 
     /**
@@ -62,12 +70,12 @@ class AmmunitionConfiscationController extends ApiController implements HasMiddl
      * @param  StorePostRequest  $request  Datos validados.
      * @return JsonResponse Recurso creado.
      */
-    public function store(StorePostRequest $request)
+    public function store(StorePostRequest $request, PersistUploadedImage $images)
     {
         $validated = $request->validated();
-        $ammunitionConfiscation = AmmunitionConfiscation::create($validated);
+        $ammunitionConfiscation = $images->save(new AmmunitionConfiscation, $validated, 'photo', 'ammunitionConfiscation', 'evidence');
 
-        return $this->showOne($ammunitionConfiscation);
+        return $this->showOne(new AmmunitionConfiscationResource($ammunitionConfiscation));
     }
 
     /**
@@ -78,7 +86,21 @@ class AmmunitionConfiscationController extends ApiController implements HasMiddl
      */
     public function show(AmmunitionConfiscation $ammunitionConfiscation)
     {
-        return $this->showOne($ammunitionConfiscation);
+        return $this->showOne(new AmmunitionConfiscationResource($ammunitionConfiscation));
+    }
+
+    public function photo(AmmunitionConfiscation $ammunitionConfiscation): StreamedResponse
+    {
+        $path = $ammunitionConfiscation->photo;
+        abort_unless(is_string($path) && preg_match('~^ammunitionConfiscation/[A-Za-z0-9_-]+\\.png$~D', $path), 404);
+        $disk = Storage::disk('evidence');
+        abort_unless($disk->exists($path), 404);
+
+        return $disk->download($path, 'evidence.png', [
+            'Content-Type' => 'image/png',
+            'Cache-Control' => 'private, no-store',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 
     /**
@@ -88,12 +110,12 @@ class AmmunitionConfiscationController extends ApiController implements HasMiddl
      * @param  AmmunitionConfiscation  $ammunitionConfiscation  Recurso objetivo.
      * @return JsonResponse Recurso actualizado.
      */
-    public function update(UpdatePutRequest $request, AmmunitionConfiscation $ammunitionConfiscation)
+    public function update(UpdatePutRequest $request, AmmunitionConfiscation $ammunitionConfiscation, PersistUploadedImage $images)
     {
         $validated = $request->validated();
-        $ammunitionConfiscation->update($validated);
+        $images->save($ammunitionConfiscation, $validated, 'photo', 'ammunitionConfiscation', 'evidence');
 
-        return $this->showOne($ammunitionConfiscation);
+        return $this->showOne(new AmmunitionConfiscationResource($ammunitionConfiscation));
     }
 
     /**
@@ -106,19 +128,19 @@ class AmmunitionConfiscationController extends ApiController implements HasMiddl
     {
         $ammunitionConfiscation->delete();
 
-        return $this->showOne($ammunitionConfiscation);
+        return $this->showOne(new AmmunitionConfiscationResource($ammunitionConfiscation));
     }
 
     /**
-     * Lista registros soft-deleted.
+     * Lista registros eliminados con filtros y paginación SQL.
      *
-     * @return JsonResponse Colección en papelera.
+     * @return JsonResponse Página de recursos con metadatos.
      */
-    public function indexDeleted()
+    public function indexDeleted(): JsonResponse
     {
-        $ammunitionConfiscations = AmmunitionConfiscation::onlyTrashed()->get();
+        $ammunitionConfiscations = AmmunitionConfiscation::onlyTrashed()->with(['confiscation:id,observation', 'ammunition:id,description']);
 
-        return $this->showAll($ammunitionConfiscations);
+        return $this->showAll($ammunitionConfiscations, AmmunitionConfiscationResource::class, self::LIST_FIELDS);
     }
 
     /**
@@ -131,7 +153,7 @@ class AmmunitionConfiscationController extends ApiController implements HasMiddl
     {
         $ammunitionConfiscation->restore();
 
-        return $this->showOne($ammunitionConfiscation);
+        return $this->showOne(new AmmunitionConfiscationResource($ammunitionConfiscation));
     }
 
     /**
@@ -140,36 +162,14 @@ class AmmunitionConfiscationController extends ApiController implements HasMiddl
      * @param  GetRequest  $request  Parámetros: period, start_date, end_date, ammunitions[].
      * @return JsonResponse lineBarData y pieData.
      */
-    public function graphIndex(GetRequest $request)
+    public function graphIndex(GetRequest $request, ConfiscationStatisticsQuery $statistics): JsonResponse
     {
-        $period = $request->input('period');
-        $startDate = $request->input('start_date');
-        $endDate = $request->input('end_date');
-        $ammunitions = json_decode($request->input('ammunitions') ?? '[]');
-        $queryp = $this->queryPeriod($period);
-
-        $query = DB::table('data_graph_ammunition_confiscation')
-            ->whereIn('ammunition_id', $ammunitions)
-            ->whereBetween('full_date', [$startDate, $endDate]);
-
-        $queryBarLine = $query->clone()->select(
-            DB::raw("{$queryp} as period"),
-            'ammunition_description',
-            DB::raw('SUM(total_amount) as total_amount')
-        )
-            ->groupBy('period', 'ammunition_id', 'ammunition_description')
-            ->orderBy('period', 'asc')->get();
-
-        $queryPie = $query->clone()->select(
-            'ammunition_description',
-            DB::raw('SUM(total_amount) as total_amount')
-        )
-            ->groupBy('ammunition_description')
-            ->orderBy('ammunition_description', 'asc')->get();
-
-        $linedata = $this->FormatCollectionBarLine($queryBarLine, 'ammunitions');
-        $pieData = $this->FormatCollectionPie($queryPie, 'ammunitions');
-
-        return response()->json(['lineBarData' => $linedata, 'pieData' => $pieData]);
+        return response()->json($statistics->get(
+            'ammunition',
+            $request->validated('period'),
+            $request->validated('start_date'),
+            $request->validated('end_date'),
+            $request->validated('ammunitions'),
+        ));
     }
 }

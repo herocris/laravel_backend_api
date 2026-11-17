@@ -2,24 +2,19 @@
 
 namespace App\Models;
 
-use App\Http\Resources\DrugConfiscation\DrugConfiscationResource;
-use App\Observers\DrugConfiscationObserver;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use App\Traits\Activitylog;
+use Database\Factories\DrugConfiscationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Activitylog\LogOptions;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
 /** Trait para invocar la funcion getActivitylogOptions */
 
-use App\Traits\Activitylog;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
 
-#[ObservedBy([DrugConfiscationObserver::class])]
 class DrugConfiscation extends Model
 {
-    /** @use HasFactory<\Database\Factories\DrugConfiscationFactory> */
-    use HasFactory, SoftDeletes, Activitylog;
-    public $resource = DrugConfiscationResource::class;
+    /** @use HasFactory<DrugConfiscationFactory> */
+    use Activitylog, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'amount',
@@ -30,6 +25,14 @@ class DrugConfiscation extends Model
         'drug_presentation_id',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'amount' => 'integer',
+            'weight' => 'float',
+        ];
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return $this->RecordLog([
@@ -38,7 +41,7 @@ class DrugConfiscation extends Model
             'photo',
             'confiscation_id',
             'drug_id',
-            'drug_presentation_id'
+            'drug_presentation_id',
         ], 'drugConfiscation');
     }
 

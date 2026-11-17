@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests\Admin\Role;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiFormRequest;
+use App\Models\Permission;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Validation\Rule;
 
 /**
  * Request para actualización de roles.
@@ -10,27 +13,38 @@ use Illuminate\Foundation\Http\FormRequest;
  * Valida:
  * - name: requerido, string.
  */
-class UpdatePutRequest extends FormRequest
+class UpdatePutRequest extends ApiFormRequest
 {
+    /** @return array<string, string> */
+    protected function inputAliases(): array
+    {
+        return [
+            'identificador' => 'id',
+            'nombre' => 'name',
+            'permisos' => 'permissions',
+        ];
+    }
+
     /**
-     * Autorización permitida.
-     *
-     * @return bool
+     * Autoriza la gestión de roles del guard efectivo mediante Gate.
      */
     public function authorize(): bool
     {
-        return true;
+        return ($this->user()?->can('role.update') ?? false)
+            && $this->route('role')->guard_name === 'api';
     }
 
     /**
      * Reglas de validación.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'name' => 'required|string',
+            'name' => ['required', 'string', 'max:255', Rule::unique('roles')->where('guard_name', $this->route('role')->guard_name)->ignore($this->route('role'))],
+            'permissions' => ['sometimes', 'array', 'list'],
+            'permissions.*' => ['bail', 'required', 'integer', 'distinct', Rule::exists(Permission::class, 'id')->where('guard_name', 'api')->withoutTrashed()],
         ];
     }
 }

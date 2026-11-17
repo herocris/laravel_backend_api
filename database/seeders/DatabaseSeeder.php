@@ -60,74 +60,13 @@ class DatabaseSeeder extends Seeder
             'password' => 'password',
         ]);
 
-        foreach ([
-            'user.view',
-            'user.create',
-            'user.update',
-            'user.delete',
-            'role.view',
-            'role.create',
-            'role.update',
-            'role.delete',
-            'permission.view',
-            'permission.create',
-            'permission.update',
-            'permission.delete',
-            'drug.view',
-            'drug.create',
-            'drug.update',
-            'drug.delete',
-            'drugPresentation.view',
-            'drugPresentation.create',
-            'drugPresentation.update',
-            'drugPresentation.delete',
-            'weapon.view',
-            'weapon.create',
-            'weapon.update',
-            'weapon.delete',
-            'ammunition.view',
-            'ammunition.create',
-            'ammunition.update',
-            'ammunition.delete',
-            'confiscation.view',
-            'confiscation.create',
-            'confiscation.update',
-            'confiscation.delete',
-            'drugConfiscation.view',
-            'drugConfiscation.create',
-            'drugConfiscation.update',
-            'drugConfiscation.delete',
-            'weaponConfiscation.view',
-            'weaponConfiscation.create',
-            'weaponConfiscation.update',
-            'weaponConfiscation.delete',
-            'ammunitionConfiscation.view',
-            'ammunitionConfiscation.create',
-            'ammunitionConfiscation.update',
-            'ammunitionConfiscation.delete',
-            'dashboard.view',
-            'graph.view',
-            'map.view',
-            'activity.view',
-        ] as $permissionName) {
-            Permission::factory()->create(['name' => $permissionName]);
-        }
-
         Permission::factory(25)->create();
 
-        foreach ([
-            'administrador',
-            'operador',
-            'analista',
-        ] as $roleName) {
-            Role::factory()->create(['name' => $roleName]);
-        }
+        $this->call(PermissionCatalogSeeder::class);
 
         $crisUser->assignRole('administrador');
         $analystUser->assignRole('analista');
         $operatorUser->assignRole('operador');
-
-        $this->call(RolePermissionsSeeder::class);
 
         Role::factory(4)->givePermissionsToRole()->create();
         User::factory(30)->giveRolesToUser()->create();

@@ -10,10 +10,11 @@ use App\Models\DrugConfiscation;
 use App\Models\DrugPresentation;
 use App\Models\Weapon;
 use App\Models\WeaponConfiscation;
+use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Tests\TestCase;
+use Tests\StatisticsTestCase;
 
-class ConfiscationGraphViewsTest extends TestCase
+class ConfiscationGraphViewsTest extends StatisticsTestCase
 {
     /**
      * @return array<string, array{string, class-string, class-string}>
@@ -46,7 +47,7 @@ class ConfiscationGraphViewsTest extends TestCase
         $attributes = [$type.'_id' => $item->id, 'confiscation_id' => $confiscation->id];
         if ($type === 'drug') {
             $attributes['drug_presentation_id'] = DrugPresentation::factory()->create()->id;
-            $attributes['weight'] = 1.5;
+            $attributes['weight'] = 1.25;
         }
         $detailClass::factory()->create(array_merge($attributes, ['amount' => 2]));
         $detailClass::factory()->create(array_merge($attributes, ['amount' => 3]));
@@ -88,11 +89,8 @@ class ConfiscationGraphViewsTest extends TestCase
             'total_amount' => 11,
         ]);
         if ($type === 'drug') {
-            $this->assertDatabaseHas($view, [
-                'full_date' => '2026-01-15',
-                'drug_id' => $item->id,
-                'total_weight' => 3,
-            ]);
+            $totalWeight = DB::table($view)->where('full_date', '2026-01-15')->where('drug_id', $item->id)->value('total_weight');
+            $this->assertSame(2.5, (float) $totalWeight);
         }
     }
 

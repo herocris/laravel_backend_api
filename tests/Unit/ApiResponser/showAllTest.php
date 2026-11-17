@@ -4,42 +4,43 @@ declare(strict_types=1);
 
 namespace Tests\Unit\ApiResponser;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\JsonResponse;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\ApiResponserProxy;
-use Tests\FakeModel;
 use Tests\UnitTestCase;
-use Illuminate\Http\JsonResponse;
 
 class showAllTest extends UnitTestCase
 {
+    use RefreshDatabase;
+
     #[Test]
     public function return_show_all_if_collection_not_empty(): void
     {
-        $items = collect([
-            new FakeModel(1, 'Uno'),
-            new FakeModel(2, 'Dos'),
-            new FakeModel(4, 'Cuatro'),
-            new FakeModel(3, 'Tres'),
-        ]);
-        $proxy = new ApiResponserProxy();
+        User::factory()->count(4)->sequence(
+            ['name' => 'Uno'],
+            ['name' => 'Dos'],
+            ['name' => 'Cuatro'],
+            ['name' => 'Tres'],
+        )->create();
+        $proxy = new ApiResponserProxy;
 
-        $response = $proxy->callShowAll($items);
+        $response = $proxy->callShowAll(User::query());
         $data = $response->getData(); // true = array asociativo
-        
+
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals(200, $response->status());
         $this->assertIsArray($data->data);
         $this->assertCount(4, $data->data);
     }
+
     #[Test]
     public function return_show_all_if_collection_is_empty()
     {
-        $items = collect([]);
-        $proxy = new ApiResponserProxy();
+        $proxy = new ApiResponserProxy;
 
-        $response = $proxy->callShowAll($items);
+        $response = $proxy->callShowAll(User::query());
         $data = $response->getData();
         $this->assertEquals(200, $response->status());
         $this->assertIsArray($data->data);

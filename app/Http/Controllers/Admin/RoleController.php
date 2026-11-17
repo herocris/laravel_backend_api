@@ -13,55 +13,51 @@ use Illuminate\Routing\Controllers\Middleware;
 
 class RoleController extends ApiController implements HasMiddleware
 {
+    private const LIST_FIELDS = [
+        'identificador' => 'id',
+        'nombre' => 'name',
+    ];
+
     /**
      * Registra middlewares específicos del controlador.
-     * `transformInput` normaliza la estructura de entrada según `RoleResource`
-     * para garantizar que las claves y formatos coincidan con la capa de
-     * presentación antes de la persistencia en `store` y `update`.
      *
      * @return array<Middleware> Lista de middlewares.
      */
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:role.view,api', only: ['index', 'show', 'indexDeleted']),
-            new Middleware('permission:role.create,api', only: ['store']),
-            new Middleware('permission:role.update,api', only: ['update', 'restore']),
-            new Middleware('permission:role.delete,api', only: ['destroy']),
-            new Middleware('transformInput:'.RoleResource::class.'', only: ['store', 'update']),
+            new Middleware('can:role.view', only: ['index', 'show', 'indexDeleted']),
+            new Middleware('can:role.create', only: ['store']),
+            new Middleware('can:role.update', only: ['update', 'restore']),
+            new Middleware('can:role.delete', only: ['destroy']),
         ];
     }
 
     /**
-     * Devuelve todos los roles existentes (sin filtrar por permisos).
-     * Útil para poblar selects o asignaciones masivas. Considerar paginación
-     * futura si la tabla crece. Respuesta HTTP 200 en caso exitoso.
+     * Lista registros con filtros y paginación SQL.
      *
-     * @return JsonResponse Colección de roles.
+     * @return JsonResponse Página de recursos con metadatos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        $roles = Role::all();
+        $roles = Role::query()->with(['permissions:id']);
 
-        return $this->showAll($roles);
+        return $this->showAll($roles, RoleResource::class, self::LIST_FIELDS);
     }
 
     /**
      * Crea un nuevo rol con los datos validados y luego sincroniza los
-     * permisos asociados. `syncPermissions` acepta nombres o IDs según
-     * configuración del paquete spatie. Si no se envían permisos se asigna
-     * un arreglo vacío (el rol nace sin permisos).
+     * permisos validados en la misma transacción. Si se omiten, el rol nace sin permisos.
      *
      * @param  StorePostRequest  $request  Datos validados (name, guard_name, etc.).
      * @return JsonResponse Rol creado con permisos actuales.
      */
-    public function store(StorePostRequest $request)
+    public function store(StorePostRequest $request): JsonResponse
     {
         $validated = $request->validated();
-        $role = Role::create($validated);
-        $role->syncPermissions(request()->permissions ?? []);
+        $role = (new Role)->saveWithPermissions($validated);
 
-        return $this->showOne($role);
+        return $this->showOne(new RoleResource($role));
     }
 
     /**
@@ -73,25 +69,24 @@ class RoleController extends ApiController implements HasMiddleware
      */
     public function show(Role $role)
     {
-        return $this->showOne($role);
+        return $this->showOne(new RoleResource($role));
     }
 
     /**
-     * Actualiza datos del rol y sincroniza su set de permisos. `syncPermissions`
-     * revoca los ausentes y asigna los nuevos, manteniendo atomicidad simple.
+     * Actualiza datos y permisos en la misma transacción. Omitir la lista
+     * conserva sus permisos; una lista vacía los revoca.
      * Retorna estado final (HTTP 200).
      *
      * @param  UpdatePutRequest  $request  Datos validados.
      * @param  Role  $role  Rol a actualizar.
      * @return JsonResponse Rol actualizado.
      */
-    public function update(UpdatePutRequest $request, Role $role)
+    public function update(UpdatePutRequest $request, Role $role): JsonResponse
     {
         $validated = $request->validated();
-        $role->update($validated);
-        $role->syncPermissions(request()->permissions ?? []);
+        $role->saveWithPermissions($validated);
 
-        return $this->showOne($role);
+        return $this->showOne(new RoleResource($role));
     }
 
     /**
@@ -106,20 +101,19 @@ class RoleController extends ApiController implements HasMiddleware
     {
         $role->delete();
 
-        return $this->showOne($role);
+        return $this->showOne(new RoleResource($role));
     }
 
     /**
-     * Lista roles en estado soft-deleted para permitir su restauración.
-     * Ideal para panel de administración (reciclaje). No paginado actualmente.
+     * Lista registros eliminados con filtros y paginación SQL.
      *
-     * @return JsonResponse Colección de roles eliminados.
+     * @return JsonResponse Página de recursos con metadatos.
      */
-    public function indexDeleted()
+    public function indexDeleted(): JsonResponse
     {
-        $roles = Role::onlyTrashed()->get();
+        $roles = Role::onlyTrashed()->with(['permissions:id']);
 
-        return $this->showAll($roles);
+        return $this->showAll($roles, RoleResource::class, self::LIST_FIELDS);
     }
 
     /**
@@ -133,6 +127,6 @@ class RoleController extends ApiController implements HasMiddleware
     {
         $role->restore();
 
-        return $this->showOne($role);
+        return $this->showOne(new RoleResource($role));
     }
 }

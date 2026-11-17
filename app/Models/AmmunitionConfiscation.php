@@ -2,35 +2,37 @@
 
 namespace App\Models;
 
-use App\Http\Resources\AmmunitionConfiscation\AmmunitionConfiscationResource;
-use App\Observers\AmmunitionConfiscationObserver;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use App\Traits\Activitylog;
+use Database\Factories\AmmunitionConfiscationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Activitylog\LogOptions;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
 /** Trait para invocar la funcion getActivitylogOptions */
 
-use App\Traits\Activitylog;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
 
-#[ObservedBy([AmmunitionConfiscationObserver::class])]
 class AmmunitionConfiscation extends Model
 {
-    /** @use HasFactory<\Database\Factories\AmmunitionConfiscationFactory> */
-    use HasFactory, SoftDeletes, Activitylog;
-    public $resource = AmmunitionConfiscationResource::class;
+    /** @use HasFactory<AmmunitionConfiscationFactory> */
+    use Activitylog, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'amount',
         'confiscation_id',
         'ammunition_id',
-        'photo'
+        'photo',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'amount' => 'integer',
+        ];
+    }
 
     public function getActivitylogOptions(): LogOptions
     {
-        return $this->RecordLog(['amount','confiscation_id','ammunition_id','photo'], 'ammunitionConfiscation');
+        return $this->RecordLog(['amount', 'confiscation_id', 'ammunition_id', 'photo'], 'ammunitionConfiscation');
     }
 
     public function confiscation()

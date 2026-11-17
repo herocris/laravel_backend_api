@@ -2,18 +2,17 @@
 
 namespace App\Models;
 
-use App\Http\Resources\Confiscation\ConfiscationResource;
+use App\Traits\Activitylog;
+use Database\Factories\DecomisoFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\Activitylog;
+use Spatie\Activitylog\LogOptions;
 
 class Confiscation extends Model
 {
-    /** @use HasFactory<\Database\Factories\DecomisoFactory> */
-    use HasFactory, SoftDeletes, Activitylog;
-    public $resource = ConfiscationResource::class;
+    /** @use HasFactory<DecomisoFactory> */
+    use Activitylog, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'date',
@@ -30,21 +29,23 @@ class Confiscation extends Model
      * el trait Activitylog dentro de getActivitylogOptions
      * la cual tiene que forzosamente ser implementada en el modelo
      */
-
     public function getActivitylogOptions(): LogOptions
     {
-        return $this->RecordLog(['date','observation','direction','department','municipality','latitude','length'],'confiscation');
+        return $this->RecordLog(['date', 'observation', 'direction', 'department', 'municipality', 'latitude', 'length'], 'confiscation');
     }
 
-    public function ammunitionConfiscations(){
+    public function ammunitionConfiscations()
+    {
         return $this->hasMany('App\Models\AmmunitionConfiscation');
     }
 
-    public function weaponConfiscations(){
+    public function weaponConfiscations()
+    {
         return $this->hasMany('App\Models\WeaponConfiscation');
     }
 
-    public function drugConfiscations(){
+    public function drugConfiscations()
+    {
         return $this->hasMany('App\Models\DrugConfiscation');
     }
 }

@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Admin\Permission;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiFormRequest;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Validation\Rule;
 
 /**
  * Request para actualización de permisos.
@@ -10,12 +12,19 @@ use Illuminate\Foundation\Http\FormRequest;
  * Valida:
  * - name: requerido, string.
  */
-class UpdatePutRequest extends FormRequest
+class UpdatePutRequest extends ApiFormRequest
 {
+    /** @return array<string, string> */
+    protected function inputAliases(): array
+    {
+        return [
+            'identificador' => 'id',
+            'nombre' => 'name',
+        ];
+    }
+
     /**
      * Autorización permitida.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -25,12 +34,12 @@ class UpdatePutRequest extends FormRequest
     /**
      * Reglas de validación.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'name' => 'required|string',
+            'name' => ['required', 'string', 'max:255', Rule::unique('permissions')->where('guard_name', $this->route('permission')->guard_name)->ignore($this->route('permission'))],
         ];
     }
 }

@@ -2,23 +2,30 @@
 
 namespace App\Http\Requests\DrugConfiscation;
 
+use App\Traits\NormalizesFilterLists;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Request para obtener datos de gráficos de decomisos de droga.
  *
  * Valida:
- * - period: requerido, string, valores permitidos: day|month|quarter|semester|year|total.
+ * - period: requerido, string, valores permitidos: month|quarter|semester|year.
  * - start_date, end_date: requeridos, formato Y-m-d.
  * - drugs: requerido, array de IDs de drogas (deben existir en tabla drugs).
  * - typeGraph: requerido, tipo de gráfico (bar|line|pie).
  */
 class GetRequest extends FormRequest
 {
+    use NormalizesFilterLists;
+
+    protected function prepareForValidation(): void
+    {
+        $this->normalizeFilterLists(['drugs']);
+    }
+
     /**
      * Autorización permitida.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -28,17 +35,17 @@ class GetRequest extends FormRequest
     /**
      * Reglas de validación.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'period' => ['required', 'string', 'in:day,month,quarter,semester,year,total'],
+            'period' => ['required', 'string', 'in:month,quarter,semester,year'],
             'start_date' => ['required', 'date_format:Y-m-d'],
-            'end_date' => ['required', 'date_format:Y-m-d'],
-            'drugs' => ['required'],
-            'drugs.*' => ['integer', 'exists:drugs,id'],
-            'typeGraph'=>['required', 'string', 'in:bar,line,pie']
+            'end_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:start_date'],
+            'drugs' => ['present', 'array', 'list'],
+            'drugs.*' => ['bail', 'required', 'integer', 'min:1', 'distinct', 'exists:drugs,id'],
+            'typeGraph' => ['required', 'string', 'in:bar,line,pie'],
         ];
     }
 }

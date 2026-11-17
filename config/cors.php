@@ -19,13 +19,16 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:5173','http://localhost:5174', 'http://127.0.0.1', 'http://localhost', 'http://188.166.7.141'],
+    'allowed_origins' => array_values(array_filter(array_map('trim', explode(',', env(
+        'CORS_ALLOWED_ORIGINS',
+        env('APP_ENV') === 'local' ? 'http://localhost:5173,http://localhost:5174,http://127.0.0.1,http://localhost' : '',
+    ))))),
 
     'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['*'],
 
-    'exposed_headers' => [],
+    'exposed_headers' => ['Retry-After', 'X-RateLimit-Limit', 'X-RateLimit-Remaining'],
 
     'max_age' => 0,
 

@@ -2,22 +2,23 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\ApiController;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Auth\RegisterPostRequest;
 use App\Models\User;
-use App\Http\Requests\Admin\User\StorePostRequest;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Autenticación JWT por cookie HttpOnly o Bearer, con auditoría de sesión.
+ */
 class AuthController extends Controller
 {
-    /**
-     * Controlador para flujo de autenticación basado en JWT.
-     * Expone endpoints de registro, login, perfil ("me"), logout y refresh.
-     * Maneja emisión y rotación del token, además de registrar eventos de
-     * actividad (login/logout) para auditoría. El token también se adjunta
-     * como cookie HttpOnly y Secure para mitigar riesgos de XSS.
-     */
+    public function csrfCookie(): Response
+    {
+        return response()->noContent();
+    }
 
     /**
      * Registra un nuevo usuario usando los datos validados y genera un
@@ -25,14 +26,16 @@ class AuthController extends Controller
      * y registra automáticamente sesión iniciada. Devuelve estructura con
      * metadatos de expiración y permisos asociados.
      *
-     * @param StorePostRequest $request Datos ya validados (incluye contraseña).
-     * @return \Illuminate\Http\JsonResponse Datos de sesión + usuario.
+     * @param  RegisterPostRequest  $request  Datos públicos validados, sin asignaciones.
+     * @return JsonResponse Datos de sesión + usuario.
      */
-    public function register(StorePostRequest $request)
+    public function register(RegisterPostRequest $request): JsonResponse
     {
         $validated = $request->validated();
         $user = User::create($validated);
         $token = auth()->login($user);
+        $request->session()->regenerate();
+
         return $this->respondWithToken($token);
     }
 
@@ -41,19 +44,21 @@ class AuthController extends Controller
      * inválidas retorna 401 con mensaje de error. En caso exitoso registra
      * evento de login y devuelve token + roles + permisos.
      *
-     * @return \Illuminate\Http\JsonResponse Token y datos de usuario o error 401.
+     * @return JsonResponse Token y datos de usuario o error 401.
      */
-    public function login()
+    public function login(Request $request): JsonResponse
     {
-        $validated = request()->validate([
+        $validated = $request->validate([
             'email' => 'required|email',
-            'password' => 'required',
+            'password' => 'required|string',
         ]);
         $credentials = $validated;
         if (! $token = Auth::attempt($credentials)) {
             return response()->json(['error' => 'Credenciales incorrectas'], 401);
         }
         $this->logAndLoginEvent(Auth::user(), 'iniciado');
+        $request->session()->regenerate();
+
         return $this->respondWithToken($token);
     }
 
@@ -62,9 +67,9 @@ class AuthController extends Controller
      * Útil para reconstruir sesión del lado cliente (perfil). No incluye
      * relaciones extendidas para mantener la respuesta ligera.
      *
-     * @return \Illuminate\Http\JsonResponse Datos básicos del usuario.
+     * @return JsonResponse Datos básicos del usuario.
      */
-    public function me()
+    public function me(): JsonResponse
     {
         return response()->json(Auth::user());
     }
@@ -74,14 +79,20 @@ class AuthController extends Controller
      * Side effects: registra evento de logout en el activity log. Devuelve
      * mensaje genérico de éxito.
      *
-     * @return \Illuminate\Http\JsonResponse Confirmación de cierre de sesión.
+     * @return JsonResponse Confirmación de cierre de sesión.
      */
-    public function logout()
+    public function logout(Request $request): JsonResponse
     {
         $this->logAndLoginEvent(Auth::user(), 'cerrado');
-        Auth::logout(true);
+        Auth::logout();
+
+        if ($request->hasSession()) {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
+
         return response()->json(['message' => 'Logout successful'])
-            ->withCookie(cookie()->forget('token'));
+            ->withCookie(cookie()->forget('token', config('session.path'), config('session.domain')));
     }
 
     /**
@@ -89,30 +100,34 @@ class AuthController extends Controller
      * largas sin requerir reingreso de credenciales. Devuelve nuevo token y
      * TTL actualizado. Mantiene contexto de usuario.
      *
-     * @return \Illuminate\Http\JsonResponse Nuevo token y metadatos.
+     * @return JsonResponse Nuevo token y metadatos.
      */
-    public function refresh()
+    public function refresh(): JsonResponse
     {
-        return $this->respondWithToken(Auth::refresh(true, true));
+        return $this->respondWithToken(Auth::refresh());
     }
 
     /**
      * Construye respuesta estandarizada de autenticación. Incluye tipo de token,
      * segundos hasta expiración (`expires_in`), datos básicos del usuario y
-     * roles/permisos actuales. Adjunta cookie segura (Secure + HttpOnly + SameSite Strict)
+     * roles/permisos actuales. Adjunta cookie HttpOnly con atributos del entorno
      * para uso en navegadores evitando exposición a scripts.
      *
-     * @param string $token Token JWT recién emitido o refrescado.
-     * @return \Illuminate\Http\JsonResponse Estructura JSON de sesión.
+     * @param  string  $token  Token JWT recién emitido o refrescado.
+     * @return JsonResponse Estructura JSON de sesión.
      */
-    protected function respondWithToken($token)
+    protected function respondWithToken(string $token): JsonResponse
     {
-        //$cookie = cookie('token', $token, 60, '/', null, true, true, false, 'Strict');
-        
-        $cookie = cookie('token', $token, 60);
+        $expiresAt = Auth::setToken($token)->payload()->get('exp');
+        $expiresIn = max(0, $expiresAt - now()->timestamp);
+        $cookie = cookie(
+            'token', $token, 0, config('session.path'), config('session.domain'),
+            config('session.secure'), true, false, config('session.same_site'),
+        )->withExpires($expiresAt);
+
         return response()->json([
             'token_type' => 'bearer',
-            'expires_in' => Auth::factory()->getTTL() * 60,
+            'expires_in' => $expiresIn,
             'user' => Auth::user()->only(['name', 'email']),
             'roles' => Auth::user()->getRoleNames(),
             'permissions' => Auth::user()->getAllPermissions()->pluck('name'),
@@ -124,9 +139,8 @@ class AuthController extends Controller
      * Permite auditoría y rastreo de accesos. Se guardan propiedades clave
      * (nombre y email) para facilitar búsquedas posteriores.
      *
-     * @param User   $user      Usuario involucrado.
-     * @param string $activity  'iniciado' | 'cerrado'
-     * @return void
+     * @param  User  $user  Usuario involucrado.
+     * @param  string  $activity  'iniciado' | 'cerrado'
      */
     private function logAndLoginEvent(User $user, string $activity): void
     {

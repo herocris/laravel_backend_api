@@ -2,23 +2,30 @@
 
 namespace App\Http\Requests\WeaponConfiscation;
 
+use App\Traits\NormalizesFilterLists;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Request para obtener datos de gráficos de decomisos de armas.
  *
  * Valida:
- * - period: requerido, string (day|month|quarter|semester|year|total).
+ * - period: requerido, string (month|quarter|semester|year).
  * - start_date, end_date: requeridos, formato Y-m-d.
  * - weapons: requerido, array de IDs de armas (deben existir en tabla weapons).
  * - typeGraph: requerido, tipo de gráfico (bar|line|pie).
  */
 class GetRequest extends FormRequest
 {
+    use NormalizesFilterLists;
+
+    protected function prepareForValidation(): void
+    {
+        $this->normalizeFilterLists(['weapons']);
+    }
+
     /**
      * Autorización permitida.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -28,17 +35,17 @@ class GetRequest extends FormRequest
     /**
      * Reglas de validación.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'period' => ['required', 'string', 'in:day,month,quarter,semester,year,total'],
+            'period' => ['required', 'string', 'in:month,quarter,semester,year'],
             'start_date' => ['required', 'date_format:Y-m-d'],
-            'end_date' => ['required', 'date_format:Y-m-d'],
-            'weapons' => ['required'],
-            'weapons.*' => ['integer', 'exists:weapons,id'],
-            'typeGraph'=>['required', 'string', 'in:bar,line,pie']
+            'end_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:start_date'],
+            'weapons' => ['present', 'array', 'list'],
+            'weapons.*' => ['bail', 'required', 'integer', 'min:1', 'distinct', 'exists:weapons,id'],
+            'typeGraph' => ['required', 'string', 'in:bar,line,pie'],
         ];
     }
 }

@@ -13,7 +13,6 @@ use App\Http\Controllers\DrugController;
 use App\Http\Controllers\DrugPresentationController;
 use App\Http\Controllers\WeaponConfiscationController;
 use App\Http\Controllers\WeaponController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -22,10 +21,11 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 |
 | Este archivo define todas las rutas de la API REST.
-| 
+|
 | Middleware aplicado:
-| - 'auth': Autenticación JWT mediante cookie HttpOnly (AuthenticateJWT)
-| - 'throttle:global': Rate limiting global para prevenir abuso
+| - 'auth': Autenticación mediante el guard api (JWT)
+| - 'throttle:api': Cuota por usuario; autenticación y estadísticas tienen cuotas propias
+| - 'can:<permiso>': Autorización por acción declarada con HasMiddleware
 |
 | Todas las rutas retornan respuestas JSON con atributos transformados al español.
 | Los endpoints están agrupados en:
@@ -41,19 +41,21 @@ use Illuminate\Support\Facades\Route;
 | Grupo 1: Autenticación y Administración
 |--------------------------------------------------------------------------
 | Endpoints para autenticación JWT y gestión de usuarios, roles y permisos.
-| Login y Register no requieren autenticación (withoutMiddleware).
+| Login y Register no requieren autenticación y sí protección CSRF.
 | Activity logs registra todas las operaciones CRUD del sistema.
 */
 
-Route::middleware(['auth','throttle:global'])->group(function () {
-    
-    // === Autenticación JWT ===
-    // === Autenticación JWT ===
-    Route::post('login', [AuthController::class,'login'])->withoutMiddleware(['auth'])->name('auth.login');
-    Route::post('register', [AuthController::class,'register'])->withoutMiddleware(['auth'])->name('auth.register');
-    Route::get('me', [AuthController::class,'me'])->name('auth.me');
-    Route::post('logout', [AuthController::class,'logout'])->name('auth.logout');
-    Route::post('refresh', [AuthController::class,'refresh'])->name('auth.refresh');
+Route::get('csrf-cookie', [AuthController::class, 'csrfCookie'])->middleware('throttle:csrf')->name('auth.csrf-cookie');
+Route::post('login', [AuthController::class, 'login'])->middleware('throttle:login')->name('auth.login');
+Route::post('register', [AuthController::class, 'register'])->middleware('throttle:register')->name('auth.register');
+
+Route::middleware(['auth', 'throttle:session'])->group(function () {
+    Route::get('me', [AuthController::class, 'me'])->name('auth.me');
+    Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
+    Route::post('refresh', [AuthController::class, 'refresh'])->name('auth.refresh');
+});
+
+Route::middleware(['auth', 'throttle:api'])->group(function () {
 
     // === Gestión de Usuarios ===
     // CRUD completo + soft deletes (indexDeleted, restore)
@@ -86,19 +88,19 @@ Route::middleware(['auth','throttle:global'])->group(function () {
 |--------------------------------------------------------------------------
 | Endpoints para gestión de entidades del sistema (drogas, armas, municiones,
 | presentaciones de drogas) y decomisos con sus items relacionados.
-| 
+|
 | Todas las entidades de catálogo incluyen:
 | - CRUD completo (index, store, show, update, destroy)
 | - Soft deletes (indexDeleted, restore)
-| 
+|
 | Los decomisos incluyen además:
 | - Endpoint especial 'map' para visualización geográfica
 | - Endpoints 'graphIndex' para estadísticas agregadas por período
 | - Endpoints 'indexByConfiscation' para filtrar items por decomiso específico
 */
 
-Route::middleware(['auth','throttle:global'])->group(function () {
-    
+Route::middleware(['auth', 'throttle:api'])->group(function () {
+
     // === Catálogo: Municiones ===
     Route::get('/ammunition/deleted', [AmmunitionController::class, 'indexDeleted'])->name('ammunition.indexDeleted');
     Route::post('/ammunition/restore/{ammunition}', [AmmunitionController::class, 'restore'])->withTrashed()->name('ammunition.restore');
@@ -107,7 +109,7 @@ Route::middleware(['auth','throttle:global'])->group(function () {
     // === Decomisos Principales ===
     // Incluye endpoint especial 'map' para visualizar decomisos en mapa
     Route::get('/confiscation/deleted', [ConfiscationController::class, 'indexDeleted'])->name('confiscation.indexDeleted');
-    Route::get('/confiscation/map', [ConfiscationController::class, 'mapConfiscations']);
+    Route::get('/confiscation/map', [ConfiscationController::class, 'mapConfiscations'])->withoutMiddleware('throttle:api')->middleware('throttle:statistics');
     Route::post('/confiscation/restore/{confiscation}', [ConfiscationController::class, 'restore'])->withTrashed()->name('confiscation.restore');
     Route::apiResource('confiscation', ConfiscationController::class);
 
@@ -127,30 +129,32 @@ Route::middleware(['auth','throttle:global'])->group(function () {
     Route::apiResource('weapon', WeaponController::class);
 
     // === Decomisos de Municiones ===
-    // graphIndex: estadísticas agregadas por período (día, mes, trimestre, semestre, año, total)
+    // graphIndex: estadísticas agregadas por mes, trimestre, semestre o año de calendario
     // indexByConfiscation: lista items de un decomiso específico
-    Route::get('/ammunitionGraphIndex', [AmmunitionConfiscationController::class, 'graphIndex'])->name('ammunitionConfiscation.graphIndex') ;
-    Route::get('/ammunitionConfiscation/{idConfiscation}/confiscation', [AmmunitionConfiscationController::class, 'indexByConfiscation'])->name('ammunitionConfiscation.indexByConfiscation')  ;
+    Route::get('/ammunitionGraphIndex', [AmmunitionConfiscationController::class, 'graphIndex'])->withoutMiddleware('throttle:api')->middleware('throttle:statistics')->name('ammunitionConfiscation.graphIndex');
+    Route::get('/ammunitionConfiscation/{idConfiscation}/confiscation', [AmmunitionConfiscationController::class, 'indexByConfiscation'])->name('ammunitionConfiscation.indexByConfiscation');
     Route::get('/ammunitionConfiscation/deleted', [AmmunitionConfiscationController::class, 'indexDeleted'])->name('ammunitionConfiscation.indexDeleted');
     Route::post('/ammunitionConfiscation/restore/{ammunitionConfiscation}', [AmmunitionConfiscationController::class, 'restore'])->withTrashed()->name('ammunitionConfiscation.restore');
+    Route::get('/ammunitionConfiscation/{ammunitionConfiscation}/photo', [AmmunitionConfiscationController::class, 'photo'])->withTrashed()->name('ammunitionConfiscation.photo');
     Route::apiResource('ammunitionConfiscation', AmmunitionConfiscationController::class);
 
     // === Decomisos de Drogas ===
     // graphIndex: estadísticas con peso y cantidad agregadas por período
     // indexByConfiscation: lista items de drogas en un decomiso específico
-    Route::get('/drugGraphIndex', [DrugConfiscationController::class, 'graphIndex'])->name('drugConfiscation.graphIndex');
+    Route::get('/drugGraphIndex', [DrugConfiscationController::class, 'graphIndex'])->withoutMiddleware('throttle:api')->middleware('throttle:statistics')->name('drugConfiscation.graphIndex');
     Route::get('/drugConfiscation/{idConfiscation}/confiscation', [DrugConfiscationController::class, 'indexByConfiscation'])->name('drugConfiscation.indexByConfiscation');
     Route::get('/drugConfiscation/deleted', [DrugConfiscationController::class, 'indexDeleted'])->name('drugConfiscation.indexDeleted');
     Route::post('/drugConfiscation/restore/{drugConfiscation}', [DrugConfiscationController::class, 'restore'])->withTrashed()->name('drugConfiscation.restore');
+    Route::get('/drugConfiscation/{drugConfiscation}/photo', [DrugConfiscationController::class, 'photo'])->withTrashed()->name('drugConfiscation.photo');
     Route::apiResource('drugConfiscation', DrugConfiscationController::class);
 
     // === Decomisos de Armas ===
     // graphIndex: estadísticas agregadas por período
     // indexByConfiscation: lista items de armas en un decomiso específico
-    Route::get('/weaponGraphIndex', [WeaponConfiscationController::class, 'graphIndex'])->name('weaponConfiscation.graphIndex');
+    Route::get('/weaponGraphIndex', [WeaponConfiscationController::class, 'graphIndex'])->withoutMiddleware('throttle:api')->middleware('throttle:statistics')->name('weaponConfiscation.graphIndex');
     Route::get('/weaponConfiscation/{idConfiscation}/confiscation', [WeaponConfiscationController::class, 'indexByConfiscation'])->name('weaponConfiscation.indexByConfiscation');
     Route::get('/weaponConfiscation/deleted', [WeaponConfiscationController::class, 'indexDeleted'])->name('weaponConfiscation.indexDeleted');
     Route::post('/weaponConfiscation/restore/{weaponConfiscation}', [WeaponConfiscationController::class, 'restore'])->withTrashed()->name('weaponConfiscation.restore');
+    Route::get('/weaponConfiscation/{weaponConfiscation}/photo', [WeaponConfiscationController::class, 'photo'])->withTrashed()->name('weaponConfiscation.photo');
     Route::apiResource('weaponConfiscation', WeaponConfiscationController::class);
 });
-

@@ -63,9 +63,12 @@ class IndexDeletedPermissionTest extends TestCase
 
         $response = $this->getJson(route('permission.indexDeleted'));
         $response->assertOk();
-        $response->assertExactJson([
-            'data' => [],
-        ]);
+        $response->assertJsonPath('data', [])
+            ->assertJsonPath('total', 0)
+            ->assertJsonPath('per_page', 10)
+            ->assertJsonPath('current_page', 1)
+            ->assertJsonPath('from', null)
+            ->assertJsonPath('to', null);
         $response->assertJsonCount(0, 'data');
     }
 

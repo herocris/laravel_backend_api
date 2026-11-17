@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\PersistUploadedImage;
 use App\Http\Requests\DrugPresentation\StorePostRequest;
 use App\Http\Requests\DrugPresentation\UpdatePutRequest;
 use App\Http\Resources\DrugPresentation\DrugPresentationResource;
@@ -12,6 +13,12 @@ use Illuminate\Routing\Controllers\Middleware;
 
 class DrugPresentationController extends ApiController implements HasMiddleware
 {
+    private const LIST_FIELDS = [
+        'identificador' => 'id',
+        'descripcion' => 'description',
+        'logo' => 'logo',
+    ];
+
     /**
      * Middlewares aplicados al controlador de presentaciones de droga.
      * Garantiza transformación consistente de la data mediante `DrugPresentationResource`.
@@ -21,24 +28,23 @@ class DrugPresentationController extends ApiController implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:drugPresentation.view,api', only: ['index', 'show', 'indexDeleted']),
-            new Middleware('permission:drugPresentation.create,api', only: ['store']),
-            new Middleware('permission:drugPresentation.update,api', only: ['update', 'restore']),
-            new Middleware('permission:drugPresentation.delete,api', only: ['destroy']),
-            new Middleware('transformInput:'.DrugPresentationResource::class.'', only: ['store', 'update']),
+            new Middleware('can:drugPresentation.view', only: ['index', 'show', 'indexDeleted']),
+            new Middleware('can:drugPresentation.create', only: ['store']),
+            new Middleware('can:drugPresentation.update', only: ['update', 'restore']),
+            new Middleware('can:drugPresentation.delete', only: ['destroy']),
         ];
     }
 
     /**
-     * Lista todas las presentaciones registradas.
+     * Lista registros con filtros y paginación SQL.
      *
-     * @return JsonResponse Colección de presentaciones.
+     * @return JsonResponse Página de recursos con metadatos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        $drugPresentations = DrugPresentation::all();
+        $drugPresentations = DrugPresentation::query();
 
-        return $this->showAll($drugPresentations);
+        return $this->showAll($drugPresentations, DrugPresentationResource::class, self::LIST_FIELDS);
     }
 
     /**
@@ -47,12 +53,12 @@ class DrugPresentationController extends ApiController implements HasMiddleware
      * @param  StorePostRequest  $request  Datos validados.
      * @return JsonResponse Recurso creado.
      */
-    public function store(StorePostRequest $request)
+    public function store(StorePostRequest $request, PersistUploadedImage $images)
     {
         $validated = $request->validated();
-        $drugPresentation = DrugPresentation::create($validated);
+        $drugPresentation = $images->save(new DrugPresentation, $validated, 'logo', 'drugPresentation', 'public');
 
-        return $this->showOne($drugPresentation);
+        return $this->showOne(new DrugPresentationResource($drugPresentation));
     }
 
     /**
@@ -63,7 +69,7 @@ class DrugPresentationController extends ApiController implements HasMiddleware
      */
     public function show(DrugPresentation $drugPresentation)
     {
-        return $this->showOne($drugPresentation);
+        return $this->showOne(new DrugPresentationResource($drugPresentation));
     }
 
     /**
@@ -73,12 +79,12 @@ class DrugPresentationController extends ApiController implements HasMiddleware
      * @param  DrugPresentation  $drugPresentation  Recurso a actualizar.
      * @return JsonResponse Recurso actualizado.
      */
-    public function update(UpdatePutRequest $request, DrugPresentation $drugPresentation)
+    public function update(UpdatePutRequest $request, DrugPresentation $drugPresentation, PersistUploadedImage $images)
     {
         $validated = $request->validated();
-        $drugPresentation->update($validated);
+        $images->save($drugPresentation, $validated, 'logo', 'drugPresentation', 'public');
 
-        return $this->showOne($drugPresentation);
+        return $this->showOne(new DrugPresentationResource($drugPresentation));
     }
 
     /**
@@ -91,19 +97,19 @@ class DrugPresentationController extends ApiController implements HasMiddleware
     {
         $drugPresentation->delete();
 
-        return $this->showOne($drugPresentation);
+        return $this->showOne(new DrugPresentationResource($drugPresentation));
     }
 
     /**
-     * Lista presentaciones en papelera.
+     * Lista registros eliminados con filtros y paginación SQL.
      *
-     * @return JsonResponse Colección soft-deleted.
+     * @return JsonResponse Página de recursos con metadatos.
      */
-    public function indexDeleted()
+    public function indexDeleted(): JsonResponse
     {
-        $drugPresentations = DrugPresentation::onlyTrashed()->get();
+        $drugPresentations = DrugPresentation::onlyTrashed();
 
-        return $this->showAll($drugPresentations);
+        return $this->showAll($drugPresentations, DrugPresentationResource::class, self::LIST_FIELDS);
     }
 
     /**
@@ -116,6 +122,6 @@ class DrugPresentationController extends ApiController implements HasMiddleware
     {
         $drugPresentation->restore();
 
-        return $this->showOne($drugPresentation);
+        return $this->showOne(new DrugPresentationResource($drugPresentation));
     }
 }

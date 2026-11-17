@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\PersistUploadedImage;
 use App\Http\Requests\Ammunition\StorePostRequest;
 use App\Http\Requests\Ammunition\UpdatePutRequest;
 use App\Http\Resources\Ammunition\AmmunitionResource;
@@ -12,34 +13,37 @@ use Illuminate\Routing\Controllers\Middleware;
 
 class AmmunitionController extends ApiController implements HasMiddleware
 {
+    private const LIST_FIELDS = [
+        'identificador' => 'id',
+        'descripcion' => 'description',
+        'logo' => 'logo',
+    ];
+
     /**
      * Middlewares del controlador de municiones.
-     * `transformInput` alinea la carga útil con `AmmunitionResource` en
-     * creación y actualización para mantener consistencia.
      *
      * @return array<Middleware> Lista de middlewares.
      */
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:ammunition.view,api', only: ['index', 'show', 'indexDeleted']),
-            new Middleware('permission:ammunition.create,api', only: ['store']),
-            new Middleware('permission:ammunition.update,api', only: ['update', 'restore']),
-            new Middleware('permission:ammunition.delete,api', only: ['destroy']),
-            new Middleware('transformInput:'.AmmunitionResource::class.'', only: ['store', 'update']),
+            new Middleware('can:ammunition.view', only: ['index', 'show', 'indexDeleted']),
+            new Middleware('can:ammunition.create', only: ['store']),
+            new Middleware('can:ammunition.update', only: ['update', 'restore']),
+            new Middleware('can:ammunition.delete', only: ['destroy']),
         ];
     }
 
     /**
-     * Lista todas las municiones activas. Sin paginación.
+     * Lista registros con filtros y paginación SQL.
      *
-     * @return JsonResponse Colección de municiones.
+     * @return JsonResponse Página de recursos con metadatos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        $ammunitions = Ammunition::all();
+        $ammunitions = Ammunition::query();
 
-        return $this->showAll($ammunitions);
+        return $this->showAll($ammunitions, AmmunitionResource::class, self::LIST_FIELDS);
     }
 
     /**
@@ -48,12 +52,12 @@ class AmmunitionController extends ApiController implements HasMiddleware
      * @param  StorePostRequest  $request  Datos validados.
      * @return JsonResponse Munición creada.
      */
-    public function store(StorePostRequest $request)
+    public function store(StorePostRequest $request, PersistUploadedImage $images)
     {
         $validated = $request->validated();
-        $ammunition = Ammunition::create($validated);
+        $ammunition = $images->save(new Ammunition, $validated, 'logo', 'ammunition', 'public');
 
-        return $this->showOne($ammunition);
+        return $this->showOne(new AmmunitionResource($ammunition));
     }
 
     /**
@@ -64,7 +68,7 @@ class AmmunitionController extends ApiController implements HasMiddleware
      */
     public function show(Ammunition $ammunition)
     {
-        return $this->showOne($ammunition);
+        return $this->showOne(new AmmunitionResource($ammunition));
     }
 
     /**
@@ -74,12 +78,12 @@ class AmmunitionController extends ApiController implements HasMiddleware
      * @param  Ammunition  $ammunition  Recurso a actualizar.
      * @return JsonResponse Recurso actualizado.
      */
-    public function update(UpdatePutRequest $request, Ammunition $ammunition)
+    public function update(UpdatePutRequest $request, Ammunition $ammunition, PersistUploadedImage $images)
     {
         $validated = $request->validated();
-        $ammunition->update($validated);
+        $images->save($ammunition, $validated, 'logo', 'ammunition', 'public');
 
-        return $this->showOne($ammunition);
+        return $this->showOne(new AmmunitionResource($ammunition));
     }
 
     /**
@@ -92,19 +96,19 @@ class AmmunitionController extends ApiController implements HasMiddleware
     {
         $ammunition->delete();
 
-        return $this->showOne($ammunition);
+        return $this->showOne(new AmmunitionResource($ammunition));
     }
 
     /**
-     * Lista municiones en papelera (soft-deleted).
+     * Lista registros eliminados con filtros y paginación SQL.
      *
-     * @return JsonResponse Colección en papelera.
+     * @return JsonResponse Página de recursos con metadatos.
      */
-    public function indexDeleted()
+    public function indexDeleted(): JsonResponse
     {
-        $ammunitions = Ammunition::onlyTrashed()->get();
+        $ammunitions = Ammunition::onlyTrashed();
 
-        return $this->showAll($ammunitions);
+        return $this->showAll($ammunitions, AmmunitionResource::class, self::LIST_FIELDS);
     }
 
     /**
@@ -117,6 +121,6 @@ class AmmunitionController extends ApiController implements HasMiddleware
     {
         $ammunition->restore();
 
-        return $this->showOne($ammunition);
+        return $this->showOne(new AmmunitionResource($ammunition));
     }
 }

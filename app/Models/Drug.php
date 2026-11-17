@@ -2,22 +2,18 @@
 
 namespace App\Models;
 
+use App\Traits\Activitylog;
+use Database\Factories\DrogaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Observers\DrugObserver;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use App\Http\Resources\Drug\DrugResource;
+/** Trait para invocar la funcion getActivitylogOptions */
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
-/** Trait para invocar la funcion getActivitylogOptions */
-use App\Traits\Activitylog;
 
-#[ObservedBy([DrugObserver::class])]
 class Drug extends Model
 {
-    /** @use HasFactory<\Database\Factories\DrogaFactory> */
-    use HasFactory, SoftDeletes, Activitylog;
-    public $resource = DrugResource::class;
+    /** @use HasFactory<DrogaFactory> */
+    use Activitylog, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'description',
@@ -31,11 +27,11 @@ class Drug extends Model
      */
     public function getActivitylogOptions(): LogOptions
     {
-        return $this->RecordLog(['description','logo'],'drug');
+        return $this->RecordLog(['description', 'logo'], 'drug');
     }
 
-    public function drugConfiscations(){
+    public function drugConfiscations()
+    {
         return $this->hasMany('App\Models\DrugConfiscation');
     }
-
 }

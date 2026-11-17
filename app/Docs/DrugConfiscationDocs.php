@@ -45,7 +45,7 @@ class DrugConfiscationDocs
     #[OA\Schema(
         schema: 'DrugConfiscationCreateRequest',
         type: 'object',
-        required: ['cantidad','peso','foto','decomiso','droga','presentacion'],
+        required: ['cantidad', 'peso', 'foto', 'decomiso', 'droga', 'presentacion'],
         properties: [
             new OA\Property(property: 'cantidad', type: 'integer', example: 5),
             new OA\Property(property: 'peso', type: 'number', format: 'float', example: 12.5),
@@ -58,7 +58,7 @@ class DrugConfiscationDocs
     #[OA\Schema(
         schema: 'DrugConfiscationUpdateRequest',
         type: 'object',
-        required: ['cantidad','peso','decomiso','droga','presentacion'],
+        required: ['cantidad', 'peso', 'decomiso', 'droga', 'presentacion'],
         properties: [
             new OA\Property(property: 'cantidad', type: 'integer', example: 6),
             new OA\Property(property: 'peso', type: 'number', format: 'float', example: 10.0),
@@ -72,7 +72,7 @@ class DrugConfiscationDocs
         path: '/api/drugConfiscation',
         tags: ['Decomisos Drogas'],
         summary: 'Listar decomisos de drogas',
-        security: [["bearerAuth" => []]],
+        security: [['bearerAuth' => []]],
         responses: [
             new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: '#/components/schemas/DrugConfiscation'))),
             new OA\Response(response: 401, description: 'No autenticado', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
@@ -88,7 +88,7 @@ class DrugConfiscationDocs
         path: '/api/drugConfiscation/{idConfiscation}/confiscation',
         tags: ['Decomisos Drogas'],
         summary: 'Listar decomisos de drogas por decomiso',
-        security: [["bearerAuth" => []]],
+        security: [['bearerAuth' => []]],
         parameters: [new OA\Parameter(name: 'idConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
         responses: [
             new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: '#/components/schemas/DrugConfiscation'))),
@@ -105,7 +105,7 @@ class DrugConfiscationDocs
         path: '/api/drugConfiscation',
         tags: ['Decomisos Drogas'],
         summary: 'Crear decomiso de droga',
-        security: [["bearerAuth" => []]],
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscationCreateRequest')),
         responses: [
             new OA\Response(response: 201, description: 'Creado', content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscation')),
@@ -123,7 +123,7 @@ class DrugConfiscationDocs
         path: '/api/drugConfiscation/{drugConfiscation}',
         tags: ['Decomisos Drogas'],
         summary: 'Mostrar decomiso de droga',
-        security: [["bearerAuth" => []]],
+        security: [['bearerAuth' => []]],
         parameters: [new OA\Parameter(name: 'drugConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
         responses: [
             new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscation')),
@@ -140,7 +140,7 @@ class DrugConfiscationDocs
         path: '/api/drugConfiscation/{drugConfiscation}',
         tags: ['Decomisos Drogas'],
         summary: 'Actualizar decomiso de droga',
-        security: [["bearerAuth" => []]],
+        security: [['bearerAuth' => []]],
         parameters: [new OA\Parameter(name: 'drugConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
         requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscationUpdateRequest')),
         responses: [
@@ -159,7 +159,7 @@ class DrugConfiscationDocs
         path: '/api/drugConfiscation/{drugConfiscation}',
         tags: ['Decomisos Drogas'],
         summary: 'Eliminar decomiso de droga',
-        security: [["bearerAuth" => []]],
+        security: [['bearerAuth' => []]],
         parameters: [new OA\Parameter(name: 'drugConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
         responses: [
             new OA\Response(response: 200, description: 'Eliminado', content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscation')),
@@ -176,7 +176,7 @@ class DrugConfiscationDocs
         path: '/api/drugConfiscation/deleted',
         tags: ['Decomisos Drogas'],
         summary: 'Listar decomisos de drogas eliminados',
-        security: [["bearerAuth" => []]],
+        security: [['bearerAuth' => []]],
         responses: [
             new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: '#/components/schemas/DrugConfiscation'))),
             new OA\Response(response: 401, description: 'No autenticado', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
@@ -192,7 +192,7 @@ class DrugConfiscationDocs
         path: '/api/drugConfiscation/restore/{drugConfiscation}',
         tags: ['Decomisos Drogas'],
         summary: 'Restaurar decomiso de droga',
-        security: [["bearerAuth" => []]],
+        security: [['bearerAuth' => []]],
         parameters: [new OA\Parameter(name: 'drugConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
         responses: [
             new OA\Response(response: 200, description: 'Restaurado', content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscation')),
@@ -209,9 +209,10 @@ class DrugConfiscationDocs
         path: '/api/drugGraphIndex',
         tags: ['Decomisos Drogas'],
         summary: 'Datos gráficos decomisos de drogas',
-        security: [["bearerAuth" => []]],
+        security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'period', in: 'query', required: true, schema: new OA\Schema(type: 'string', example: 'day')), 
+            new OA\Parameter(name: 'period', in: 'query', required: true, schema: new OA\Schema(type: 'string', enum: ['month', 'quarter', 'semester', 'year'], example: 'month', description: 'Períodos de calendario: YYYY-MM, YYYY-Q1…Q4, YYYY-S1…S2 o YYYY. Cantidades enteras; etiquetas homónimas incluyen ID. Pie suma el rango completo.')),
+            new OA\Parameter(name: 'typeGraph', in: 'query', required: true, schema: new OA\Schema(type: 'string', enum: ['bar', 'line', 'pie'], example: 'bar')),
             new OA\Parameter(name: 'start_date', in: 'query', required: true, schema: new OA\Schema(type: 'string', format: 'date', example: '2025-01-01')),
             new OA\Parameter(name: 'end_date', in: 'query', required: true, schema: new OA\Schema(type: 'string', format: 'date', example: '2025-01-31')),
             new OA\Parameter(name: 'drugs', in: 'query', required: true, schema: new OA\Schema(type: 'string', example: '[1,2]'), description: 'JSON array de IDs de drogas'),

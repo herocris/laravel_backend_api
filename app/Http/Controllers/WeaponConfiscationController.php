@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ConfiscationStatisticsQuery;
+use App\Helpers\PersistUploadedImage;
 use App\Http\Requests\WeaponConfiscation\GetRequest;
 use App\Http\Requests\WeaponConfiscation\StorePostRequest;
 use App\Http\Requests\WeaponConfiscation\UpdatePutRequest;
@@ -10,10 +12,17 @@ use App\Models\WeaponConfiscation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class WeaponConfiscationController extends ApiController implements HasMiddleware
 {
+    private const LIST_FIELDS = [
+        'identificador' => 'id',
+        'cantidad' => 'amount',
+        'foto' => 'photo',
+    ];
+
     /**
      * Middlewares para items de decomiso de armas: transforma entrada según recurso.
      *
@@ -22,25 +31,24 @@ class WeaponConfiscationController extends ApiController implements HasMiddlewar
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:weaponConfiscation.view,api', only: ['index', 'show', 'indexDeleted', 'indexByConfiscation']),
-            new Middleware('permission:weaponConfiscation.create,api', only: ['store']),
-            new Middleware('permission:weaponConfiscation.update,api', only: ['update', 'restore']),
-            new Middleware('permission:weaponConfiscation.delete,api', only: ['destroy']),
-            new Middleware('permission:graph.view,api', only: ['graphIndex']),
-            new Middleware('transformInput:'.WeaponConfiscationResource::class.'', only: ['store', 'update']),
+            new Middleware('can:weaponConfiscation.view', only: ['index', 'show', 'indexDeleted', 'indexByConfiscation', 'photo']),
+            new Middleware('can:weaponConfiscation.create', only: ['store']),
+            new Middleware('can:weaponConfiscation.update', only: ['update', 'restore']),
+            new Middleware('can:weaponConfiscation.delete', only: ['destroy']),
+            new Middleware('can:graph.view', only: ['graphIndex']),
         ];
     }
 
     /**
-     * Lista todos los registros de armas decomisadas.
+     * Lista registros con filtros y paginación SQL.
      *
-     * @return JsonResponse Colección de registros.
+     * @return JsonResponse Página de recursos con metadatos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        $weaponConfiscations = WeaponConfiscation::all();
+        $weaponConfiscations = WeaponConfiscation::query()->with(['confiscation:id,observation', 'weapon:id,description']);
 
-        return $this->showAll($weaponConfiscations);
+        return $this->showAll($weaponConfiscations, WeaponConfiscationResource::class, self::LIST_FIELDS);
     }
 
     /**
@@ -49,11 +57,11 @@ class WeaponConfiscationController extends ApiController implements HasMiddlewar
      * @param  int  $idConfiscation  ID del decomiso.
      * @return JsonResponse Colección filtrada.
      */
-    public function indexByConfiscation(int $idConfiscation)
+    public function indexByConfiscation(int $idConfiscation): JsonResponse
     {
-        $weaponConfiscations = WeaponConfiscation::where('confiscation_id', $idConfiscation);
+        $weaponConfiscations = WeaponConfiscation::where('confiscation_id', $idConfiscation)->with(['confiscation:id,observation', 'weapon:id,description']);
 
-        return $this->showAll($weaponConfiscations->get());
+        return $this->showAll($weaponConfiscations, WeaponConfiscationResource::class, self::LIST_FIELDS);
     }
 
     /**
@@ -62,12 +70,12 @@ class WeaponConfiscationController extends ApiController implements HasMiddlewar
      * @param  StorePostRequest  $request  Datos validados.
      * @return JsonResponse Recurso creado.
      */
-    public function store(StorePostRequest $request)
+    public function store(StorePostRequest $request, PersistUploadedImage $images)
     {
         $validated = $request->validated();
-        $weaponConfiscation = WeaponConfiscation::create($validated);
+        $weaponConfiscation = $images->save(new WeaponConfiscation, $validated, 'photo', 'weaponConfiscation', 'evidence');
 
-        return $this->showOne($weaponConfiscation);
+        return $this->showOne(new WeaponConfiscationResource($weaponConfiscation));
     }
 
     /**
@@ -78,7 +86,21 @@ class WeaponConfiscationController extends ApiController implements HasMiddlewar
      */
     public function show(WeaponConfiscation $weaponConfiscation)
     {
-        return $this->showOne($weaponConfiscation);
+        return $this->showOne(new WeaponConfiscationResource($weaponConfiscation));
+    }
+
+    public function photo(WeaponConfiscation $weaponConfiscation): StreamedResponse
+    {
+        $path = $weaponConfiscation->photo;
+        abort_unless(is_string($path) && preg_match('~^weaponConfiscation/[A-Za-z0-9_-]+\\.png$~D', $path), 404);
+        $disk = Storage::disk('evidence');
+        abort_unless($disk->exists($path), 404);
+
+        return $disk->download($path, 'evidence.png', [
+            'Content-Type' => 'image/png',
+            'Cache-Control' => 'private, no-store',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 
     /**
@@ -88,12 +110,12 @@ class WeaponConfiscationController extends ApiController implements HasMiddlewar
      * @param  WeaponConfiscation  $weaponConfiscation  Recurso objetivo.
      * @return JsonResponse Recurso actualizado.
      */
-    public function update(UpdatePutRequest $request, WeaponConfiscation $weaponConfiscation)
+    public function update(UpdatePutRequest $request, WeaponConfiscation $weaponConfiscation, PersistUploadedImage $images)
     {
         $validated = $request->validated();
-        $weaponConfiscation->update($validated);
+        $images->save($weaponConfiscation, $validated, 'photo', 'weaponConfiscation', 'evidence');
 
-        return $this->showOne($weaponConfiscation);
+        return $this->showOne(new WeaponConfiscationResource($weaponConfiscation));
     }
 
     /**
@@ -106,19 +128,19 @@ class WeaponConfiscationController extends ApiController implements HasMiddlewar
     {
         $weaponConfiscation->delete();
 
-        return $this->showOne($weaponConfiscation);
+        return $this->showOne(new WeaponConfiscationResource($weaponConfiscation));
     }
 
     /**
-     * Lista registros soft-deleted.
+     * Lista registros eliminados con filtros y paginación SQL.
      *
-     * @return JsonResponse Colección en papelera.
+     * @return JsonResponse Página de recursos con metadatos.
      */
-    public function indexDeleted()
+    public function indexDeleted(): JsonResponse
     {
-        $weaponConfiscations = WeaponConfiscation::onlyTrashed()->get();
+        $weaponConfiscations = WeaponConfiscation::onlyTrashed()->with(['confiscation:id,observation', 'weapon:id,description']);
 
-        return $this->showAll($weaponConfiscations);
+        return $this->showAll($weaponConfiscations, WeaponConfiscationResource::class, self::LIST_FIELDS);
     }
 
     /**
@@ -131,46 +153,24 @@ class WeaponConfiscationController extends ApiController implements HasMiddlewar
     {
         $weaponConfiscation->restore();
 
-        return $this->showOne($weaponConfiscation);
+        return $this->showOne(new WeaponConfiscationResource($weaponConfiscation));
     }
 
     /**
      * Genera datos agregados de armas decomisadas para gráficos.
-     * Usa período (día, mes, etc.) y rango de fechas; filtra por conjunto de armas.
+     * Usa períodos de calendario y rango de fechas; filtra por conjunto de armas.
      *
      * @param  GetRequest  $request  Parámetros: period, start_date, end_date, weapons[].
      * @return JsonResponse lineBarData y pieData.
      */
-    public function graphIndex(GetRequest $request)
+    public function graphIndex(GetRequest $request, ConfiscationStatisticsQuery $statistics): JsonResponse
     {
-        $period = $request->input('period');
-        $startDate = $request->input('start_date');
-        $endDate = $request->input('end_date');
-        $weapons = json_decode($request->input('weapons') ?? '[]');
-        $queryp = $this->queryPeriod($period);
-
-        $query = DB::table('data_graph_weapon_confiscation')
-            ->whereIn('weapon_id', $weapons)
-            ->whereBetween('full_date', [$startDate, $endDate]);
-
-        $queryBarLine = $query->clone()->select(
-            DB::raw("{$queryp} as period"),
-            'weapon_description',
-            DB::raw('SUM(total_amount) as total_amount')
-        )
-            ->groupBy('period', 'weapon_id', 'weapon_description')
-            ->orderBy('period', 'asc')->get();
-
-        $queryPie = $query->clone()->select(
-            'weapon_description',
-            DB::raw('SUM(total_amount) as total_amount')
-        )
-            ->groupBy('weapon_description')
-            ->orderBy('weapon_description', 'asc')->get();
-
-        $linedata = $this->FormatCollectionBarLine($queryBarLine, 'weapons');
-        $pieData = $this->FormatCollectionPie($queryPie, 'weapons');
-
-        return response()->json(['lineBarData' => $linedata, 'pieData' => $pieData]);
+        return response()->json($statistics->get(
+            'weapon',
+            $request->validated('period'),
+            $request->validated('start_date'),
+            $request->validated('end_date'),
+            $request->validated('weapons'),
+        ));
     }
 }

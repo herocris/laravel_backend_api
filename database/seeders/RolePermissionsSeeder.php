@@ -15,25 +15,34 @@ class RolePermissionsSeeder extends Seeder
     public function run(): void
     {
         DB::transaction(function (): void {
-            $readPermissions = [
-                'drug.view',
-                'drugPresentation.view',
-                'weapon.view',
-                'ammunition.view',
-                'confiscation.view',
-                'drugConfiscation.view',
-                'weaponConfiscation.view',
-                'ammunitionConfiscation.view',
-                'dashboard.view',
-                'graph.view',
-                'map.view',
-            ];
+            foreach ($this->permissionsByRole() as $roleName => $permissions) {
+                Role::findByName($roleName, 'api')->syncPermissions($permissions);
+            }
+        });
+    }
 
-            Role::findByName('administrador', 'api')->syncPermissions(
-                Permission::where('guard_name', 'api')->get(),
-            );
+    /**
+     * @return array<string, list<string>>
+     */
+    public function permissionsByRole(): array
+    {
+        $readPermissions = [
+            'drug.view',
+            'drugPresentation.view',
+            'weapon.view',
+            'ammunition.view',
+            'confiscation.view',
+            'drugConfiscation.view',
+            'weaponConfiscation.view',
+            'ammunitionConfiscation.view',
+            'dashboard.view',
+            'graph.view',
+            'map.view',
+        ];
 
-            Role::findByName('operador', 'api')->syncPermissions([
+        return [
+            'administrador' => Permission::where('guard_name', 'api')->pluck('name')->all(),
+            'operador' => [
                 ...$readPermissions,
                 'drug.create',
                 'drug.update',
@@ -51,9 +60,8 @@ class RolePermissionsSeeder extends Seeder
                 'weaponConfiscation.update',
                 'ammunitionConfiscation.create',
                 'ammunitionConfiscation.update',
-            ]);
-
-            Role::findByName('analista', 'api')->syncPermissions($readPermissions);
-        });
+            ],
+            'analista' => $readPermissions,
+        ];
     }
 }

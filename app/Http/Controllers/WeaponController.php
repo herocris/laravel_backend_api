@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\PersistUploadedImage;
 use App\Http\Requests\Weapon\StorePostRequest;
 use App\Http\Requests\Weapon\UpdatePutRequest;
 use App\Http\Resources\Weapon\WeaponResource;
@@ -12,35 +13,37 @@ use Illuminate\Routing\Controllers\Middleware;
 
 class WeaponController extends ApiController implements HasMiddleware
 {
+    private const LIST_FIELDS = [
+        'identificador' => 'id',
+        'descripcion' => 'description',
+        'logo' => 'logo',
+    ];
+
     /**
      * Declara middlewares aplicados al controlador de armas.
-     * `transformInput` mantiene coherencia entre estructura de entrada y
-     * el `WeaponResource` para operaciones de creación y actualización.
      *
      * @return array<Middleware> Lista de middlewares.
      */
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:weapon.view,api', only: ['index', 'show', 'indexDeleted']),
-            new Middleware('permission:weapon.create,api', only: ['store']),
-            new Middleware('permission:weapon.update,api', only: ['update', 'restore']),
-            new Middleware('permission:weapon.delete,api', only: ['destroy']),
-            new Middleware('transformInput:'.WeaponResource::class.'', only: ['store', 'update']),
+            new Middleware('can:weapon.view', only: ['index', 'show', 'indexDeleted']),
+            new Middleware('can:weapon.create', only: ['store']),
+            new Middleware('can:weapon.update', only: ['update', 'restore']),
+            new Middleware('can:weapon.delete', only: ['destroy']),
         ];
     }
 
     /**
-     * Lista todas las armas registradas (sin paginación).
-     * Recomendado paginar a futuro para grandes volúmenes.
+     * Lista registros con filtros y paginación SQL.
      *
-     * @return JsonResponse Colección de armas activas.
+     * @return JsonResponse Página de recursos con metadatos.
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        $weapons = Weapon::all();
+        $weapons = Weapon::query();
 
-        return $this->showAll($weapons);
+        return $this->showAll($weapons, WeaponResource::class, self::LIST_FIELDS);
     }
 
     /**
@@ -49,12 +52,12 @@ class WeaponController extends ApiController implements HasMiddleware
      * @param  StorePostRequest  $request  Datos validados.
      * @return JsonResponse Arma creada.
      */
-    public function store(StorePostRequest $request)
+    public function store(StorePostRequest $request, PersistUploadedImage $images)
     {
         $validated = $request->validated();
-        $weapon = Weapon::create($validated);
+        $weapon = $images->save(new Weapon, $validated, 'logo', 'weapon', 'public');
 
-        return $this->showOne($weapon);
+        return $this->showOne(new WeaponResource($weapon));
     }
 
     /**
@@ -65,7 +68,7 @@ class WeaponController extends ApiController implements HasMiddleware
      */
     public function show(Weapon $weapon)
     {
-        return $this->showOne($weapon);
+        return $this->showOne(new WeaponResource($weapon));
     }
 
     /**
@@ -75,12 +78,12 @@ class WeaponController extends ApiController implements HasMiddleware
      * @param  Weapon  $weapon  Arma a actualizar.
      * @return JsonResponse Arma actualizada.
      */
-    public function update(UpdatePutRequest $request, Weapon $weapon)
+    public function update(UpdatePutRequest $request, Weapon $weapon, PersistUploadedImage $images)
     {
         $validated = $request->validated();
-        $weapon->update($validated);
+        $images->save($weapon, $validated, 'logo', 'weapon', 'public');
 
-        return $this->showOne($weapon);
+        return $this->showOne(new WeaponResource($weapon));
     }
 
     /**
@@ -93,19 +96,19 @@ class WeaponController extends ApiController implements HasMiddleware
     {
         $weapon->delete();
 
-        return $this->showOne($weapon);
+        return $this->showOne(new WeaponResource($weapon));
     }
 
     /**
-     * Lista armas soft-deleted para recuperación.
+     * Lista registros eliminados con filtros y paginación SQL.
      *
-     * @return JsonResponse Colección en papelera.
+     * @return JsonResponse Página de recursos con metadatos.
      */
-    public function indexDeleted()
+    public function indexDeleted(): JsonResponse
     {
-        $weapons = Weapon::onlyTrashed()->get();
+        $weapons = Weapon::onlyTrashed();
 
-        return $this->showAll($weapons);
+        return $this->showAll($weapons, WeaponResource::class, self::LIST_FIELDS);
     }
 
     /**
@@ -118,6 +121,6 @@ class WeaponController extends ApiController implements HasMiddleware
     {
         $weapon->restore();
 
-        return $this->showOne($weapon);
+        return $this->showOne(new WeaponResource($weapon));
     }
 }

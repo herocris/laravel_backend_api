@@ -4,31 +4,25 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-use App\Observers\UserObserver;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use App\Http\Resources\Admin\User\UserResource;
-use Tymon\JWTAuth\Contracts\JWTSubject;
+use App\Traits\Activitylog;
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Auth;
-use Spatie\Permission\Traits\HasRoles;
-//use Spatie\Activitylog\Traits\LogsActivity;
+// use Spatie\Activitylog\Traits\LogsActivity;
+use Illuminate\Support\Arr;
 use Spatie\Activitylog\LogOptions;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
 /** Trait para invocar la funcion getActivitylogOptions */
 
-use App\Traits\Activitylog;
-use OpenApi\Attributes as OA;
+use Spatie\Permission\Traits\HasRoles;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-#[ObservedBy([UserObserver::class])]
 class User extends Authenticatable implements JWTSubject
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles, SoftDeletes, Activitylog;
+    /** @use HasFactory<UserFactory> */
+    use Activitylog, HasFactory, HasRoles, Notifiable, SoftDeletes;
 
-    public $resource = UserResource::class;
     /**
      * The attributes that are mass assignable.
      *
@@ -49,6 +43,30 @@ class User extends Authenticatable implements JWTSubject
         'password',
         'remember_token',
     ];
+
+    /**
+     * Persiste datos administrativos ya autorizados y validados, sin depender de HTTP.
+     * Las asignaciones omitidas se conservan; una lista vacía las revoca.
+     *
+     * @param  array{name?: string, email?: string, password?: string, roles?: list<int|string>, permissions?: list<int|string>}  $data
+     */
+    public function saveWithAssignments(array $data): self
+    {
+        return $this->getConnection()->transaction(function () use ($data): self {
+            $this->fill(Arr::only($data, ['name', 'email', 'password']));
+            $this->save();
+
+            if (array_key_exists('roles', $data)) {
+                $this->syncRoles(array_map('intval', $data['roles']));
+            }
+
+            if (array_key_exists('permissions', $data)) {
+                $this->syncPermissions(array_map('intval', $data['permissions']));
+            }
+
+            return $this;
+        });
+    }
 
     /**
      * Get the attributes that should be cast.
