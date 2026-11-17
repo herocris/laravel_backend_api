@@ -28,10 +28,6 @@ class DrugResource extends JsonResource
         return [
             'identificador' => $this->id,
             'descripcion' => $this->description,
-            // 'presentacion' => [
-            //     'identificador' => $this->drugPresentation->id,
-            //     'descripcion' => $this->drugPresentation->description,
-            // ],
             'logo' => $this->logo,
         ];
     }

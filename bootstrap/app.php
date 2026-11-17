@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Middleware\ApiCookieSession;
-use App\Http\Middleware\AuthenticateJWT;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Middleware\Authorize;
 use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
@@ -9,7 +8,6 @@ use Illuminate\Contracts\Session\Middleware\AuthenticatesSessions;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -42,9 +40,6 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->api(prepend: [ApiCookieSession::class]);
         $middleware->encryptCookies(except: ['token']);
-        $middleware->alias([
-            'jwt.auth' => AuthenticateJWT::class,
-        ]);
 
         $middleware->priority([
             HandlePrecognitiveRequests::class,
@@ -103,18 +98,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (PermissionDoesNotExist $e, Request $request): JsonResponse {
             return response()->json(['error' => 'No existe el o los permisos que esta intentando asignar', 'code' => 422], 422);
         });
-
-        // $exceptions->render(function (QueryException $e, Request $request) { //exepcion de entrada duplicada en base de datos
-
-        //     $ex = $e->getPrevious();
-        //     //dd($ex->errorInfo);
-        //     if ($ex->getCode() === '23000') {
-        //         return response()->json([
-        //             'message' => 'El correo ya está registrado.',
-        //             'code' => 409
-        //         ], 409);
-        //     }
-        // });
 
         $exceptions->render(function (HttpExceptionInterface $e, Request $request): JsonResponse {
             $status = $e->getStatusCode();

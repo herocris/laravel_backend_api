@@ -2,7 +2,7 @@
 
 namespace App\Traits;
 
-use Illuminate\Support\Facades\Auth;
+use Spatie\Activitylog\CauserResolver;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -23,21 +23,18 @@ trait Activitylog
      * Configura las opciones de registro de actividad para el modelo.
      *
      * Define qué campos se registran, activa el registro solo de campos modificados (dirty),
-     * genera descripciones en español para cada evento, y asigna el nombre del usuario autenticado
-     * como log name (o 'Sistema' en caso de seeders).
+     * genera descripciones en español y usa el mismo actor que Spatie para el nombre del log.
+     * Sin actor explícito ni sesión, Sistema se representa con causer nulo, sin crear usuarios.
      *
-     * @param  array  $fields  Lista de campos del modelo que deben ser registrados
-     * @param  string  $model  Nombre del modelo en español para descripciones legibles
-     * @return LogOptions Configuración de opciones de registro
+     * @param  list<string>  $fields  Campos del modelo que deben ser registrados
      */
-    protected function RecordLog($fields, $model): LogOptions
+    protected function RecordLog(array $fields, string $model): LogOptions
     {
         return LogOptions::defaults()
             ->logOnly($fields)
             ->logOnlyDirty()
             ->setDescriptionForEvent(fn (string $eventName) => 'Se ha '.$this->eventName($eventName).' el '.$model)
-            ->useLogName(Auth::user()?->name ?? 'Sistema');
-        // Chain fluent methods for configuration options
+            ->useLogName(app(CauserResolver::class)->resolve()?->name ?? 'Sistema');
     }
 
     /**
@@ -51,7 +48,7 @@ trait Activitylog
      */
     private function eventName(string $evento): string
     {
-        return match ($evento) {// en lugar de switch
+        return match ($evento) {
             'created' => 'creado',
             'updated' => 'actualizado',
             'deleted' => 'borrado',

@@ -8,7 +8,6 @@ use App\Http\Requests\Admin\User\UpdatePutRequest;
 use App\Http\Resources\Admin\User\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 

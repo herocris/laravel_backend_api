@@ -36,26 +36,6 @@ class ApiResponserProxy
         return $this->transformData($collection, FakeResource::class);
     }
 
-    public function callSortData(Collection $collection): Collection
-    {
-        return $this->sortData($collection);
-    }
-
-    public function callSearchByColumn(Collection $collection): Collection
-    {
-        return $this->searchByColumn($collection);
-    }
-
-    public function callPaginate(Collection $collection)
-    {
-        return $this->paginate($collection);
-    }
-
-    public function callError($msg, $code)
-    {
-        return $this->errorResponse($msg, $code);
-    }
-
     public function callSuccess($data, $code)
     {
         return $this->successResponse($data, $code);
@@ -67,7 +47,7 @@ class ActivitylogProxy
 {
     use Activitylog;
 
-    public function callRecordLog($fields, $model)
+    public function callRecordLog(array $fields, string $model): LogOptions
     {
         return $this->RecordLog($fields, $model);
     }

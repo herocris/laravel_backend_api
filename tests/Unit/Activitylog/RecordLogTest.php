@@ -4,27 +4,25 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Activitylog;
 
-use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Activitylog\CauserResolver;
 use Spatie\Activitylog\LogOptions;
 use Tests\ActivitylogProxy;
 use Tests\UnitTestCase;
 
 class RecordLogTest extends UnitTestCase
 {
-
     protected function setUp(): void
     {
         parent::setUp();
-        Auth::shouldReceive('user')
-            ->once()
-            ->andReturn((object)['name' => 'Test User']);
+        app(CauserResolver::class)->setCauser(User::factory()->make(['name' => 'Test User']));
     }
 
     #[Test]
     public function it_returns_logoptions_instance(): void
     {
-        $proxy = new ActivitylogProxy();
+        $proxy = new ActivitylogProxy;
         $result = $proxy->callRecordLog(['name'], 'ammunition');
         $this->assertInstanceOf(LogOptions::class, $result);
     }
@@ -33,7 +31,7 @@ class RecordLogTest extends UnitTestCase
     public function it_sets_log_only_fields(): void
     {
         $fields = ['description', 'logo'];
-        $proxy = new ActivitylogProxy();
+        $proxy = new ActivitylogProxy;
         $result = $proxy->callRecordLog($fields, 'ammunition');
         // logOnly se guarda internamente en protected property
         $this->assertEquals($fields, $result->logAttributes);
@@ -42,7 +40,7 @@ class RecordLogTest extends UnitTestCase
     #[Test]
     public function it_sets_log_only_dirty_flag(): void
     {
-        $proxy = new ActivitylogProxy();
+        $proxy = new ActivitylogProxy;
         $result = $proxy->callRecordLog(['field'], 'ammunition');
         $this->assertTrue($result->logOnlyDirty);
     }
@@ -50,7 +48,7 @@ class RecordLogTest extends UnitTestCase
     #[Test]
     public function it_sets_correct_description_for_events(): void
     {
-        $proxy = new ActivitylogProxy();
+        $proxy = new ActivitylogProxy;
         $result = $proxy->callRecordLog(['name'], 'ammunition');
         $callable = $result->descriptionForEvent;
         $this->assertIsCallable($callable);

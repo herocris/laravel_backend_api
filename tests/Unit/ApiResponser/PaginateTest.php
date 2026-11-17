@@ -4,56 +4,56 @@ declare(strict_types=1);
 
 namespace Tests\Unit\ApiResponser;
 
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\ApiResponserProxy;
 use Tests\UnitTestCase;
 
 class PaginateTest extends UnitTestCase
 {
-    private Collection $items;
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->items = collect([
-            ['identificador' => 2, 'nombre' => 'Dos'],
-            ['identificador' => 1, 'nombre' => 'Uno'],
-            ['identificador' => 4, 'nombre' => 'Cuatro'],
-            ['identificador' => 3, 'nombre' => 'Tres'],
-        ]);
-    }
+    use RefreshDatabase;
+
     #[Test]
-    public function correct_structure_collection_paginate(): void
+    public function returns_the_sql_page_and_pagination_metadata(): void
     {
+        User::factory()->count(4)->create();
         $this->app->instance('request', Request::create('/test', 'GET'));
 
-        $proxy = new ApiResponserProxy();
+        $response = (new ApiResponserProxy)->callShowAll(User::query());
+        $page = $response->getData(true);
 
-        $paginated = $proxy->callPaginate($this->items);
-        // Debe regresar una Collection con la estructura ordenada
-        $this->assertInstanceOf(LengthAwarePaginator::class, $paginated);
+        $this->assertSame([1, 2, 3, 4], array_column($page['data'], 'identificador'));
+        $this->assertSame(4, $page['total']);
+        $this->assertSame(10, $page['per_page']);
+        $this->assertArrayHasKey('links', $page);
     }
+
     #[Test]
-    public function correct_page_result(): void
+    public function returns_the_requested_sql_page(): void
     {
-        $this->app->instance('request', Request::create('/test?page=2', 'GET'));
+        User::factory()->count(4)->create();
+        $this->app->instance('request', Request::create('/test?page=2&per_page=2', 'GET'));
 
-        $proxy = new ApiResponserProxy();
+        $response = (new ApiResponserProxy)->callShowAll(User::query());
+        $page = $response->getData(true);
 
-        $paginated = $proxy->callPaginate($this->items);
-        $this->assertEquals(2, $paginated->currentPage());
+        $this->assertSame(2, $page['current_page']);
+        $this->assertSame([3, 4], array_column($page['data'], 'identificador'));
     }
+
     #[Test]
-    public function correct_per_page_result(): void
+    public function limits_the_sql_page_size(): void
     {
+        User::factory()->count(4)->create();
         $this->app->instance('request', Request::create('/test?per_page=2', 'GET'));
 
-        $proxy = new ApiResponserProxy();
-        $paginated = $proxy->callPaginate($this->items);
+        $response = (new ApiResponserProxy)->callShowAll(User::query());
+        $page = $response->getData(true);
 
-        $this->assertEquals(2, $paginated->perPage());
-        $this->assertCount(2, $paginated->items());
+        $this->assertSame(2, $page['per_page']);
+        $this->assertSame([1, 2], array_column($page['data'], 'identificador'));
+        $this->assertSame(4, $page['total']);
     }
 }

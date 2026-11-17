@@ -38,10 +38,7 @@
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/"
-        },
-        "files": [
-        "app/Helpers/nameEvent.php"
-    ]
+        }
     },
     "scripts": {
         "post-autoload-dump": [

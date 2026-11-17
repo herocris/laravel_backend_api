@@ -4,56 +4,63 @@ declare(strict_types=1);
 
 namespace Tests\Unit\ApiResponser;
 
-use Tests\ApiResponserProxy;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\UnitTestCase;
 
 class ErrorResponseTest extends UnitTestCase
 {
     #[Test]
-    public function it_returns_a_json_response_instance(): void
+    public function it_returns_a_json_response_for_http_errors(): void
     {
-        $proxy = new ApiResponserProxy();
-        $response = $proxy->callError('Not found', 404);
+        Route::get('/test/error', function (): void {
+            abort(409, 'Conflict');
+        });
 
-        $this->assertInstanceOf(JsonResponse::class, $response);
+        $response = $this->getJson('/test/error');
+
+        $this->assertInstanceOf(JsonResponse::class, $response->baseResponse);
+        $response->assertStatus(409)->assertHeader('Content-Type', 'application/json');
     }
 
     #[Test]
     public function it_returns_correct_http_status_code(): void
     {
-        $proxy = new ApiResponserProxy();
-        $response = $proxy->callError('Unauthorized', 401);
+        Route::get('/test/error', function (): void {
+            abort(401, 'Unauthorized');
+        });
 
-        $this->assertEquals(401, $response->getStatusCode());
+        $response = $this->getJson('/test/error');
+
+        $response->assertUnauthorized();
     }
 
     #[Test]
     public function it_returns_correct_json_structure(): void
     {
-        $proxy = new ApiResponserProxy();
-        $response = $proxy->callError('Invalid data', 422);
+        Route::get('/test/error', function (): void {
+            abort(422, 'Invalid data');
+        });
 
-        $expected = [
-            'error' => 'Invalid data',
-            'code' => 422,
-        ];
+        $response = $this->getJson('/test/error');
 
-        $this->assertEquals($expected, $response->getData(true));
+        $response->assertUnprocessable()->assertExactJson(['error' => 'Invalid data', 'code' => 422]);
     }
 
     #[Test]
-    public function it_accepts_array_as_error_message(): void
+    public function it_returns_an_array_of_validation_messages(): void
     {
-        $message = ['email' => 'Invalid format', 'password' => 'Too short'];
+        Route::get('/test/error', function (): void {
+            throw ValidationException::withMessages(['email' => 'Invalid format', 'password' => 'Too short']);
+        });
 
-        $proxy = new ApiResponserProxy();
-        $response = $proxy->callError($message, 422);
+        $response = $this->getJson('/test/error');
 
-        $this->assertEquals([
-            'error' => $message,
+        $response->assertUnprocessable()->assertExactJson([
+            'error' => ['email' => ['Invalid format'], 'password' => ['Too short']],
             'code' => 422,
-        ], $response->getData(true));
+        ]);
     }
 }
