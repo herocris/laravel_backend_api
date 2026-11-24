@@ -48,9 +48,13 @@ class UpdateUserTest extends TestCase
         $response->assertOk();
 
         $response->assertJson([
-            'identificador' => $this->user->id,
-            'nombre' => 'Nombre Actualizado',
-            'correo' => 'original@example.com',
+            'success' => true,
+            'message' => 'User updated successfully.',
+            'data' => [
+                'identificador' => $this->user->id,
+                'nombre' => 'Nombre Actualizado',
+                'correo' => 'original@example.com',
+            ],
         ]);
 
         $this->assertDatabaseHas('users', [

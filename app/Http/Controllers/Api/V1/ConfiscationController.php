@@ -10,11 +10,11 @@ use App\Http\Requests\Api\V1\Confiscation\UpdateConfiscationRequest;
 use App\Http\Resources\Api\V1\ConfiscationResource;
 use App\Models\Confiscation;
 use App\Support\Cache\ConfiscationReadCache;
-use App\Support\Http\ApiResponse;
 use App\Support\Query\ConfiscationMapQuery;
 use App\Support\Query\Definitions\ConfiscationIndexDefinition;
 use App\Support\Query\IndexQueryApplier;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
@@ -39,13 +39,18 @@ class ConfiscationController extends Controller implements HasMiddleware
     /**
      * Lista registros con filtros y paginación SQL.
      *
-     * @return JsonResponse Página de recursos con metadatos.
+     * @return AnonymousResourceCollection Página de recursos con metadatos.
      */
-    public function index(IndexConfiscationRequest $request, IndexQueryApplier $index): JsonResponse
+    public function index(IndexConfiscationRequest $request, IndexQueryApplier $index): AnonymousResourceCollection
     {
         $confiscations = Confiscation::query();
 
-        return ApiResponse::paginated($index->apply($confiscations, $request->validated(), ConfiscationIndexDefinition::definition()), ConfiscationResource::class, $request);
+        $items = $index->apply($confiscations, $request->validated(), ConfiscationIndexDefinition::definition());
+
+        return ConfiscationResource::collection($items)->withQuery($request->paginationQuery())->additional([
+            'success' => true,
+            'message' => 'Confiscation records retrieved successfully.',
+        ]);
     }
 
     /**
@@ -83,18 +88,24 @@ class ConfiscationController extends Controller implements HasMiddleware
         $validated = $request->validated();
         $confiscation = Confiscation::create($validated);
 
-        return ApiResponse::resource(new ConfiscationResource($confiscation));
+        return (new ConfiscationResource($confiscation))->additional([
+            'success' => true,
+            'message' => 'Confiscation created successfully.',
+        ])->response()->setStatusCode(201);
     }
 
     /**
      * Muestra un decomiso específico.
      *
      * @param  Confiscation  $confiscation  Instancia objetivo.
-     * @return JsonResponse Recurso solicitado.
+     * @return ConfiscationResource Recurso solicitado.
      */
-    public function show(Confiscation $confiscation): JsonResponse
+    public function show(Confiscation $confiscation): ConfiscationResource
     {
-        return ApiResponse::resource(new ConfiscationResource($confiscation));
+        return (new ConfiscationResource($confiscation))->additional([
+            'success' => true,
+            'message' => 'Confiscation retrieved successfully.',
+        ]);
     }
 
     /**
@@ -102,51 +113,65 @@ class ConfiscationController extends Controller implements HasMiddleware
      *
      * @param  UpdateConfiscationRequest  $request  Datos validados.
      * @param  Confiscation  $confiscation  Recurso a actualizar.
-     * @return JsonResponse Recurso actualizado.
+     * @return ConfiscationResource Recurso actualizado.
      */
-    public function update(UpdateConfiscationRequest $request, Confiscation $confiscation): JsonResponse
+    public function update(UpdateConfiscationRequest $request, Confiscation $confiscation): ConfiscationResource
     {
         $validated = $request->validated();
         $confiscation->update($validated);
 
-        return ApiResponse::resource(new ConfiscationResource($confiscation));
+        return (new ConfiscationResource($confiscation))->additional([
+            'success' => true,
+            'message' => 'Confiscation updated successfully.',
+        ]);
     }
 
     /**
      * Soft delete del decomiso.
      *
      * @param  Confiscation  $confiscation  Recurso a eliminar lógicamente.
-     * @return JsonResponse Recurso eliminado.
+     * @return ConfiscationResource Recurso eliminado.
      */
-    public function destroy(Confiscation $confiscation): JsonResponse
+    public function destroy(Confiscation $confiscation): ConfiscationResource
     {
         $confiscation->delete();
 
-        return ApiResponse::resource(new ConfiscationResource($confiscation));
+        return (new ConfiscationResource($confiscation))->additional([
+            'success' => true,
+            'message' => 'Confiscation deleted successfully.',
+        ]);
     }
 
     /**
      * Lista registros eliminados con filtros y paginación SQL.
      *
-     * @return JsonResponse Página de recursos con metadatos.
+     * @return AnonymousResourceCollection Página de recursos con metadatos.
      */
-    public function indexDeleted(IndexConfiscationRequest $request, IndexQueryApplier $index): JsonResponse
+    public function indexDeleted(IndexConfiscationRequest $request, IndexQueryApplier $index): AnonymousResourceCollection
     {
         $confiscations = Confiscation::onlyTrashed();
 
-        return ApiResponse::paginated($index->apply($confiscations, $request->validated(), ConfiscationIndexDefinition::definition()), ConfiscationResource::class, $request);
+        $items = $index->apply($confiscations, $request->validated(), ConfiscationIndexDefinition::definition());
+
+        return ConfiscationResource::collection($items)->withQuery($request->paginationQuery())->additional([
+            'success' => true,
+            'message' => 'Confiscation records retrieved successfully.',
+        ]);
     }
 
     /**
      * Restaura un decomiso eliminado previamente.
      *
      * @param  Confiscation  $confiscation  Recurso a restaurar.
-     * @return JsonResponse Recurso restaurado.
+     * @return ConfiscationResource Recurso restaurado.
      */
-    public function restore(Confiscation $confiscation): JsonResponse
+    public function restore(Confiscation $confiscation): ConfiscationResource
     {
         $confiscation->restore();
 
-        return ApiResponse::resource(new ConfiscationResource($confiscation));
+        return (new ConfiscationResource($confiscation))->additional([
+            'success' => true,
+            'message' => 'Confiscation restored successfully.',
+        ]);
     }
 }

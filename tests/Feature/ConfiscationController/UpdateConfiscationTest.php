@@ -42,14 +42,18 @@ class UpdateConfiscationTest extends TestCase
 
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $response->json('identificador'),
-            'fecha' => $this->updateData['fecha'],
-            'observacion' => $this->updateData['observacion'],
-            'direccion' => $this->updateData['direccion'],
-            'departamento' => $this->updateData['departamento'],
-            'municipalidad' => $this->updateData['municipalidad'],
-            'latitud' => $this->updateData['latitud'],
-            'longitud' => $this->updateData['longitud'],
+            'success' => true,
+            'message' => 'Confiscation updated successfully.',
+            'data' => [
+                'identificador' => $response->json('data.identificador'),
+                'fecha' => $this->updateData['fecha'],
+                'observacion' => $this->updateData['observacion'],
+                'direccion' => $this->updateData['direccion'],
+                'departamento' => $this->updateData['departamento'],
+                'municipalidad' => $this->updateData['municipalidad'],
+                'latitud' => $this->updateData['latitud'],
+                'longitud' => $this->updateData['longitud'],
+            ],
         ]);
 
         $this->assertDatabaseHas('confiscations', [

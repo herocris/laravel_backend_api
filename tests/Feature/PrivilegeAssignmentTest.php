@@ -68,10 +68,10 @@ class PrivilegeAssignmentTest extends TestCase
         $response = $this->postJson('/api/'.$resource, [
             'nombre' => 'Created', 'correo' => 'created@example.com', 'password' => 'password123',
             'roles' => [(string) $role->id], 'permisos' => [(string) $permission->id],
-        ])->assertOk()->assertJsonPath('permisos', [$permission->id]);
+        ])->assertCreated()->assertJsonPath('data.permisos', [$permission->id]);
 
         $model = $resource === 'user' ? User::class : Role::class;
-        $created = $model::findOrFail($response->json('identificador'));
+        $created = $model::findOrFail($response->json('data.identificador'));
         $this->assertTrue($created->hasPermissionTo($permission));
         if ($resource === 'user') {
             $this->assertTrue($created->hasRole($role));
@@ -108,11 +108,11 @@ class PrivilegeAssignmentTest extends TestCase
         }
 
         $response = $this->patchJson('/api/'.$resource.'/'.$target->id, $payload)->assertOk()
-            ->assertJsonPath('permisos', $clearPermissions ? [] : [$permission->id]);
+            ->assertJsonPath('data.permisos', $clearPermissions ? [] : [$permission->id]);
 
         $this->assertSame($clearPermissions ? [] : [$permission->id], $target->fresh()->permissions->pluck('id')->all());
         if ($resource === 'user') {
-            $response->assertJsonPath('roles', $clearRoles ? [] : [$role->id]);
+            $response->assertJsonPath('data.roles', $clearRoles ? [] : [$role->id]);
             $this->assertSame($clearRoles ? [] : [$role->id], $target->fresh()->roles->pluck('id')->all());
         }
         $this->assertDatabaseHas($target->getTable(), ['id' => $target->id, 'name' => 'Updated']);
@@ -279,13 +279,13 @@ class PrivilegeAssignmentTest extends TestCase
         $response = $this->putJson('/api/'.$resource.'/'.$target->id, [
             'nombre' => 'Reassigned', 'correo' => 'reassigned@example.com', 'password' => 'password123',
             'roles' => [$newRole->id], 'permisos' => [$newPermission->id],
-        ])->assertOk()->assertJsonPath('permisos', [$newPermission->id]);
+        ])->assertOk()->assertJsonPath('data.permisos', [$newPermission->id]);
 
         $this->assertSame([$newPermission->id], $target->fresh()->permissions->pluck('id')->all());
         $this->assertTrue($target->fresh()->hasPermissionTo($newPermission));
         $this->assertFalse($target->fresh()->hasPermissionTo($oldPermission));
         if ($resource === 'user') {
-            $response->assertJsonPath('roles', [$newRole->id]);
+            $response->assertJsonPath('data.roles', [$newRole->id]);
             $this->assertSame([$newRole->id], $target->fresh()->roles->pluck('id')->all());
         }
     }

@@ -11,11 +11,11 @@ use App\Http\Requests\Api\V1\DrugConfiscation\UpdateDrugConfiscationRequest;
 use App\Http\Resources\Api\V1\DrugConfiscationResource;
 use App\Models\DrugConfiscation;
 use App\Support\Cache\ConfiscationReadCache;
-use App\Support\Http\ApiResponse;
 use App\Support\Query\ConfiscationStatisticsQuery;
 use App\Support\Query\Definitions\DrugConfiscationIndexDefinition;
 use App\Support\Query\IndexQueryApplier;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Storage;
@@ -42,26 +42,36 @@ class DrugConfiscationController extends Controller implements HasMiddleware
     /**
      * Lista registros con filtros y paginación SQL.
      *
-     * @return JsonResponse Página de recursos con metadatos.
+     * @return AnonymousResourceCollection Página de recursos con metadatos.
      */
-    public function index(IndexDrugConfiscationRequest $request, IndexQueryApplier $index): JsonResponse
+    public function index(IndexDrugConfiscationRequest $request, IndexQueryApplier $index): AnonymousResourceCollection
     {
         $drugConfiscations = DrugConfiscation::query();
 
-        return ApiResponse::paginated($index->apply($drugConfiscations, $request->validated(), DrugConfiscationIndexDefinition::definition()), DrugConfiscationResource::class, $request);
+        $items = $index->apply($drugConfiscations, $request->validated(), DrugConfiscationIndexDefinition::definition());
+
+        return DrugConfiscationResource::collection($items)->withQuery($request->paginationQuery())->additional([
+            'success' => true,
+            'message' => 'Drug Confiscation records retrieved successfully.',
+        ]);
     }
 
     /**
      * Lista registros filtrados por decomiso padre.
      *
      * @param  int  $idConfiscation  ID del decomiso.
-     * @return JsonResponse Colección filtrada.
+     * @return AnonymousResourceCollection Colección filtrada.
      */
-    public function indexByConfiscation(IndexDrugConfiscationRequest $request, int $idConfiscation, IndexQueryApplier $index): JsonResponse
+    public function indexByConfiscation(IndexDrugConfiscationRequest $request, int $idConfiscation, IndexQueryApplier $index): AnonymousResourceCollection
     {
         $drugConfiscations = DrugConfiscation::where('confiscation_id', $idConfiscation);
 
-        return ApiResponse::paginated($index->apply($drugConfiscations, $request->validated(), DrugConfiscationIndexDefinition::definition()), DrugConfiscationResource::class, $request);
+        $items = $index->apply($drugConfiscations, $request->validated(), DrugConfiscationIndexDefinition::definition());
+
+        return DrugConfiscationResource::collection($items)->withQuery($request->paginationQuery())->additional([
+            'success' => true,
+            'message' => 'Drug Confiscation records retrieved successfully.',
+        ]);
     }
 
     /**
@@ -75,18 +85,24 @@ class DrugConfiscationController extends Controller implements HasMiddleware
         $validated = $request->validated();
         $drugConfiscation = $images->execute(new DrugConfiscation, $validated, 'photo', 'drugConfiscation', 'evidence');
 
-        return ApiResponse::resource(new DrugConfiscationResource($drugConfiscation->load(DrugConfiscationIndexDefinition::definition()['with'])));
+        return (new DrugConfiscationResource($drugConfiscation->load(DrugConfiscationIndexDefinition::definition()['with'])))->additional([
+            'success' => true,
+            'message' => 'Drug Confiscation created successfully.',
+        ])->response()->setStatusCode(201);
     }
 
     /**
      * Muestra un registro específico.
      *
      * @param  DrugConfiscation  $drugConfiscation  Instancia objetivo.
-     * @return JsonResponse Recurso solicitado.
+     * @return DrugConfiscationResource Recurso solicitado.
      */
-    public function show(DrugConfiscation $drugConfiscation): JsonResponse
+    public function show(DrugConfiscation $drugConfiscation): DrugConfiscationResource
     {
-        return ApiResponse::resource(new DrugConfiscationResource($drugConfiscation->load(DrugConfiscationIndexDefinition::definition()['with'])));
+        return (new DrugConfiscationResource($drugConfiscation->load(DrugConfiscationIndexDefinition::definition()['with'])))->additional([
+            'success' => true,
+            'message' => 'Drug Confiscation retrieved successfully.',
+        ]);
     }
 
     public function photo(DrugConfiscation $drugConfiscation): StreamedResponse
@@ -108,52 +124,66 @@ class DrugConfiscationController extends Controller implements HasMiddleware
      *
      * @param  UpdateDrugConfiscationRequest  $request  Datos validados.
      * @param  DrugConfiscation  $drugConfiscation  Recurso objetivo.
-     * @return JsonResponse Recurso actualizado.
+     * @return DrugConfiscationResource Recurso actualizado.
      */
-    public function update(UpdateDrugConfiscationRequest $request, DrugConfiscation $drugConfiscation, PersistUploadedImageAction $images): JsonResponse
+    public function update(UpdateDrugConfiscationRequest $request, DrugConfiscation $drugConfiscation, PersistUploadedImageAction $images): DrugConfiscationResource
     {
         $validated = $request->validated();
         $images->execute($drugConfiscation, $validated, 'photo', 'drugConfiscation', 'evidence');
 
-        return ApiResponse::resource(new DrugConfiscationResource($drugConfiscation->load(DrugConfiscationIndexDefinition::definition()['with'])));
+        return (new DrugConfiscationResource($drugConfiscation->load(DrugConfiscationIndexDefinition::definition()['with'])))->additional([
+            'success' => true,
+            'message' => 'Drug Confiscation updated successfully.',
+        ]);
     }
 
     /**
      * Soft delete del registro.
      *
      * @param  DrugConfiscation  $drugConfiscation  Recurso a eliminar.
-     * @return JsonResponse Recurso eliminado.
+     * @return DrugConfiscationResource Recurso eliminado.
      */
-    public function destroy(DrugConfiscation $drugConfiscation): JsonResponse
+    public function destroy(DrugConfiscation $drugConfiscation): DrugConfiscationResource
     {
         $drugConfiscation->delete();
 
-        return ApiResponse::resource(new DrugConfiscationResource($drugConfiscation->load(DrugConfiscationIndexDefinition::definition()['with'])));
+        return (new DrugConfiscationResource($drugConfiscation->load(DrugConfiscationIndexDefinition::definition()['with'])))->additional([
+            'success' => true,
+            'message' => 'Drug Confiscation deleted successfully.',
+        ]);
     }
 
     /**
      * Lista registros eliminados con filtros y paginación SQL.
      *
-     * @return JsonResponse Página de recursos con metadatos.
+     * @return AnonymousResourceCollection Página de recursos con metadatos.
      */
-    public function indexDeleted(IndexDrugConfiscationRequest $request, IndexQueryApplier $index): JsonResponse
+    public function indexDeleted(IndexDrugConfiscationRequest $request, IndexQueryApplier $index): AnonymousResourceCollection
     {
         $drugConfiscations = DrugConfiscation::onlyTrashed();
 
-        return ApiResponse::paginated($index->apply($drugConfiscations, $request->validated(), DrugConfiscationIndexDefinition::definition()), DrugConfiscationResource::class, $request);
+        $items = $index->apply($drugConfiscations, $request->validated(), DrugConfiscationIndexDefinition::definition());
+
+        return DrugConfiscationResource::collection($items)->withQuery($request->paginationQuery())->additional([
+            'success' => true,
+            'message' => 'Drug Confiscation records retrieved successfully.',
+        ]);
     }
 
     /**
      * Restaura un registro eliminado.
      *
      * @param  DrugConfiscation  $drugConfiscation  Recurso a restaurar.
-     * @return JsonResponse Recurso restaurado.
+     * @return DrugConfiscationResource Recurso restaurado.
      */
-    public function restore(DrugConfiscation $drugConfiscation): JsonResponse
+    public function restore(DrugConfiscation $drugConfiscation): DrugConfiscationResource
     {
         $drugConfiscation->restore();
 
-        return ApiResponse::resource(new DrugConfiscationResource($drugConfiscation->load(DrugConfiscationIndexDefinition::definition()['with'])));
+        return (new DrugConfiscationResource($drugConfiscation->load(DrugConfiscationIndexDefinition::definition()['with'])))->additional([
+            'success' => true,
+            'message' => 'Drug Confiscation restored successfully.',
+        ]);
     }
 
     /**

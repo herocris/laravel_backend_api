@@ -68,11 +68,11 @@ class PrivilegeDelegationTest extends TestCase
         $response = $this->actingAs($actor, 'api')->json($update ? 'PATCH' : 'POST', '/api/'.$resource.($update ? '/'.$target->id : ''), [
             ...$this->payload(),
             ...($viaRole ? ['roles' => [(string) $role->id]] : ['permisos' => [(string) $permission->id]]),
-        ])->assertOk()->assertJsonPath('nombre', 'Delegated');
+        ])->assertStatus($update ? 200 : 201)->assertJsonPath('data.nombre', 'Delegated');
 
-        $created = ($resource === 'user' ? User::class : Role::class)::findOrFail($response->json('identificador'));
+        $created = ($resource === 'user' ? User::class : Role::class)::findOrFail($response->json('data.identificador'));
         $this->assertTrue($created->hasPermissionTo($permission));
-        $response->assertJsonPath($viaRole ? 'roles' : 'permisos', [$viaRole ? $role->id : $permission->id]);
+        $response->assertJsonPath($viaRole ? 'data.roles' : 'data.permisos', [$viaRole ? $role->id : $permission->id]);
     }
 
     /** @return iterable<string, array{string, string, bool}> */
@@ -243,7 +243,7 @@ class PrivilegeDelegationTest extends TestCase
         }
 
         $this->actingAs($actor, 'api')->json($restore ? 'POST' : 'DELETE', '/api/'.$resource.($restore ? '/restore' : '').'/'.$target->id)
-            ->assertOk()->assertJsonPath('identificador', $target->id)->assertJsonPath('permisos', [$permission->id]);
+            ->assertOk()->assertJsonPath('data.identificador', $target->id)->assertJsonPath('data.permisos', [$permission->id]);
 
         if ($restore) {
             $this->assertNotSoftDeleted($target);

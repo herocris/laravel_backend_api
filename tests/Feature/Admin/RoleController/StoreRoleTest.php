@@ -39,10 +39,14 @@ class StoreRoleTest extends TestCase
         ];
 
         $response = $this->postJson(route('role.store'), $payload);
-        $response->assertOk();
+        $response->assertCreated();
         $response->assertJson([
-            'nombre' => 'Supervisor',
-            'permisos' => [$perm1->id, $perm2->id],
+            'success' => true,
+            'message' => 'Role created successfully.',
+            'data' => [
+                'nombre' => 'Supervisor',
+                'permisos' => [$perm1->id, $perm2->id],
+            ],
         ]);
         $this->assertDatabaseHas('roles', [
             'name' => 'Supervisor',

@@ -36,16 +36,20 @@ class StoreDrugPresentationTest extends TestCase
         ];
 
         $response = $this->postJson(route('drugPresentation.store'), $payload);
-        $response->assertOk();
+        $response->assertCreated();
 
         $response->assertExactJson([
-            'identificador' => $response->json('identificador'),
-            'descripcion' => $payload['descripcion'],
-            'logo' => $response->json('logo'),
+            'success' => true,
+            'message' => 'Drug Presentation created successfully.',
+            'data' => [
+                'identificador' => $response->json('data.identificador'),
+                'descripcion' => $payload['descripcion'],
+                'logo' => $response->json('data.logo'),
+            ],
         ]);
 
         $this->assertDatabaseHas('drug_presentations', [
-            'id' => $response->json('identificador'),
+            'id' => $response->json('data.identificador'),
         ]);
     }
 

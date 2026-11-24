@@ -162,7 +162,7 @@ class DrugConfiscationDocs
         security: [['bearerAuth' => []], ['authCookie' => [], 'csrfHeader' => []]],
         requestBody: new OA\RequestBody(required: true, content: new OA\MediaType(mediaType: 'multipart/form-data', schema: new OA\Schema(ref: '#/components/schemas/DrugConfiscationCreateRequest'))),
         responses: [
-            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscation')),
+            new OA\Response(response: 201, description: 'OK', content: new OA\JsonContent(allOf: [new OA\Schema(ref: '#/components/schemas/ResourceResponse'), new OA\Schema(properties: [new OA\Property(property: 'data', ref: '#/components/schemas/DrugConfiscation')])])),
             new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
             new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
             new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
@@ -185,7 +185,7 @@ class DrugConfiscationDocs
             new OA\Parameter(name: 'drugConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer', minimum: 1)),
         ],
         responses: [
-            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscation')),
+            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(allOf: [new OA\Schema(ref: '#/components/schemas/ResourceResponse'), new OA\Schema(properties: [new OA\Property(property: 'data', ref: '#/components/schemas/DrugConfiscation')])])),
             new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
             new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
             new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
@@ -208,7 +208,7 @@ class DrugConfiscationDocs
         ],
         requestBody: new OA\RequestBody(required: true, content: new OA\MediaType(mediaType: 'multipart/form-data', schema: new OA\Schema(ref: '#/components/schemas/DrugConfiscationUpdateRequest'))),
         responses: [
-            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscation')),
+            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(allOf: [new OA\Schema(ref: '#/components/schemas/ResourceResponse'), new OA\Schema(properties: [new OA\Property(property: 'data', ref: '#/components/schemas/DrugConfiscation')])])),
             new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
             new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
             new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
@@ -232,7 +232,7 @@ class DrugConfiscationDocs
         ],
         requestBody: new OA\RequestBody(required: true, content: new OA\MediaType(mediaType: 'multipart/form-data', schema: new OA\Schema(ref: '#/components/schemas/DrugConfiscationUpdateRequest'))),
         responses: [
-            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscation')),
+            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(allOf: [new OA\Schema(ref: '#/components/schemas/ResourceResponse'), new OA\Schema(properties: [new OA\Property(property: 'data', ref: '#/components/schemas/DrugConfiscation')])])),
             new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
             new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
             new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
@@ -255,7 +255,7 @@ class DrugConfiscationDocs
             new OA\Parameter(name: 'drugConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer', minimum: 1)),
         ],
         responses: [
-            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscation')),
+            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(allOf: [new OA\Schema(ref: '#/components/schemas/ResourceResponse'), new OA\Schema(properties: [new OA\Property(property: 'data', ref: '#/components/schemas/DrugConfiscation')])])),
             new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
             new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
             new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),
@@ -278,7 +278,7 @@ class DrugConfiscationDocs
             new OA\Parameter(name: 'drugConfiscation', in: 'path', required: true, schema: new OA\Schema(type: 'integer', minimum: 1)),
         ],
         responses: [
-            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/DrugConfiscation')),
+            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(allOf: [new OA\Schema(ref: '#/components/schemas/ResourceResponse'), new OA\Schema(properties: [new OA\Property(property: 'data', ref: '#/components/schemas/DrugConfiscation')])])),
             new OA\Response(response: 401, description: 'UnauthorizedResponse', content: new OA\JsonContent(ref: '#/components/schemas/UnauthorizedResponse')),
             new OA\Response(response: 403, description: 'ForbiddenResponse', content: new OA\JsonContent(ref: '#/components/schemas/ForbiddenResponse')),
             new OA\Response(response: 404, description: 'NotFoundResponse', content: new OA\JsonContent(ref: '#/components/schemas/NotFoundResponse')),

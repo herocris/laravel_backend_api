@@ -51,29 +51,33 @@ class StoreDrugConfiscationTest extends TestCase
         ];
 
         $response = $this->postJson(route('drugConfiscation.store'), $payload);
-        $response->assertOk();
+        $response->assertCreated();
 
         $response->assertExactJson([
-            'identificador' => $response->json('identificador'),
-            'peso' => $payload['peso'],
-            'cantidad' => $payload['cantidad'],
-            'decomiso' => [
-                'identificador' => $this->confiscation->id,
-                'observacion' => $this->confiscation->observation,
+            'success' => true,
+            'message' => 'Drug Confiscation created successfully.',
+            'data' => [
+                'identificador' => $response->json('data.identificador'),
+                'peso' => $payload['peso'],
+                'cantidad' => $payload['cantidad'],
+                'decomiso' => [
+                    'identificador' => $this->confiscation->id,
+                    'observacion' => $this->confiscation->observation,
+                ],
+                'droga' => [
+                    'identificador' => $this->drug->id,
+                    'descripcion' => $this->drug->description,
+                ],
+                'presentacion' => [
+                    'identificador' => $this->drugPresentation->id,
+                    'descripcion' => $this->drugPresentation->description,
+                ],
+                'foto' => $response->json('data.foto'),
             ],
-            'droga' => [
-                'identificador' => $this->drug->id,
-                'descripcion' => $this->drug->description,
-            ],
-            'presentacion' => [
-                'identificador' => $this->drugPresentation->id,
-                'descripcion' => $this->drugPresentation->description,
-            ],
-            'foto' => $response->json('foto'),
         ]);
 
         $this->assertDatabaseHas('drug_confiscations', [
-            'id' => $response->json('identificador'),
+            'id' => $response->json('data.identificador'),
         ]);
     }
 

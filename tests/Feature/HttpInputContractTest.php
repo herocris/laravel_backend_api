@@ -124,15 +124,19 @@ class HttpInputContractTest extends TestCase
             'is_admin' => true,
             'email_verified_at' => '2024-01-01',
             'unexpected' => ['nombre' => 'Overwrite'],
-        ])->assertOk();
+        ])->assertCreated();
 
         $created = User::where('email', 'public@example.test')->firstOrFail();
         $response->assertExactJson([
-            'identificador' => $created->id,
-            'nombre' => 'Public User',
-            'correo' => 'public@example.test',
-            'roles' => [],
-            'permisos' => [$permission->id],
+            'success' => true,
+            'message' => 'User created successfully.',
+            'data' => [
+                'identificador' => $created->id,
+                'nombre' => 'Public User',
+                'correo' => 'public@example.test',
+                'roles' => [],
+                'permisos' => [$permission->id],
+            ],
         ]);
         $this->assertDatabaseHas('users', ['id' => $created->id, 'name' => 'Public User', 'email_verified_at' => null]);
         $this->assertDatabaseMissing('users', ['id' => 999999]);

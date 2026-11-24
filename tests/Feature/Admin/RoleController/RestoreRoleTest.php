@@ -38,9 +38,13 @@ class RestoreRoleTest extends TestCase
 
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $this->role->id,
-            'nombre' => 'DeletedRole',
-            'permisos' => [],
+            'success' => true,
+            'message' => 'Role restored successfully.',
+            'data' => [
+                'identificador' => $this->role->id,
+                'nombre' => 'DeletedRole',
+                'permisos' => [],
+            ],
         ]);
 
         $this->assertDatabaseHas('roles', [

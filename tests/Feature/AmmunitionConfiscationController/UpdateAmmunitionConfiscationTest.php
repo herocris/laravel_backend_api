@@ -51,17 +51,21 @@ class UpdateAmmunitionConfiscationTest extends TestCase
 
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $response->json('identificador'),
-            'cantidad' => $updateData['cantidad'],
-            'decomiso' => [
-                'identificador' => $this->confiscation->id,
-                'observacion' => $this->confiscation->observation,
+            'success' => true,
+            'message' => 'Ammunition Confiscation updated successfully.',
+            'data' => [
+                'identificador' => $response->json('data.identificador'),
+                'cantidad' => $updateData['cantidad'],
+                'decomiso' => [
+                    'identificador' => $this->confiscation->id,
+                    'observacion' => $this->confiscation->observation,
+                ],
+                'municion' => [
+                    'identificador' => $this->ammunition->id,
+                    'descripcion' => $this->ammunition->description,
+                ],
+                'foto' => $response->json('data.foto'),
             ],
-            'municion' => [
-                'identificador' => $this->ammunition->id,
-                'descripcion' => $this->ammunition->description,
-            ],
-            'foto' => $response->json('foto'),
         ]);
 
         $this->assertDatabaseHas('ammunition_confiscations', [

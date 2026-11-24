@@ -61,20 +61,30 @@ use OpenApi\Attributes as OA;
     new OA\Property(property: 'error', type: 'string', example: 'CSRF token mismatch.'),
     new OA\Property(property: 'code', type: 'integer', example: 419),
 ])]
-#[OA\Schema(schema: 'Pagination', type: 'object', required: ['data', 'current_page', 'per_page', 'total'], properties: [
-    new OA\Property(property: 'current_page', type: 'integer'),
-    new OA\Property(property: 'per_page', type: 'integer'),
-    new OA\Property(property: 'total', type: 'integer'),
-    new OA\Property(property: 'last_page', type: 'integer'),
-    new OA\Property(property: 'from', type: 'integer', nullable: true),
-    new OA\Property(property: 'to', type: 'integer', nullable: true),
-    new OA\Property(property: 'path', type: 'string'),
-    new OA\Property(property: 'first_page_url', type: 'string'),
-    new OA\Property(property: 'last_page_url', type: 'string'),
-    new OA\Property(property: 'next_page_url', type: 'string', nullable: true),
-    new OA\Property(property: 'prev_page_url', type: 'string', nullable: true),
-    new OA\Property(property: 'links', type: 'array', items: new OA\Items(type: 'object')),
-], description: 'Paginador Laravel, también cuando data está vacío. Filtros escalares antiguos parciales y literales. search, filter tipado, fields e include son optativos. Sin selección explícita se conservan campos y relaciones previos; identificador permanece y los metadatos no cambian.')]
+#[OA\Schema(schema: 'ResourceResponse', type: 'object', required: ['success', 'message', 'data'], properties: [
+    new OA\Property(property: 'success', type: 'boolean', example: true),
+    new OA\Property(property: 'message', type: 'string'),
+])]
+#[OA\Schema(schema: 'Pagination', type: 'object', required: ['success', 'message', 'data', 'links', 'meta'], properties: [
+    new OA\Property(property: 'success', type: 'boolean', example: true),
+    new OA\Property(property: 'message', type: 'string'),
+    new OA\Property(property: 'links', type: 'object', properties: [
+        new OA\Property(property: 'first', type: 'string'),
+        new OA\Property(property: 'last', type: 'string'),
+        new OA\Property(property: 'prev', type: 'string', nullable: true),
+        new OA\Property(property: 'next', type: 'string', nullable: true),
+    ]),
+    new OA\Property(property: 'meta', type: 'object', properties: [
+        new OA\Property(property: 'current_page', type: 'integer'),
+        new OA\Property(property: 'per_page', type: 'integer'),
+        new OA\Property(property: 'total', type: 'integer'),
+        new OA\Property(property: 'last_page', type: 'integer'),
+        new OA\Property(property: 'from', type: 'integer', nullable: true),
+        new OA\Property(property: 'to', type: 'integer', nullable: true),
+        new OA\Property(property: 'path', type: 'string'),
+        new OA\Property(property: 'links', type: 'array', items: new OA\Items(type: 'object')),
+    ]),
+], description: 'Colección paginada mediante Resources: data contiene los registros, links los enlaces de navegación y meta los metadatos. Incluye success y message incluso en páginas vacías. Los enlaces conservan filtros, selección de campos e include= explícitamente vacío.')]
 #[OA\Schema(schema: 'GraphResponse', type: 'object', properties: [
     new OA\Property(property: 'lineBarData', type: 'array', items: new OA\Items(type: 'object'), description: 'Cada fila tiene name (período) y claves dinámicas de catálogo con cantidades enteras; homónimos incluyen (#ID).'),
     new OA\Property(property: 'pieData', type: 'array', items: new OA\Items(type: 'object', properties: [

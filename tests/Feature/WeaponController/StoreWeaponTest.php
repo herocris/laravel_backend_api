@@ -36,16 +36,20 @@ class StoreWeaponTest extends TestCase
         ];
 
         $response = $this->postJson(route('weapon.store'), $payload);
-        $response->assertOk();
+        $response->assertCreated();
 
         $response->assertExactJson([
-            'identificador' => $response->json('identificador'),
-            'descripcion' => $payload['descripcion'],
-            'logo' => $response->json('logo'),
+            'success' => true,
+            'message' => 'Weapon created successfully.',
+            'data' => [
+                'identificador' => $response->json('data.identificador'),
+                'descripcion' => $payload['descripcion'],
+                'logo' => $response->json('data.logo'),
+            ],
         ]);
 
         $this->assertDatabaseHas('weapons', [
-            'id' => $response->json('identificador'),
+            'id' => $response->json('data.identificador'),
         ]);
     }
 

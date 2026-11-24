@@ -43,9 +43,13 @@ class UpdateRoleTest extends TestCase
         $response = $this->putJson(route('role.update', ['role' => $this->role->id]), $payload);
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $this->role->id,
-            'nombre' => 'Administrator',
-            'permisos' => [$perm1->id, $perm2->id],
+            'success' => true,
+            'message' => 'Role updated successfully.',
+            'data' => [
+                'identificador' => $this->role->id,
+                'nombre' => 'Administrator',
+                'permisos' => [$perm1->id, $perm2->id],
+            ],
         ]);
         $this->assertDatabaseHas('roles', [
             'name' => 'Administrator',

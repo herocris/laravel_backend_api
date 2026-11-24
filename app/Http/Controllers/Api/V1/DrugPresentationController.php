@@ -9,10 +9,10 @@ use App\Http\Requests\Api\V1\DrugPresentation\StoreDrugPresentationRequest;
 use App\Http\Requests\Api\V1\DrugPresentation\UpdateDrugPresentationRequest;
 use App\Http\Resources\Api\V1\DrugPresentationResource;
 use App\Models\DrugPresentation;
-use App\Support\Http\ApiResponse;
 use App\Support\Query\Definitions\DrugPresentationIndexDefinition;
 use App\Support\Query\IndexQueryApplier;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
@@ -37,13 +37,18 @@ class DrugPresentationController extends Controller implements HasMiddleware
     /**
      * Lista registros con filtros y paginación SQL.
      *
-     * @return JsonResponse Página de recursos con metadatos.
+     * @return AnonymousResourceCollection Página de recursos con metadatos.
      */
-    public function index(IndexDrugPresentationRequest $request, IndexQueryApplier $index): JsonResponse
+    public function index(IndexDrugPresentationRequest $request, IndexQueryApplier $index): AnonymousResourceCollection
     {
         $drugPresentations = DrugPresentation::query();
 
-        return ApiResponse::paginated($index->apply($drugPresentations, $request->validated(), DrugPresentationIndexDefinition::definition()), DrugPresentationResource::class, $request);
+        $items = $index->apply($drugPresentations, $request->validated(), DrugPresentationIndexDefinition::definition());
+
+        return DrugPresentationResource::collection($items)->withQuery($request->paginationQuery())->additional([
+            'success' => true,
+            'message' => 'Drug Presentation records retrieved successfully.',
+        ]);
     }
 
     /**
@@ -57,18 +62,24 @@ class DrugPresentationController extends Controller implements HasMiddleware
         $validated = $request->validated();
         $drugPresentation = $images->execute(new DrugPresentation, $validated, 'logo', 'drugPresentation', 'public');
 
-        return ApiResponse::resource(new DrugPresentationResource($drugPresentation));
+        return (new DrugPresentationResource($drugPresentation))->additional([
+            'success' => true,
+            'message' => 'Drug Presentation created successfully.',
+        ])->response()->setStatusCode(201);
     }
 
     /**
      * Muestra una presentación específica.
      *
      * @param  DrugPresentation  $drugPresentation  Instancia objetivo.
-     * @return JsonResponse Recurso solicitado.
+     * @return DrugPresentationResource Recurso solicitado.
      */
-    public function show(DrugPresentation $drugPresentation): JsonResponse
+    public function show(DrugPresentation $drugPresentation): DrugPresentationResource
     {
-        return ApiResponse::resource(new DrugPresentationResource($drugPresentation));
+        return (new DrugPresentationResource($drugPresentation))->additional([
+            'success' => true,
+            'message' => 'Drug Presentation retrieved successfully.',
+        ]);
     }
 
     /**
@@ -76,51 +87,65 @@ class DrugPresentationController extends Controller implements HasMiddleware
      *
      * @param  UpdateDrugPresentationRequest  $request  Datos validados.
      * @param  DrugPresentation  $drugPresentation  Recurso a actualizar.
-     * @return JsonResponse Recurso actualizado.
+     * @return DrugPresentationResource Recurso actualizado.
      */
-    public function update(UpdateDrugPresentationRequest $request, DrugPresentation $drugPresentation, PersistUploadedImageAction $images): JsonResponse
+    public function update(UpdateDrugPresentationRequest $request, DrugPresentation $drugPresentation, PersistUploadedImageAction $images): DrugPresentationResource
     {
         $validated = $request->validated();
         $images->execute($drugPresentation, $validated, 'logo', 'drugPresentation', 'public');
 
-        return ApiResponse::resource(new DrugPresentationResource($drugPresentation));
+        return (new DrugPresentationResource($drugPresentation))->additional([
+            'success' => true,
+            'message' => 'Drug Presentation updated successfully.',
+        ]);
     }
 
     /**
      * Soft delete de la presentación.
      *
      * @param  DrugPresentation  $drugPresentation  Recurso a eliminar.
-     * @return JsonResponse Recurso eliminado.
+     * @return DrugPresentationResource Recurso eliminado.
      */
-    public function destroy(DrugPresentation $drugPresentation): JsonResponse
+    public function destroy(DrugPresentation $drugPresentation): DrugPresentationResource
     {
         $drugPresentation->delete();
 
-        return ApiResponse::resource(new DrugPresentationResource($drugPresentation));
+        return (new DrugPresentationResource($drugPresentation))->additional([
+            'success' => true,
+            'message' => 'Drug Presentation deleted successfully.',
+        ]);
     }
 
     /**
      * Lista registros eliminados con filtros y paginación SQL.
      *
-     * @return JsonResponse Página de recursos con metadatos.
+     * @return AnonymousResourceCollection Página de recursos con metadatos.
      */
-    public function indexDeleted(IndexDrugPresentationRequest $request, IndexQueryApplier $index): JsonResponse
+    public function indexDeleted(IndexDrugPresentationRequest $request, IndexQueryApplier $index): AnonymousResourceCollection
     {
         $drugPresentations = DrugPresentation::onlyTrashed();
 
-        return ApiResponse::paginated($index->apply($drugPresentations, $request->validated(), DrugPresentationIndexDefinition::definition()), DrugPresentationResource::class, $request);
+        $items = $index->apply($drugPresentations, $request->validated(), DrugPresentationIndexDefinition::definition());
+
+        return DrugPresentationResource::collection($items)->withQuery($request->paginationQuery())->additional([
+            'success' => true,
+            'message' => 'Drug Presentation records retrieved successfully.',
+        ]);
     }
 
     /**
      * Restaura una presentación eliminada.
      *
      * @param  DrugPresentation  $drugPresentation  Recurso a restaurar.
-     * @return JsonResponse Recurso restaurado.
+     * @return DrugPresentationResource Recurso restaurado.
      */
-    public function restore(DrugPresentation $drugPresentation): JsonResponse
+    public function restore(DrugPresentation $drugPresentation): DrugPresentationResource
     {
         $drugPresentation->restore();
 
-        return ApiResponse::resource(new DrugPresentationResource($drugPresentation));
+        return (new DrugPresentationResource($drugPresentation))->additional([
+            'success' => true,
+            'message' => 'Drug Presentation restored successfully.',
+        ]);
     }
 }

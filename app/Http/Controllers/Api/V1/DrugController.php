@@ -9,10 +9,10 @@ use App\Http\Requests\Api\V1\Drug\StoreDrugRequest;
 use App\Http\Requests\Api\V1\Drug\UpdateDrugRequest;
 use App\Http\Resources\Api\V1\DrugResource;
 use App\Models\Drug;
-use App\Support\Http\ApiResponse;
 use App\Support\Query\Definitions\DrugIndexDefinition;
 use App\Support\Query\IndexQueryApplier;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
@@ -36,19 +36,24 @@ class DrugController extends Controller implements HasMiddleware
     /**
      * Lista registros con filtros y paginación SQL.
      *
-     * @return JsonResponse Página de recursos con metadatos.
+     * @return AnonymousResourceCollection Página de recursos con metadatos.
      */
-    public function index(IndexDrugRequest $request, IndexQueryApplier $index): JsonResponse
+    public function index(IndexDrugRequest $request, IndexQueryApplier $index): AnonymousResourceCollection
     {
         $drugs = Drug::query();
 
-        return ApiResponse::paginated($index->apply($drugs, $request->validated(), DrugIndexDefinition::definition()), DrugResource::class, $request);
+        $items = $index->apply($drugs, $request->validated(), DrugIndexDefinition::definition());
+
+        return DrugResource::collection($items)->withQuery($request->paginationQuery())->additional([
+            'success' => true,
+            'message' => 'Drug records retrieved successfully.',
+        ]);
     }
 
     /**
      * Crea una nueva droga usando datos validados por `StoreDrugRequest`.
      * Side effects: dispara eventos Eloquent (creating/created). No retorna
-     * 201 por diseño del helper `ApiResponse::resource` (puede ajustarse si se requiere).
+     * 201 al crear el recurso.
      *
      * @param  StoreDrugRequest  $request  Datos validados (descripcion, logo, etc.).
      * @return JsonResponse Recurso recién creado.
@@ -58,7 +63,10 @@ class DrugController extends Controller implements HasMiddleware
         $validated = $request->validated();
         $drug = $images->execute(new Drug, $validated, 'logo', 'drug', 'public');
 
-        return ApiResponse::resource(new DrugResource($drug));
+        return (new DrugResource($drug))->additional([
+            'success' => true,
+            'message' => 'Drug created successfully.',
+        ])->response()->setStatusCode(201);
     }
 
     /**
@@ -66,11 +74,14 @@ class DrugController extends Controller implements HasMiddleware
      * Si el ID no existe Laravel responde 404 antes de entrar al método.
      *
      * @param  Drug  $drug  Instancia objetivo.
-     * @return JsonResponse Representación del recurso.
+     * @return DrugResource Representación del recurso.
      */
-    public function show(Drug $drug): JsonResponse
+    public function show(Drug $drug): DrugResource
     {
-        return ApiResponse::resource(new DrugResource($drug));
+        return (new DrugResource($drug))->additional([
+            'success' => true,
+            'message' => 'Drug retrieved successfully.',
+        ]);
     }
 
     /**
@@ -79,14 +90,17 @@ class DrugController extends Controller implements HasMiddleware
      *
      * @param  UpdateDrugRequest  $request  Datos validados.
      * @param  Drug  $drug  Modelo a actualizar.
-     * @return JsonResponse Recurso actualizado.
+     * @return DrugResource Recurso actualizado.
      */
-    public function update(UpdateDrugRequest $request, Drug $drug, PersistUploadedImageAction $images): JsonResponse
+    public function update(UpdateDrugRequest $request, Drug $drug, PersistUploadedImageAction $images): DrugResource
     {
         $validated = $request->validated();
         $images->execute($drug, $validated, 'logo', 'drug', 'public');
 
-        return ApiResponse::resource(new DrugResource($drug));
+        return (new DrugResource($drug))->additional([
+            'success' => true,
+            'message' => 'Drug updated successfully.',
+        ]);
     }
 
     /**
@@ -94,25 +108,33 @@ class DrugController extends Controller implements HasMiddleware
      * futura restauración y auditoría. No elimina relaciones dependientes.
      *
      * @param  Drug  $drug  Recurso a eliminar lógicamente.
-     * @return JsonResponse Recurso eliminado.
+     * @return DrugResource Recurso eliminado.
      */
-    public function destroy(Drug $drug): JsonResponse
+    public function destroy(Drug $drug): DrugResource
     {
         $drug->delete();
 
-        return ApiResponse::resource(new DrugResource($drug));
+        return (new DrugResource($drug))->additional([
+            'success' => true,
+            'message' => 'Drug deleted successfully.',
+        ]);
     }
 
     /**
      * Lista registros eliminados con filtros y paginación SQL.
      *
-     * @return JsonResponse Página de recursos con metadatos.
+     * @return AnonymousResourceCollection Página de recursos con metadatos.
      */
-    public function indexDeleted(IndexDrugRequest $request, IndexQueryApplier $index): JsonResponse
+    public function indexDeleted(IndexDrugRequest $request, IndexQueryApplier $index): AnonymousResourceCollection
     {
         $drugs = Drug::onlyTrashed();
 
-        return ApiResponse::paginated($index->apply($drugs, $request->validated(), DrugIndexDefinition::definition()), DrugResource::class, $request);
+        $items = $index->apply($drugs, $request->validated(), DrugIndexDefinition::definition());
+
+        return DrugResource::collection($items)->withQuery($request->paginationQuery())->additional([
+            'success' => true,
+            'message' => 'Drug records retrieved successfully.',
+        ]);
     }
 
     /**
@@ -120,12 +142,15 @@ class DrugController extends Controller implements HasMiddleware
      * binding con `withTrashed()`. Si ya estaba activa no cambia estado.
      *
      * @param  Drug  $drug  Recurso a restaurar.
-     * @return JsonResponse Recurso restaurado.
+     * @return DrugResource Recurso restaurado.
      */
-    public function restore(Drug $drug): JsonResponse
+    public function restore(Drug $drug): DrugResource
     {
         $drug->restore();
 
-        return ApiResponse::resource(new DrugResource($drug));
+        return (new DrugResource($drug))->additional([
+            'success' => true,
+            'message' => 'Drug restored successfully.',
+        ]);
     }
 }

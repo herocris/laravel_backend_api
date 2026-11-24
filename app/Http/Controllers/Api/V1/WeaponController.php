@@ -9,10 +9,10 @@ use App\Http\Requests\Api\V1\Weapon\StoreWeaponRequest;
 use App\Http\Requests\Api\V1\Weapon\UpdateWeaponRequest;
 use App\Http\Resources\Api\V1\WeaponResource;
 use App\Models\Weapon;
-use App\Support\Http\ApiResponse;
 use App\Support\Query\Definitions\WeaponIndexDefinition;
 use App\Support\Query\IndexQueryApplier;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
@@ -36,13 +36,18 @@ class WeaponController extends Controller implements HasMiddleware
     /**
      * Lista registros con filtros y paginación SQL.
      *
-     * @return JsonResponse Página de recursos con metadatos.
+     * @return AnonymousResourceCollection Página de recursos con metadatos.
      */
-    public function index(IndexWeaponRequest $request, IndexQueryApplier $index): JsonResponse
+    public function index(IndexWeaponRequest $request, IndexQueryApplier $index): AnonymousResourceCollection
     {
         $weapons = Weapon::query();
 
-        return ApiResponse::paginated($index->apply($weapons, $request->validated(), WeaponIndexDefinition::definition()), WeaponResource::class, $request);
+        $items = $index->apply($weapons, $request->validated(), WeaponIndexDefinition::definition());
+
+        return WeaponResource::collection($items)->withQuery($request->paginationQuery())->additional([
+            'success' => true,
+            'message' => 'Weapon records retrieved successfully.',
+        ]);
     }
 
     /**
@@ -56,18 +61,24 @@ class WeaponController extends Controller implements HasMiddleware
         $validated = $request->validated();
         $weapon = $images->execute(new Weapon, $validated, 'logo', 'weapon', 'public');
 
-        return ApiResponse::resource(new WeaponResource($weapon));
+        return (new WeaponResource($weapon))->additional([
+            'success' => true,
+            'message' => 'Weapon created successfully.',
+        ])->response()->setStatusCode(201);
     }
 
     /**
      * Muestra un arma específica por ID (binding automático).
      *
      * @param  Weapon  $weapon  Instancia objetivo.
-     * @return JsonResponse Representación del arma.
+     * @return WeaponResource Representación del arma.
      */
-    public function show(Weapon $weapon): JsonResponse
+    public function show(Weapon $weapon): WeaponResource
     {
-        return ApiResponse::resource(new WeaponResource($weapon));
+        return (new WeaponResource($weapon))->additional([
+            'success' => true,
+            'message' => 'Weapon retrieved successfully.',
+        ]);
     }
 
     /**
@@ -75,51 +86,65 @@ class WeaponController extends Controller implements HasMiddleware
      *
      * @param  UpdateWeaponRequest  $request  Datos validados.
      * @param  Weapon  $weapon  Arma a actualizar.
-     * @return JsonResponse Arma actualizada.
+     * @return WeaponResource Arma actualizada.
      */
-    public function update(UpdateWeaponRequest $request, Weapon $weapon, PersistUploadedImageAction $images): JsonResponse
+    public function update(UpdateWeaponRequest $request, Weapon $weapon, PersistUploadedImageAction $images): WeaponResource
     {
         $validated = $request->validated();
         $images->execute($weapon, $validated, 'logo', 'weapon', 'public');
 
-        return ApiResponse::resource(new WeaponResource($weapon));
+        return (new WeaponResource($weapon))->additional([
+            'success' => true,
+            'message' => 'Weapon updated successfully.',
+        ]);
     }
 
     /**
      * Soft delete del arma (marca `deleted_at`).
      *
      * @param  Weapon  $weapon  Arma a eliminar lógicamente.
-     * @return JsonResponse Arma eliminada.
+     * @return WeaponResource Arma eliminada.
      */
-    public function destroy(Weapon $weapon): JsonResponse
+    public function destroy(Weapon $weapon): WeaponResource
     {
         $weapon->delete();
 
-        return ApiResponse::resource(new WeaponResource($weapon));
+        return (new WeaponResource($weapon))->additional([
+            'success' => true,
+            'message' => 'Weapon deleted successfully.',
+        ]);
     }
 
     /**
      * Lista registros eliminados con filtros y paginación SQL.
      *
-     * @return JsonResponse Página de recursos con metadatos.
+     * @return AnonymousResourceCollection Página de recursos con metadatos.
      */
-    public function indexDeleted(IndexWeaponRequest $request, IndexQueryApplier $index): JsonResponse
+    public function indexDeleted(IndexWeaponRequest $request, IndexQueryApplier $index): AnonymousResourceCollection
     {
         $weapons = Weapon::onlyTrashed();
 
-        return ApiResponse::paginated($index->apply($weapons, $request->validated(), WeaponIndexDefinition::definition()), WeaponResource::class, $request);
+        $items = $index->apply($weapons, $request->validated(), WeaponIndexDefinition::definition());
+
+        return WeaponResource::collection($items)->withQuery($request->paginationQuery())->additional([
+            'success' => true,
+            'message' => 'Weapon records retrieved successfully.',
+        ]);
     }
 
     /**
      * Restaura un arma soft-deleted. Requiere binding con `withTrashed()`.
      *
      * @param  Weapon  $weapon  Arma a restaurar.
-     * @return JsonResponse Arma restaurada.
+     * @return WeaponResource Arma restaurada.
      */
-    public function restore(Weapon $weapon): JsonResponse
+    public function restore(Weapon $weapon): WeaponResource
     {
         $weapon->restore();
 
-        return ApiResponse::resource(new WeaponResource($weapon));
+        return (new WeaponResource($weapon))->additional([
+            'success' => true,
+            'message' => 'Weapon restored successfully.',
+        ]);
     }
 }

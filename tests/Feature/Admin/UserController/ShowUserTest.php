@@ -36,11 +36,15 @@ class ShowUserTest extends TestCase
 
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $this->user->id,
-            'nombre' => $this->user->name,
-            'correo' => $this->user->email,
-            'roles' => [],
-            'permisos' => [],
+            'success' => true,
+            'message' => 'User retrieved successfully.',
+            'data' => [
+                'identificador' => $this->user->id,
+                'nombre' => $this->user->name,
+                'correo' => $this->user->email,
+                'roles' => [],
+                'permisos' => [],
+            ],
         ]);
     }
 

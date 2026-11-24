@@ -41,22 +41,26 @@ class DeleteDrugConfiscationTest extends TestCase
         $response = $this->deleteJson(route('drugConfiscation.destroy', $this->drugConfiscation->id));
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $this->drugConfiscation->id,
-            'cantidad' => $this->drugConfiscation->amount,
-            'peso' => $this->drugConfiscation->weight,
-            'decomiso' => [
-                'identificador' => $this->confiscation->id,
-                'observacion' => $this->confiscation->observation,
+            'success' => true,
+            'message' => 'Drug Confiscation deleted successfully.',
+            'data' => [
+                'identificador' => $this->drugConfiscation->id,
+                'cantidad' => $this->drugConfiscation->amount,
+                'peso' => $this->drugConfiscation->weight,
+                'decomiso' => [
+                    'identificador' => $this->confiscation->id,
+                    'observacion' => $this->confiscation->observation,
+                ],
+                'droga' => [
+                    'identificador' => $this->drug->id,
+                    'descripcion' => $this->drug->description,
+                ],
+                'presentacion' => [
+                    'identificador' => $this->drugPresentation->id,
+                    'descripcion' => $this->drugPresentation->description,
+                ],
+                'foto' => $this->drugConfiscation->photo,
             ],
-            'droga' => [
-                'identificador' => $this->drug->id,
-                'descripcion' => $this->drug->description,
-            ],
-            'presentacion' => [
-                'identificador' => $this->drugPresentation->id,
-                'descripcion' => $this->drugPresentation->description,
-            ],
-            'foto' => $this->drugConfiscation->photo,
         ]);
         $this->assertSoftDeleted('drug_confiscations', ['id' => $this->drugConfiscation->id]);
     }

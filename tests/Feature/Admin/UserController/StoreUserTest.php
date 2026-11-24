@@ -39,13 +39,17 @@ class StoreUserTest extends TestCase
 
         $response = $this->postJson(route('user.store'), $user);
 
-        $response->assertOk();
+        $response->assertCreated();
         $response->assertExactJson([
-            'identificador' => $response->json('identificador'),
-            'nombre' => $user['nombre'],
-            'correo' => $user['correo'],
-            'roles' => [$role->id, $role2->id],
-            'permisos' => [],
+            'success' => true,
+            'message' => 'User created successfully.',
+            'data' => [
+                'identificador' => $response->json('data.identificador'),
+                'nombre' => $user['nombre'],
+                'correo' => $user['correo'],
+                'roles' => [$role->id, $role2->id],
+                'permisos' => [],
+            ],
         ]);
         // Verifica persistencia con nombres de columnas reales
         $this->assertDatabaseHas('users', [
@@ -62,7 +66,7 @@ class StoreUserTest extends TestCase
             'correo' => 'hashuser@example.com',
             'password' => 'plainSecret',
         ];
-        $this->postJson(route('user.store'), $payload)->assertOk();
+        $this->postJson(route('user.store'), $payload)->assertCreated();
 
         $created = User::where('email', $payload['correo'])->first();
         $this->assertNotNull($created);
@@ -78,9 +82,9 @@ class StoreUserTest extends TestCase
             'correo' => 'hiddenuser@example.com',
             'password' => 'secret123',
         ];
-        $response = $this->postJson(route('user.store'), $payload)->assertOk();
+        $response = $this->postJson(route('user.store'), $payload)->assertCreated();
 
-        $data = $response->getData(true);
+        $data = $response->json('data');
         $this->assertArrayNotHasKey('password', $data);
         $this->assertArrayNotHasKey('remember_token', $data);
     }

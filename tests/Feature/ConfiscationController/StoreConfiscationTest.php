@@ -38,21 +38,25 @@ class StoreConfiscationTest extends TestCase
         ];
 
         $response = $this->postJson(route('confiscation.store'), $payload);
-        $response->assertOk();
+        $response->assertCreated();
 
         $response->assertExactJson([
-            'identificador' => $response->json('identificador'),
-            'fecha' => $payload['fecha'],
-            'observacion' => $payload['observacion'],
-            'direccion' => $payload['direccion'],
-            'departamento' => $payload['departamento'],
-            'municipalidad' => $payload['municipalidad'],
-            'latitud' => $payload['latitud'],
-            'longitud' => $payload['longitud'],
+            'success' => true,
+            'message' => 'Confiscation created successfully.',
+            'data' => [
+                'identificador' => $response->json('data.identificador'),
+                'fecha' => $payload['fecha'],
+                'observacion' => $payload['observacion'],
+                'direccion' => $payload['direccion'],
+                'departamento' => $payload['departamento'],
+                'municipalidad' => $payload['municipalidad'],
+                'latitud' => $payload['latitud'],
+                'longitud' => $payload['longitud'],
+            ],
         ]);
 
         $this->assertDatabaseHas('confiscations', [
-            'id' => $response->json('identificador'),
+            'id' => $response->json('data.identificador'),
         ]);
     }
 

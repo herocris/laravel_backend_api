@@ -10,11 +10,11 @@ use App\Http\Requests\Api\V1\Permission\UpdatePermissionRequest;
 use App\Http\Resources\Api\V1\PermissionResource;
 use App\Models\Permission;
 use App\Support\Authorization\AccessControl;
-use App\Support\Http\ApiResponse;
 use App\Support\Query\Definitions\PermissionIndexDefinition;
 use App\Support\Query\IndexQueryApplier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
@@ -41,19 +41,24 @@ class PermissionController extends Controller implements HasMiddleware
     /**
      * Lista registros con filtros y paginación SQL.
      *
-     * @return JsonResponse Página de recursos con metadatos.
+     * @return AnonymousResourceCollection Página de recursos con metadatos.
      */
-    public function index(IndexPermissionRequest $request, IndexQueryApplier $index): JsonResponse
+    public function index(IndexPermissionRequest $request, IndexQueryApplier $index): AnonymousResourceCollection
     {
         $permissions = Permission::query();
 
-        return ApiResponse::paginated($index->apply($permissions, $request->validated(), PermissionIndexDefinition::definition()), PermissionResource::class, $request);
+        $items = $index->apply($permissions, $request->validated(), PermissionIndexDefinition::definition());
+
+        return PermissionResource::collection($items)->withQuery($request->paginationQuery())->additional([
+            'success' => true,
+            'message' => 'Permission records retrieved successfully.',
+        ]);
     }
 
     /**
      * Crea un permiso nuevo tras validación (`StorePermissionRequest`). Side effects:
      * dispara eventos Eloquent y queda disponible inmediatamente para asignar
-     * a roles. Retorna estado final (HTTP 200 por uso de `ApiResponse::resource`).
+     * a roles. Retorna estado final (HTTP 201).
      *
      * @param  StorePermissionRequest  $request  Datos validados.
      * @return JsonResponse Permiso creado.
@@ -63,7 +68,10 @@ class PermissionController extends Controller implements HasMiddleware
         $validated = $request->validated();
         $permission = Permission::create($validated);
 
-        return ApiResponse::resource(new PermissionResource($permission));
+        return (new PermissionResource($permission))->additional([
+            'success' => true,
+            'message' => 'Permission created successfully.',
+        ])->response()->setStatusCode(201);
     }
 
     /**
@@ -71,11 +79,14 @@ class PermissionController extends Controller implements HasMiddleware
      * Laravel genera 404 automáticamente antes de ejecutar este método.
      *
      * @param  Permission  $permission  Instancia objetivo.
-     * @return JsonResponse Datos del permiso.
+     * @return PermissionResource Datos del permiso.
      */
-    public function show(Permission $permission): JsonResponse
+    public function show(Permission $permission): PermissionResource
     {
-        return ApiResponse::resource(new PermissionResource($permission));
+        return (new PermissionResource($permission))->additional([
+            'success' => true,
+            'message' => 'Permission retrieved successfully.',
+        ]);
     }
 
     /**
@@ -84,15 +95,18 @@ class PermissionController extends Controller implements HasMiddleware
      *
      * @param  UpdatePermissionRequest  $request  Datos validados.
      * @param  Permission  $permission  Permiso objetivo.
-     * @return JsonResponse Permiso actualizado.
+     * @return PermissionResource Permiso actualizado.
      */
-    public function update(UpdatePermissionRequest $request, Permission $permission): JsonResponse
+    public function update(UpdatePermissionRequest $request, Permission $permission): PermissionResource
     {
         $validated = $request->validated();
         $this->accessControl->authorizePermissionRename($request->user(), $permission, $validated['name']);
         $permission->update($validated);
 
-        return ApiResponse::resource(new PermissionResource($permission));
+        return (new PermissionResource($permission))->additional([
+            'success' => true,
+            'message' => 'Permission updated successfully.',
+        ]);
     }
 
     /**
@@ -100,26 +114,34 @@ class PermissionController extends Controller implements HasMiddleware
      * Esto permite auditoría y restauración posterior sin pérdida de integridad.
      *
      * @param  Permission  $permission  Permiso a eliminar lógicamente.
-     * @return JsonResponse Permiso eliminado.
+     * @return PermissionResource Permiso eliminado.
      */
-    public function destroy(Request $request, Permission $permission): JsonResponse
+    public function destroy(Request $request, Permission $permission): PermissionResource
     {
         $this->accessControl->authorizePermissionTargets($request->user(), $permission);
         $permission->delete();
 
-        return ApiResponse::resource(new PermissionResource($permission));
+        return (new PermissionResource($permission))->additional([
+            'success' => true,
+            'message' => 'Permission deleted successfully.',
+        ]);
     }
 
     /**
      * Lista registros eliminados con filtros y paginación SQL.
      *
-     * @return JsonResponse Página de recursos con metadatos.
+     * @return AnonymousResourceCollection Página de recursos con metadatos.
      */
-    public function indexDeleted(IndexPermissionRequest $request, IndexQueryApplier $index): JsonResponse
+    public function indexDeleted(IndexPermissionRequest $request, IndexQueryApplier $index): AnonymousResourceCollection
     {
         $permissions = Permission::onlyTrashed();
 
-        return ApiResponse::paginated($index->apply($permissions, $request->validated(), PermissionIndexDefinition::definition()), PermissionResource::class, $request);
+        $items = $index->apply($permissions, $request->validated(), PermissionIndexDefinition::definition());
+
+        return PermissionResource::collection($items)->withQuery($request->paginationQuery())->additional([
+            'success' => true,
+            'message' => 'Permission records retrieved successfully.',
+        ]);
     }
 
     /**
@@ -127,13 +149,16 @@ class PermissionController extends Controller implements HasMiddleware
      * `withTrashed()` en la definición de la ruta. Si ya estaba activo no cambia.
      *
      * @param  Permission  $permission  Permiso a restaurar.
-     * @return JsonResponse Permiso restaurado.
+     * @return PermissionResource Permiso restaurado.
      */
-    public function restore(Request $request, Permission $permission): JsonResponse
+    public function restore(Request $request, Permission $permission): PermissionResource
     {
         $this->accessControl->authorizePermissionTargets($request->user(), $permission);
         $permission->restore();
 
-        return ApiResponse::resource(new PermissionResource($permission));
+        return (new PermissionResource($permission))->additional([
+            'success' => true,
+            'message' => 'Permission restored successfully.',
+        ]);
     }
 }

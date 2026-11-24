@@ -50,7 +50,7 @@ class AdministrativeTransactionTest extends TestCase
         $this->assertDatabaseMissing('roles', ['name' => 'Rolled back']);
         $this->assertDatabaseCount('activity_log', $auditCount);
         $this->grantPermissions($actor, ['role.create']);
-        $this->postJson('/api/role', ['nombre' => 'After rollback'])->assertOk();
+        $this->postJson('/api/role', ['nombre' => 'After rollback'])->assertCreated();
         $this->assertDatabaseHas('roles', ['name' => 'After rollback']);
     }
 

@@ -31,7 +31,7 @@ class IndexDeletedRoleTest extends TestCase
         $response = $this->getJson(route('role.indexDeleted'));
         $response->assertOk();
         $response->assertJsonStructure([
-            'current_page',
+            'success', 'message',
             'data' => [
                 '*' => [
                     'identificador',
@@ -39,23 +39,8 @@ class IndexDeletedRoleTest extends TestCase
                     'permisos',
                 ],
             ],
-            'first_page_url',
-            'from',
-            'last_page',
-            'last_page_url',
-            'links' => [
-                '*' => [
-                    'url',
-                    'label',
-                    'active',
-                ],
-            ],
-            'next_page_url',
-            'path',
-            'per_page',
-            'prev_page_url',
-            'to',
-            'total',
+            'links' => ['first', 'last', 'prev', 'next'],
+            'meta' => ['current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', 'links'],
         ]);
         $response->assertJsonCount(10, 'data');
     }
@@ -69,11 +54,11 @@ class IndexDeletedRoleTest extends TestCase
         $response = $this->getJson(route('role.indexDeleted'));
         $response->assertOk();
         $response->assertJsonPath('data', [])
-            ->assertJsonPath('total', 0)
-            ->assertJsonPath('per_page', 10)
-            ->assertJsonPath('current_page', 1)
-            ->assertJsonPath('from', null)
-            ->assertJsonPath('to', null);
+            ->assertJsonPath('meta.total', 0)
+            ->assertJsonPath('meta.per_page', 10)
+            ->assertJsonPath('meta.current_page', 1)
+            ->assertJsonPath('meta.from', null)
+            ->assertJsonPath('meta.to', null);
         $response->assertJsonCount(0, 'data');
     }
 

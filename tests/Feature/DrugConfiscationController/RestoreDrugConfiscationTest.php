@@ -45,22 +45,26 @@ class RestoreDrugConfiscationTest extends TestCase
 
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $this->drugConfiscation->id,
-            'cantidad' => $this->drugConfiscation->amount,
-            'peso' => $this->drugConfiscation->weight,
-            'decomiso' => [
-                'identificador' => $this->confiscation->id,
-                'observacion' => $this->confiscation->observation,
+            'success' => true,
+            'message' => 'Drug Confiscation restored successfully.',
+            'data' => [
+                'identificador' => $this->drugConfiscation->id,
+                'cantidad' => $this->drugConfiscation->amount,
+                'peso' => $this->drugConfiscation->weight,
+                'decomiso' => [
+                    'identificador' => $this->confiscation->id,
+                    'observacion' => $this->confiscation->observation,
+                ],
+                'droga' => [
+                    'identificador' => $this->drug->id,
+                    'descripcion' => $this->drug->description,
+                ],
+                'presentacion' => [
+                    'identificador' => $this->drugPresentation->id,
+                    'descripcion' => $this->drugPresentation->description,
+                ],
+                'foto' => $this->drugConfiscation->photo,
             ],
-            'droga' => [
-                'identificador' => $this->drug->id,
-                'descripcion' => $this->drug->description,
-            ],
-            'presentacion' => [
-                'identificador' => $this->drugPresentation->id,
-                'descripcion' => $this->drugPresentation->description,
-            ],
-            'foto' => $this->drugConfiscation->photo,
         ]);
 
         $this->assertDatabaseHas('drug_confiscations', [

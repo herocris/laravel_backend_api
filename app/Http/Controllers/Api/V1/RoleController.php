@@ -11,11 +11,11 @@ use App\Http\Requests\Api\V1\Role\UpdateRoleRequest;
 use App\Http\Resources\Api\V1\RoleResource;
 use App\Models\Role;
 use App\Support\Authorization\AccessControl;
-use App\Support\Http\ApiResponse;
 use App\Support\Query\Definitions\RoleIndexDefinition;
 use App\Support\Query\IndexQueryApplier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
@@ -42,13 +42,18 @@ class RoleController extends Controller implements HasMiddleware
     /**
      * Lista registros con filtros y paginación SQL.
      *
-     * @return JsonResponse Página de recursos con metadatos.
+     * @return AnonymousResourceCollection Página de recursos con metadatos.
      */
-    public function index(IndexRoleRequest $request, IndexQueryApplier $index): JsonResponse
+    public function index(IndexRoleRequest $request, IndexQueryApplier $index): AnonymousResourceCollection
     {
         $roles = Role::query();
 
-        return ApiResponse::paginated($index->apply($roles, $request->validated(), RoleIndexDefinition::definition()), RoleResource::class, $request);
+        $items = $index->apply($roles, $request->validated(), RoleIndexDefinition::definition());
+
+        return RoleResource::collection($items)->withQuery($request->paginationQuery())->additional([
+            'success' => true,
+            'message' => 'Role records retrieved successfully.',
+        ]);
     }
 
     /**
@@ -64,7 +69,10 @@ class RoleController extends Controller implements HasMiddleware
         $this->accessControl->authorizePermissions($request->user(), $validated['permissions'] ?? []);
         $role = $action->execute(new Role, $validated);
 
-        return ApiResponse::resource(new RoleResource($role->load(RoleIndexDefinition::definition()['with'])));
+        return (new RoleResource($role->load(RoleIndexDefinition::definition()['with'])))->additional([
+            'success' => true,
+            'message' => 'Role created successfully.',
+        ])->response()->setStatusCode(201);
     }
 
     /**
@@ -72,11 +80,14 @@ class RoleController extends Controller implements HasMiddleware
      * Puedes encadenar `load('permissions')` si se requiere completo en futuro.
      *
      * @param  Role  $role  Instancia objetivo.
-     * @return JsonResponse Datos del rol.
+     * @return RoleResource Datos del rol.
      */
-    public function show(Role $role): JsonResponse
+    public function show(Role $role): RoleResource
     {
-        return ApiResponse::resource(new RoleResource($role->load(RoleIndexDefinition::definition()['with'])));
+        return (new RoleResource($role->load(RoleIndexDefinition::definition()['with'])))->additional([
+            'success' => true,
+            'message' => 'Role retrieved successfully.',
+        ]);
     }
 
     /**
@@ -86,16 +97,19 @@ class RoleController extends Controller implements HasMiddleware
      *
      * @param  UpdateRoleRequest  $request  Datos validados.
      * @param  Role  $role  Rol a actualizar.
-     * @return JsonResponse Rol actualizado.
+     * @return RoleResource Rol actualizado.
      */
-    public function update(UpdateRoleRequest $request, Role $role, SaveRoleAction $action): JsonResponse
+    public function update(UpdateRoleRequest $request, Role $role, SaveRoleAction $action): RoleResource
     {
         $validated = $request->validated();
         $this->accessControl->authorizeRole($request->user(), $role);
         $this->accessControl->authorizePermissions($request->user(), $validated['permissions'] ?? []);
         $action->execute($role, $validated);
 
-        return ApiResponse::resource(new RoleResource($role->load(RoleIndexDefinition::definition()['with'])));
+        return (new RoleResource($role->load(RoleIndexDefinition::definition()['with'])))->additional([
+            'success' => true,
+            'message' => 'Role updated successfully.',
+        ]);
     }
 
     /**
@@ -104,26 +118,34 @@ class RoleController extends Controller implements HasMiddleware
      * accidental y facilita auditoría.
      *
      * @param  Role  $role  Rol a eliminar lógicamente.
-     * @return JsonResponse Rol eliminado.
+     * @return RoleResource Rol eliminado.
      */
-    public function destroy(Request $request, Role $role): JsonResponse
+    public function destroy(Request $request, Role $role): RoleResource
     {
         $this->accessControl->authorizeRole($request->user(), $role);
         $role->delete();
 
-        return ApiResponse::resource(new RoleResource($role->load(RoleIndexDefinition::definition()['with'])));
+        return (new RoleResource($role->load(RoleIndexDefinition::definition()['with'])))->additional([
+            'success' => true,
+            'message' => 'Role deleted successfully.',
+        ]);
     }
 
     /**
      * Lista registros eliminados con filtros y paginación SQL.
      *
-     * @return JsonResponse Página de recursos con metadatos.
+     * @return AnonymousResourceCollection Página de recursos con metadatos.
      */
-    public function indexDeleted(IndexRoleRequest $request, IndexQueryApplier $index): JsonResponse
+    public function indexDeleted(IndexRoleRequest $request, IndexQueryApplier $index): AnonymousResourceCollection
     {
         $roles = Role::onlyTrashed();
 
-        return ApiResponse::paginated($index->apply($roles, $request->validated(), RoleIndexDefinition::definition()), RoleResource::class, $request);
+        $items = $index->apply($roles, $request->validated(), RoleIndexDefinition::definition());
+
+        return RoleResource::collection($items)->withQuery($request->paginationQuery())->additional([
+            'success' => true,
+            'message' => 'Role records retrieved successfully.',
+        ]);
     }
 
     /**
@@ -131,13 +153,16 @@ class RoleController extends Controller implements HasMiddleware
      * `withTrashed()`. Si ya estaba activo no produce cambios.
      *
      * @param  Role  $role  Rol a restaurar.
-     * @return JsonResponse Rol restaurado.
+     * @return RoleResource Rol restaurado.
      */
-    public function restore(Request $request, Role $role): JsonResponse
+    public function restore(Request $request, Role $role): RoleResource
     {
         $this->accessControl->authorizeRole($request->user(), $role);
         $role->restore();
 
-        return ApiResponse::resource(new RoleResource($role->load(RoleIndexDefinition::definition()['with'])));
+        return (new RoleResource($role->load(RoleIndexDefinition::definition()['with'])))->additional([
+            'success' => true,
+            'message' => 'Role restored successfully.',
+        ]);
     }
 }

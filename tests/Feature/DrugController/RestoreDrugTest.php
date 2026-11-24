@@ -36,9 +36,13 @@ class RestoreDrugTest extends TestCase
 
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $this->drug->id,
-            'descripcion' => $this->drug->description,
-            'logo' => $this->drug->logo,
+            'success' => true,
+            'message' => 'Drug restored successfully.',
+            'data' => [
+                'identificador' => $this->drug->id,
+                'descripcion' => $this->drug->description,
+                'logo' => $this->drug->logo,
+            ],
         ]);
 
         $this->assertDatabaseHas('drugs', [

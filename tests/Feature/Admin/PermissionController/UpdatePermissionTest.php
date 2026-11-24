@@ -35,8 +35,12 @@ class UpdatePermissionTest extends TestCase
 
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $this->permission->id,
-            'nombre' => 'updated.permission',
+            'success' => true,
+            'message' => 'Permission updated successfully.',
+            'data' => [
+                'identificador' => $this->permission->id,
+                'nombre' => 'updated.permission',
+            ],
         ]);
 
         $this->assertDatabaseHas('permissions', [

@@ -35,8 +35,12 @@ class RestorePermissionTest extends TestCase
 
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $this->permission->id,
-            'nombre' => $this->permission->name,
+            'success' => true,
+            'message' => 'Permission restored successfully.',
+            'data' => [
+                'identificador' => $this->permission->id,
+                'nombre' => $this->permission->name,
+            ],
         ]);
 
         $this->assertDatabaseHas('permissions', [

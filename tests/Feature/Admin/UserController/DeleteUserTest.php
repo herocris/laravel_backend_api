@@ -37,9 +37,13 @@ class DeleteUserTest extends TestCase
         $response->assertOk();
 
         $response->assertJson([
-            'identificador' => $this->user->id,
-            'nombre' => $this->user->name,
-            'correo' => $this->user->email,
+            'success' => true,
+            'message' => 'User deleted successfully.',
+            'data' => [
+                'identificador' => $this->user->id,
+                'nombre' => $this->user->name,
+                'correo' => $this->user->email,
+            ],
         ]);
 
         $this->assertSoftDeleted('users', ['id' => $this->user->id]);

@@ -32,9 +32,13 @@ class DeleteWeaponTest extends TestCase
         $response = $this->deleteJson(route('weapon.destroy', $this->weapon->id));
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $this->weapon->id,
-            'descripcion' => $this->weapon->description,
-            'logo' => $this->weapon->logo,
+            'success' => true,
+            'message' => 'Weapon deleted successfully.',
+            'data' => [
+                'identificador' => $this->weapon->id,
+                'descripcion' => $this->weapon->description,
+                'logo' => $this->weapon->logo,
+            ],
         ]);
         $this->assertSoftDeleted('weapons', ['id' => $this->weapon->id]);
     }

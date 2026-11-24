@@ -37,17 +37,21 @@ class DeleteAmmunitionConfiscationTest extends TestCase
         $response = $this->deleteJson(route('ammunitionConfiscation.destroy', $this->ammunitionConfiscation->id));
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $this->ammunitionConfiscation->id,
-            'cantidad' => $this->ammunitionConfiscation->amount,
-            'decomiso' => [
-                'identificador' => $this->confiscation->id,
-                'observacion' => $this->confiscation->observation,
+            'success' => true,
+            'message' => 'Ammunition Confiscation deleted successfully.',
+            'data' => [
+                'identificador' => $this->ammunitionConfiscation->id,
+                'cantidad' => $this->ammunitionConfiscation->amount,
+                'decomiso' => [
+                    'identificador' => $this->confiscation->id,
+                    'observacion' => $this->confiscation->observation,
+                ],
+                'municion' => [
+                    'identificador' => $this->ammunition->id,
+                    'descripcion' => $this->ammunition->description,
+                ],
+                'foto' => $this->ammunitionConfiscation->photo,
             ],
-            'municion' => [
-                'identificador' => $this->ammunition->id,
-                'descripcion' => $this->ammunition->description,
-            ],
-            'foto' => $this->ammunitionConfiscation->photo,
         ]);
         $this->assertSoftDeleted('ammunition_confiscations', ['id' => $this->ammunitionConfiscation->id]);
     }

@@ -36,9 +36,13 @@ class RestoreAmmunitionTest extends TestCase
 
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $this->ammunition->id,
-            'descripcion' => $this->ammunition->description,
-            'logo' => $this->ammunition->logo,
+            'success' => true,
+            'message' => 'Ammunition restored successfully.',
+            'data' => [
+                'identificador' => $this->ammunition->id,
+                'descripcion' => $this->ammunition->description,
+                'logo' => $this->ammunition->logo,
+            ],
         ]);
 
         $this->assertDatabaseHas('ammunitions', [

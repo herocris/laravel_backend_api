@@ -61,6 +61,18 @@ abstract class IndexRequest extends FormRequest
         return $rules;
     }
 
+    /** @return array<string, mixed> */
+    public function paginationQuery(): array
+    {
+        $parameters = $this->query();
+
+        if (array_key_exists('include', $parameters) && $parameters['include'] === []) {
+            $parameters['include'] = '';
+        }
+
+        return $parameters;
+    }
+
     protected function prepareForValidation(): void
     {
         foreach (['fields', 'include'] as $parameter) {

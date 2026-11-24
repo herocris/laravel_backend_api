@@ -25,8 +25,8 @@ class PaginateTest extends UnitTestCase
         $page = $response->getData(true);
 
         $this->assertSame([1, 2, 3, 4], array_column($page['data'], 'identificador'));
-        $this->assertSame(4, $page['total']);
-        $this->assertSame(10, $page['per_page']);
+        $this->assertSame(4, $page['meta']['total']);
+        $this->assertSame(10, $page['meta']['per_page']);
         $this->assertArrayHasKey('links', $page);
     }
 
@@ -39,7 +39,7 @@ class PaginateTest extends UnitTestCase
         $response = (new ApiResponserProxy)->callShowAll(User::query());
         $page = $response->getData(true);
 
-        $this->assertSame(2, $page['current_page']);
+        $this->assertSame(2, $page['meta']['current_page']);
         $this->assertSame([3, 4], array_column($page['data'], 'identificador'));
     }
 
@@ -52,8 +52,8 @@ class PaginateTest extends UnitTestCase
         $response = (new ApiResponserProxy)->callShowAll(User::query());
         $page = $response->getData(true);
 
-        $this->assertSame(2, $page['per_page']);
+        $this->assertSame(2, $page['meta']['per_page']);
         $this->assertSame([1, 2], array_column($page['data'], 'identificador'));
-        $this->assertSame(4, $page['total']);
+        $this->assertSame(4, $page['meta']['total']);
     }
 }

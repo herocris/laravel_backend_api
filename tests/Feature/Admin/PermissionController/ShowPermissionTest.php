@@ -30,8 +30,12 @@ class ShowPermissionTest extends TestCase
 
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $this->permission->id,
-            'nombre' => 'test_permission',
+            'success' => true,
+            'message' => 'Permission retrieved successfully.',
+            'data' => [
+                'identificador' => $this->permission->id,
+                'nombre' => 'test_permission',
+            ],
         ]);
     }
 

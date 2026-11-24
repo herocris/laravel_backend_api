@@ -38,7 +38,7 @@ class PortfolioDemoTest extends TestCase
         $this->seed(PortfolioDemoSeeder::class);
         $this->actingAs(User::where('email', 'analista@demo.invalid')->firstOrFail(), 'api');
 
-        $this->getJson('/api/confiscation?per_page=2')->assertOk()->assertJsonCount(2, 'data')->assertJsonPath('total', 3);
+        $this->getJson('/api/confiscation?per_page=2')->assertOk()->assertJsonCount(2, 'data')->assertJsonPath('meta.total', 3);
         $this->getJson('/api/confiscation/map?start_date=2026-01-01&end_date=2026-12-31&drugs=%5B1%5D')
             ->assertOk()->assertJsonCount(3, 'mapItems');
         $this->getJson('/api/drugGraphIndex?period=quarter&typeGraph=bar&start_date=2026-01-01&end_date=2026-12-31&drugs=%5B1%5D')
@@ -55,7 +55,7 @@ class PortfolioDemoTest extends TestCase
         $operator = User::where('email', 'operador@demo.invalid')->firstOrFail();
         $this->actingAs($operator, 'api');
         $this->postJson('/api/confiscation', $this->confiscationInput())
-            ->assertOk()->assertJsonPath('observacion', 'DEMO creada por operador');
+            ->assertCreated()->assertJsonPath('data.observacion', 'DEMO creada por operador');
         $record = Confiscation::where('observation', 'DEMO creada por operador')->firstOrFail();
         $this->assertDatabaseHas('activity_log', [
             'subject_type' => Confiscation::class, 'subject_id' => $record->id,

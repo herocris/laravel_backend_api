@@ -96,13 +96,13 @@ class SqlListingTest extends TestCase
             Model::preventLazyLoading(false);
         }
 
-        $response->assertOk()->assertJsonCount(2, 'data')->assertJsonPath('total', 5)
-            ->assertJsonPath('current_page', 2)->assertJsonPath('per_page', 2)
-            ->assertJsonPath('from', 3)->assertJsonPath('to', 4)->assertJsonPath('last_page', 3)
+        $response->assertOk()->assertJsonCount(2, 'data')->assertJsonPath('meta.total', 5)
+            ->assertJsonPath('meta.current_page', 2)->assertJsonPath('meta.per_page', 2)
+            ->assertJsonPath('meta.from', 3)->assertJsonPath('meta.to', 4)->assertJsonPath('meta.last_page', 3)
             ->assertJsonPath('data.0.identificador', $records[2]->id)
             ->assertJsonPath('data.1.identificador', $records[3]->id);
         $this->assertSame(2, $hydrated);
-        parse_str(parse_url($response->json('next_page_url'), PHP_URL_QUERY), $nextQuery);
+        parse_str(parse_url($response->json('links.next'), PHP_URL_QUERY), $nextQuery);
         $this->assertSame('3', $nextQuery['page']);
         $this->assertSame((string) $value, $nextQuery[$field]);
     }
@@ -132,7 +132,7 @@ class SqlListingTest extends TestCase
 
         $this->actingAs($actor, 'api')->getJson('/api/drug?'.http_build_query([
             'descripcion' => 'DRUG 50%_!', 'logo' => 'NEEDLE', 'description' => 'ignored', 'fake' => 'ignored',
-        ]))->assertOk()->assertJsonPath('total', 1)->assertJsonPath('data.0.identificador', $match->id);
+        ]))->assertOk()->assertJsonPath('meta.total', 1)->assertJsonPath('data.0.identificador', $match->id);
     }
 
     public static function invalidParameters(): array
@@ -184,10 +184,13 @@ class SqlListingTest extends TestCase
 
         $this->actingAs($actor, 'api')->getJson('/api/drug?'.http_build_query([
             'per_page' => 2, 'page' => $page, 'descripcion' => $filter,
-        ]))->assertOk()->assertJsonPath('data', [])->assertJsonPath('current_page', $page)
-            ->assertJsonPath('total', $filter === null ? $rows : 0)->assertJsonPath('per_page', 2)
-            ->assertJsonPath('from', null)->assertJsonPath('to', null)
-            ->assertJsonStructure(['links', 'path', 'last_page', 'first_page_url', 'last_page_url']);
+        ]))->assertOk()->assertJsonPath('data', [])->assertJsonPath('meta.current_page', $page)
+            ->assertJsonPath('meta.total', $filter === null ? $rows : 0)->assertJsonPath('meta.per_page', 2)
+            ->assertJsonPath('meta.from', null)->assertJsonPath('meta.to', null)
+            ->assertJsonStructure([
+                'links' => ['first', 'last', 'prev', 'next'],
+                'meta' => ['path', 'last_page'],
+            ]);
     }
 
     public static function directions(): array
@@ -242,7 +245,7 @@ class SqlListingTest extends TestCase
         DrugPresentation::findOrFail($attributes['drug_presentation_id'])->delete();
 
         $this->actingAs($actor, 'api')->getJson('/api/drugConfiscation?per_page=2')->assertOk()
-            ->assertJsonPath('total', 3)->assertJsonPath('data.0.decomiso.identificador', $attributes['confiscation_id'])
+            ->assertJsonPath('meta.total', 3)->assertJsonPath('data.0.decomiso.identificador', $attributes['confiscation_id'])
             ->assertJsonPath('data.0.droga.identificador', $attributes['drug_id'])
             ->assertJsonPath('data.0.presentacion.identificador', $attributes['drug_presentation_id']);
     }
@@ -256,9 +259,9 @@ class SqlListingTest extends TestCase
         Drug::factory()->create(['id' => 33]);
         $this->actingAs($actor, 'api');
 
-        $this->getJson('/api/drug?identificador=2')->assertOk()->assertJsonPath('total', 2);
+        $this->getJson('/api/drug?identificador=2')->assertOk()->assertJsonPath('meta.total', 2);
         $this->getJson('/api/drug?'.http_build_query(['descripcion' => "' OR 1=1 --"]))
-            ->assertOk()->assertJsonPath('total', 0);
+            ->assertOk()->assertJsonPath('meta.total', 0);
     }
 
     public function test_maximum_page_size_bounds_hydration(): void
@@ -272,7 +275,7 @@ class SqlListingTest extends TestCase
         });
 
         $this->actingAs($actor, 'api')->getJson('/api/drug?per_page=100')
-            ->assertOk()->assertJsonCount(100, 'data')->assertJsonPath('total', 101)->assertJsonPath('per_page', 100);
+            ->assertOk()->assertJsonCount(100, 'data')->assertJsonPath('meta.total', 101)->assertJsonPath('meta.per_page', 100);
 
         $this->assertSame(100, $hydrated);
     }

@@ -74,10 +74,10 @@ class InputIntegrityTest extends TestCase
             'identificador' => 99999, 'deleted_at' => '2026-01-01',
         ]);
 
-        $response = $this->postJson('/api/confiscation', $payload)->assertOk()->assertJsonPath('fecha', '2024-02-29');
+        $response = $this->postJson('/api/confiscation', $payload)->assertCreated()->assertJsonPath('data.fecha', '2024-02-29');
 
         $this->assertDatabaseHas('confiscations', [
-            'id' => $response->json('identificador'), 'latitude' => $latitude, 'length' => $longitude,
+            'id' => $response->json('data.identificador'), 'latitude' => $latitude, 'length' => $longitude,
             'observation' => str_repeat('á', 255), 'deleted_at' => null,
         ]);
         $this->assertDatabaseMissing('confiscations', ['id' => 99999]);
@@ -241,7 +241,7 @@ class InputIntegrityTest extends TestCase
         $target->{$relation}->delete();
 
         $this->getJson('/api/'.$resource.'/'.$target->id)->assertOk()
-            ->assertJsonPath('decomiso.identificador', $target->confiscation_id);
+            ->assertJsonPath('data.decomiso.identificador', $target->confiscation_id);
     }
 
     #[DataProvider('itemModelsForTests')]
@@ -254,10 +254,10 @@ class InputIntegrityTest extends TestCase
         $payload = array_replace($this->itemPayload($target), ['cantidad' => '2147483647', 'peso' => '0.01',
             'foto' => UploadedFile::fake()->image('photo.png')]);
 
-        $response = $this->postJson('/api/'.$resource, $payload)->assertOk()->assertJsonPath('cantidad', 2147483647);
+        $response = $this->postJson('/api/'.$resource, $payload)->assertCreated()->assertJsonPath('data.cantidad', 2147483647);
 
-        $this->assertDatabaseHas($target->getTable(), ['id' => $response->json('identificador'), 'amount' => 2147483647]);
-        Storage::disk('evidence')->assertExists($response->json('foto'));
+        $this->assertDatabaseHas($target->getTable(), ['id' => $response->json('data.identificador'), 'amount' => 2147483647]);
+        Storage::disk('evidence')->assertExists($response->json('data.foto'));
     }
 
     #[TestWith(['POST'])]
@@ -274,9 +274,9 @@ class InputIntegrityTest extends TestCase
         }
 
         $response = $this->json($method, '/api/drugConfiscation'.($method === 'PUT' ? '/'.$target->id : ''), $payload)
-            ->assertOk()->assertJsonPath('cantidad', 1)->assertJsonPath('peso', 123.45);
+            ->assertStatus($method === 'POST' ? 201 : 200)->assertJsonPath('data.cantidad', 1)->assertJsonPath('data.peso', 123.45);
 
-        $this->assertDatabaseHas('drug_confiscations', ['id' => $response->json('identificador'), 'weight' => 123.45]);
+        $this->assertDatabaseHas('drug_confiscations', ['id' => $response->json('data.identificador'), 'weight' => 123.45]);
     }
 
     #[DataProvider('itemModelsForTests')]

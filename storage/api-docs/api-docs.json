@@ -496,12 +496,24 @@
                     }
                 },
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/AmmunitionConfiscation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/AmmunitionConfiscation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -838,7 +850,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/AmmunitionConfiscation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/AmmunitionConfiscation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -938,7 +962,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/AmmunitionConfiscation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/AmmunitionConfiscation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -1039,7 +1075,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/AmmunitionConfiscation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/AmmunitionConfiscation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -1150,7 +1198,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/AmmunitionConfiscation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/AmmunitionConfiscation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -1253,7 +1313,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/AmmunitionConfiscation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/AmmunitionConfiscation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -2035,12 +2107,24 @@
                     }
                 },
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Ammunition"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Ammunition"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -2354,7 +2438,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Ammunition"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Ammunition"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -2454,7 +2550,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Ammunition"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Ammunition"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -2555,7 +2663,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Ammunition"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Ammunition"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -2666,7 +2786,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Ammunition"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Ammunition"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -2769,7 +2901,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Ammunition"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Ammunition"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -3620,12 +3764,24 @@
                     }
                 },
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Confiscation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Confiscation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -3968,7 +4124,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Confiscation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Confiscation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -4068,7 +4236,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Confiscation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Confiscation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -4169,7 +4349,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Confiscation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Confiscation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -4280,7 +4472,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Confiscation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Confiscation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -4383,7 +4587,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Confiscation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Confiscation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -4854,12 +5070,24 @@
                     }
                 },
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/DrugConfiscation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/DrugConfiscation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -5207,7 +5435,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/DrugConfiscation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/DrugConfiscation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -5307,7 +5547,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/DrugConfiscation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/DrugConfiscation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -5408,7 +5660,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/DrugConfiscation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/DrugConfiscation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -5519,7 +5783,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/DrugConfiscation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/DrugConfiscation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -5622,7 +5898,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/DrugConfiscation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/DrugConfiscation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -6415,12 +6703,24 @@
                     }
                 },
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Drug"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Drug"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -6734,7 +7034,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Drug"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Drug"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -6834,7 +7146,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Drug"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Drug"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -6935,7 +7259,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Drug"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Drug"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -7046,7 +7382,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Drug"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Drug"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -7149,7 +7497,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Drug"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Drug"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -7455,12 +7815,24 @@
                     }
                 },
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/DrugPresentation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/DrugPresentation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -7774,7 +8146,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/DrugPresentation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/DrugPresentation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -7874,7 +8258,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/DrugPresentation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/DrugPresentation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -7975,7 +8371,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/DrugPresentation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/DrugPresentation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -8086,7 +8494,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/DrugPresentation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/DrugPresentation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -8189,7 +8609,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/DrugPresentation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/DrugPresentation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -8491,12 +8923,24 @@
                     }
                 },
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Permission"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Permission"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -8806,7 +9250,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Permission"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Permission"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -8906,7 +9362,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Permission"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Permission"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -9007,7 +9475,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Permission"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Permission"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -9118,7 +9598,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Permission"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Permission"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -9221,7 +9713,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Permission"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Permission"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -9528,12 +10032,24 @@
                     }
                 },
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Role"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Role"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -9848,7 +10364,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Role"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Role"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -9948,7 +10476,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Role"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Role"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -10049,7 +10589,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Role"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Role"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -10160,7 +10712,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Role"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Role"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -10263,7 +10827,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Role"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Role"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -10578,12 +11154,24 @@
                     }
                 },
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/User"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/User"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -10906,7 +11494,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/User"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/User"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -11006,7 +11606,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/User"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/User"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -11107,7 +11719,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/User"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/User"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -11218,7 +11842,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/User"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/User"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -11321,7 +11957,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/User"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/User"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -11650,12 +12298,24 @@
                     }
                 },
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/WeaponConfiscation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/WeaponConfiscation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -11992,7 +12652,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/WeaponConfiscation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/WeaponConfiscation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -12092,7 +12764,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/WeaponConfiscation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/WeaponConfiscation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -12193,7 +12877,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/WeaponConfiscation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/WeaponConfiscation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -12304,7 +13000,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/WeaponConfiscation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/WeaponConfiscation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -12407,7 +13115,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/WeaponConfiscation"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/WeaponConfiscation"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -13189,12 +13909,24 @@
                     }
                 },
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Weapon"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Weapon"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -13508,7 +14240,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Weapon"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Weapon"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -13608,7 +14352,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Weapon"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Weapon"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -13709,7 +14465,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Weapon"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Weapon"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -13820,7 +14588,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Weapon"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Weapon"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -13923,7 +14703,19 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Weapon"
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResourceResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Weapon"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
                                 }
                             }
                         }
@@ -14449,57 +15241,92 @@
                 },
                 "type": "object"
             },
-            "Pagination": {
-                "description": "Paginador Laravel, también cuando data está vacío. Filtros escalares antiguos parciales y literales. search, filter tipado, fields e include son optativos. Sin selección explícita se conservan campos y relaciones previos; identificador permanece y los metadatos no cambian.",
+            "ResourceResponse": {
                 "required": [
-                    "data",
-                    "current_page",
-                    "per_page",
-                    "total"
+                    "success",
+                    "message",
+                    "data"
                 ],
                 "properties": {
-                    "current_page": {
-                        "type": "integer"
+                    "success": {
+                        "type": "boolean",
+                        "example": true
                     },
-                    "per_page": {
-                        "type": "integer"
-                    },
-                    "total": {
-                        "type": "integer"
-                    },
-                    "last_page": {
-                        "type": "integer"
-                    },
-                    "from": {
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "to": {
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "path": {
+                    "message": {
                         "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "Pagination": {
+                "description": "Colección paginada mediante Resources: data contiene los registros, links los enlaces de navegación y meta los metadatos. Incluye success y message incluso en páginas vacías. Los enlaces conservan filtros, selección de campos e include= explícitamente vacío.",
+                "required": [
+                    "success",
+                    "message",
+                    "data",
+                    "links",
+                    "meta"
+                ],
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
                     },
-                    "first_page_url": {
+                    "message": {
                         "type": "string"
-                    },
-                    "last_page_url": {
-                        "type": "string"
-                    },
-                    "next_page_url": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "prev_page_url": {
-                        "type": "string",
-                        "nullable": true
                     },
                     "links": {
-                        "type": "array",
-                        "items": {
-                            "type": "object"
-                        }
+                        "properties": {
+                            "first": {
+                                "type": "string"
+                            },
+                            "last": {
+                                "type": "string"
+                            },
+                            "prev": {
+                                "type": "string",
+                                "nullable": true
+                            },
+                            "next": {
+                                "type": "string",
+                                "nullable": true
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "meta": {
+                        "properties": {
+                            "current_page": {
+                                "type": "integer"
+                            },
+                            "per_page": {
+                                "type": "integer"
+                            },
+                            "total": {
+                                "type": "integer"
+                            },
+                            "last_page": {
+                                "type": "integer"
+                            },
+                            "from": {
+                                "type": "integer",
+                                "nullable": true
+                            },
+                            "to": {
+                                "type": "integer",
+                                "nullable": true
+                            },
+                            "path": {
+                                "type": "string"
+                            },
+                            "links": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "type": "object"
                     }
                 },
                 "type": "object"

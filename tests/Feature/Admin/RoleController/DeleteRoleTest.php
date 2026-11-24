@@ -31,9 +31,13 @@ class DeleteRoleTest extends TestCase
         $response = $this->deleteJson(route('role.destroy', ['role' => $this->role->id]));
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $this->role->id,
-            'nombre' => $this->role->name,
-            'permisos' => [],
+            'success' => true,
+            'message' => 'Role deleted successfully.',
+            'data' => [
+                'identificador' => $this->role->id,
+                'nombre' => $this->role->name,
+                'permisos' => [],
+            ],
         ]);
         $this->assertSoftDeleted('roles', ['id' => $this->role->id]);
     }

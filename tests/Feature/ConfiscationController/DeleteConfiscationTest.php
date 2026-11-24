@@ -29,14 +29,18 @@ class DeleteConfiscationTest extends TestCase
         $response = $this->deleteJson(route('confiscation.destroy', $this->confiscation->id));
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $this->confiscation->id,
-            'fecha' => $this->confiscation->date,
-            'observacion' => $this->confiscation->observation,
-            'direccion' => $this->confiscation->direction,
-            'departamento' => $this->confiscation->department,
-            'municipalidad' => $this->confiscation->municipality,
-            'latitud' => $this->confiscation->latitude,
-            'longitud' => $this->confiscation->length,
+            'success' => true,
+            'message' => 'Confiscation deleted successfully.',
+            'data' => [
+                'identificador' => $this->confiscation->id,
+                'fecha' => $this->confiscation->date,
+                'observacion' => $this->confiscation->observation,
+                'direccion' => $this->confiscation->direction,
+                'departamento' => $this->confiscation->department,
+                'municipalidad' => $this->confiscation->municipality,
+                'latitud' => $this->confiscation->latitude,
+                'longitud' => $this->confiscation->length,
+            ],
         ]);
         $this->assertSoftDeleted('confiscations', ['id' => $this->confiscation->id]);
     }

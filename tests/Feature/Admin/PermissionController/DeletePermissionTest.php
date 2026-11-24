@@ -31,8 +31,12 @@ class DeletePermissionTest extends TestCase
         $response = $this->deleteJson(route('permission.destroy', $this->permission->id));
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $this->permission->id,
-            'nombre' => $this->permission->name,
+            'success' => true,
+            'message' => 'Permission deleted successfully.',
+            'data' => [
+                'identificador' => $this->permission->id,
+                'nombre' => $this->permission->name,
+            ],
         ]);
         $this->assertSoftDeleted('permissions', ['id' => $this->permission->id]);
     }

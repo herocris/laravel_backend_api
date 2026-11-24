@@ -40,9 +40,13 @@ class UpdateWeaponTest extends TestCase
 
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $response->json('identificador'),
-            'descripcion' => $updateData['descripcion'],
-            'logo' => $response->json('logo'),
+            'success' => true,
+            'message' => 'Weapon updated successfully.',
+            'data' => [
+                'identificador' => $response->json('data.identificador'),
+                'descripcion' => $updateData['descripcion'],
+                'logo' => $response->json('data.logo'),
+            ],
         ]);
 
         $this->assertDatabaseHas('weapons', [

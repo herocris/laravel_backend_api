@@ -36,9 +36,13 @@ class ShowRoleTest extends TestCase
 
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $this->role->id,
-            'nombre' => 'Editor',
-            'permisos' => [$this->role->permissions->first()->id],
+            'success' => true,
+            'message' => 'Role retrieved successfully.',
+            'data' => [
+                'identificador' => $this->role->id,
+                'nombre' => 'Editor',
+                'permisos' => [$this->role->permissions->first()->id],
+            ],
         ]);
     }
 

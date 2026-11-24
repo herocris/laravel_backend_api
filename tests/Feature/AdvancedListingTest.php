@@ -63,7 +63,9 @@ class AdvancedListingTest extends TestCase
 
         $this->actingAs($actor, 'api')->getJson($path.'?'.http_build_query([
             'filter' => ['identificador' => $record->id], 'fields' => ['identificador'], 'include' => '',
-        ]))->assertOk()->assertJsonPath('total', 1)->assertJsonPath('data', [['identificador' => $record->id]]);
+        ]))->assertOk()->assertJsonPath('success', true)->assertJsonPath('meta.total', 1)
+            ->assertJsonPath('data', [['identificador' => $record->id]])
+            ->assertJsonStructure(['message', 'links' => ['first', 'last', 'prev', 'next']]);
     }
 
     public function test_search_is_grouped_with_legacy_filters_and_combines_text_columns(): void
@@ -76,7 +78,7 @@ class AdvancedListingTest extends TestCase
 
         $response = $this->actingAs($actor, 'api')->getJson('/api/confiscation?search=needle&departamento=Allowed&fields=observacion');
 
-        $response->assertOk()->assertJsonPath('total', 2)->assertJsonPath('data', [
+        $response->assertOk()->assertJsonPath('meta.total', 2)->assertJsonPath('data', [
             ['identificador' => $first->id, 'observacion' => 'NEEDLE'],
             ['identificador' => $second->id, 'observacion' => 'Other'],
         ]);
@@ -91,9 +93,9 @@ class AdvancedListingTest extends TestCase
         $this->actingAs($actor, 'api');
 
         $this->getJson('/api/drug?'.http_build_query(['search' => '50%_!', 'filter' => ['descripcion' => 'DOSE']]))
-            ->assertOk()->assertJsonPath('total', 1)->assertJsonPath('data.0.identificador', $match->id);
+            ->assertOk()->assertJsonPath('meta.total', 1)->assertJsonPath('data.0.identificador', $match->id);
         $this->getJson('/api/drug?'.http_build_query(['search' => "' OR 1=1 --"]))
-            ->assertOk()->assertJsonPath('total', 0);
+            ->assertOk()->assertJsonPath('meta.total', 0);
     }
 
     public function test_typed_numeric_filters_use_equality_while_legacy_filters_remain_partial(): void
@@ -104,8 +106,8 @@ class AdvancedListingTest extends TestCase
         Drug::factory()->create(['id' => 21]);
         $this->actingAs($actor, 'api');
 
-        $this->getJson('/api/drug?identificador=2')->assertOk()->assertJsonPath('total', 2);
-        $this->getJson('/api/drug?filter[identificador]=12')->assertOk()->assertJsonPath('total', 1)->assertJsonPath('data.0.identificador', 12);
+        $this->getJson('/api/drug?identificador=2')->assertOk()->assertJsonPath('meta.total', 2);
+        $this->getJson('/api/drug?filter[identificador]=12')->assertOk()->assertJsonPath('meta.total', 1)->assertJsonPath('data.0.identificador', 12);
     }
 
     public function test_fields_and_relations_limit_sql_columns_and_preserve_keys_for_historical_relations(): void
@@ -151,7 +153,7 @@ class AdvancedListingTest extends TestCase
         $this->actingAs($actor, 'api')->getJson('/api/drugConfiscation?'.http_build_query([
             'search' => 'needle', 'fields' => 'cantidad', 'include' => '',
             'filter' => ['droga_descripcion' => 'Unique', 'fecha_desde' => '2026-06-01', 'fecha_hasta' => '2026-06-30'],
-        ]))->assertOk()->assertJsonPath('total', 1)->assertJsonPath('data', [['identificador' => $record->id, 'cantidad' => $record->amount]]);
+        ]))->assertOk()->assertJsonPath('meta.total', 1)->assertJsonPath('data', [['identificador' => $record->id, 'cantidad' => $record->amount]]);
 
         $this->assertSame(0, $hydratedDrugs);
     }
@@ -209,9 +211,9 @@ class AdvancedListingTest extends TestCase
         $this->actingAs($actor, 'api');
         $response = $this->getJson('/api/user?'.http_build_query([
             'search' => 'Match', 'filter' => ['nombre' => 'Match'], 'fields' => ['nombre'], 'include' => '', 'per_page' => 2,
-        ]))->assertOk()->assertJsonPath('total', 3);
+        ]))->assertOk()->assertJsonPath('meta.total', 3);
 
-        $next = $this->getJson($response->json('next_page_url'))->assertOk()->assertJsonPath('current_page', 2)->assertJsonCount(1, 'data');
+        $next = $this->getJson($response->json('links.next'))->assertOk()->assertJsonPath('meta.current_page', 2)->assertJsonCount(1, 'data');
 
         $this->assertSame(['identificador', 'nombre'], array_keys($next->json('data.0')));
     }

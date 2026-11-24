@@ -32,10 +32,14 @@ class StorePermissionTest extends TestCase
         ];
 
         $response = $this->postJson(route('permission.store'), $payload);
-        $response->assertOk();
+        $response->assertCreated();
         $response->assertExactJson([
-            'identificador' => $response->json('identificador'),
-            'nombre' => 'Supervisor',
+            'success' => true,
+            'message' => 'Permission created successfully.',
+            'data' => [
+                'identificador' => $response->json('data.identificador'),
+                'nombre' => 'Supervisor',
+            ],
         ]);
         $this->assertDatabaseHas('permissions', [
             'name' => 'Supervisor',

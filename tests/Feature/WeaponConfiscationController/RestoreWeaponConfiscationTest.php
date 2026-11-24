@@ -41,17 +41,21 @@ class RestoreWeaponConfiscationTest extends TestCase
 
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $this->weaponConfiscation->id,
-            'cantidad' => $this->weaponConfiscation->amount,
-            'decomiso' => [
-                'identificador' => $this->confiscation->id,
-                'observacion' => $this->confiscation->observation,
+            'success' => true,
+            'message' => 'Weapon Confiscation restored successfully.',
+            'data' => [
+                'identificador' => $this->weaponConfiscation->id,
+                'cantidad' => $this->weaponConfiscation->amount,
+                'decomiso' => [
+                    'identificador' => $this->confiscation->id,
+                    'observacion' => $this->confiscation->observation,
+                ],
+                'arma' => [
+                    'identificador' => $this->weapon->id,
+                    'descripcion' => $this->weapon->description,
+                ],
+                'foto' => $this->weaponConfiscation->photo,
             ],
-            'arma' => [
-                'identificador' => $this->weapon->id,
-                'descripcion' => $this->weapon->description,
-            ],
-            'foto' => $this->weaponConfiscation->photo,
         ]);
 
         $this->assertDatabaseHas('weapon_confiscations', [

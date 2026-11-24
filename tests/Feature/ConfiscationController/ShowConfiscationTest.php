@@ -30,14 +30,18 @@ class ShowConfiscationTest extends TestCase
 
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $this->confiscation->id,
-            'fecha' => $this->confiscation->date,
-            'observacion' => $this->confiscation->observation,
-            'direccion' => $this->confiscation->direction,
-            'departamento' => $this->confiscation->department,
-            'municipalidad' => $this->confiscation->municipality,
-            'latitud' => $this->confiscation->latitude,
-            'longitud' => $this->confiscation->length,
+            'success' => true,
+            'message' => 'Confiscation retrieved successfully.',
+            'data' => [
+                'identificador' => $this->confiscation->id,
+                'fecha' => $this->confiscation->date,
+                'observacion' => $this->confiscation->observation,
+                'direccion' => $this->confiscation->direction,
+                'departamento' => $this->confiscation->department,
+                'municipalidad' => $this->confiscation->municipality,
+                'latitud' => $this->confiscation->latitude,
+                'longitud' => $this->confiscation->length,
+            ],
         ]);
     }
 

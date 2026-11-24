@@ -32,9 +32,13 @@ class DeleteDrugPresentationTest extends TestCase
         $response = $this->deleteJson(route('drugPresentation.destroy', $this->drugPresentation->id));
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $this->drugPresentation->id,
-            'descripcion' => $this->drugPresentation->description,
-            'logo' => $this->drugPresentation->logo,
+            'success' => true,
+            'message' => 'Drug Presentation deleted successfully.',
+            'data' => [
+                'identificador' => $this->drugPresentation->id,
+                'descripcion' => $this->drugPresentation->description,
+                'logo' => $this->drugPresentation->logo,
+            ],
         ]);
         $this->assertSoftDeleted('drug_presentations', ['id' => $this->drugPresentation->id]);
     }

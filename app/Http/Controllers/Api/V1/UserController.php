@@ -11,11 +11,11 @@ use App\Http\Requests\Api\V1\User\UpdateUserRequest;
 use App\Http\Resources\Api\V1\UserResource;
 use App\Models\User;
 use App\Support\Authorization\AccessControl;
-use App\Support\Http\ApiResponse;
 use App\Support\Query\Definitions\UserIndexDefinition;
 use App\Support\Query\IndexQueryApplier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
@@ -42,20 +42,25 @@ class UserController extends Controller implements HasMiddleware
     /**
      * Lista registros con filtros y paginación SQL.
      *
-     * @return JsonResponse Página de recursos con metadatos.
+     * @return AnonymousResourceCollection Página de recursos con metadatos.
      */
-    public function index(IndexUserRequest $request, IndexQueryApplier $index): JsonResponse
+    public function index(IndexUserRequest $request, IndexQueryApplier $index): AnonymousResourceCollection
     {
         $users = User::query();
 
-        return ApiResponse::paginated($index->apply($users, $request->validated(), UserIndexDefinition::definition()), UserResource::class, $request);
+        $items = $index->apply($users, $request->validated(), UserIndexDefinition::definition());
+
+        return UserResource::collection($items)->withQuery($request->paginationQuery())->additional([
+            'success' => true,
+            'message' => 'User records retrieved successfully.',
+        ]);
     }
 
     /**
      * Crea un nuevo usuario con datos ya validados por `StoreUserRequest`.
      * Side effects: dispara eventos de Eloquent (creating/created) y podría
      * aplicar mutadores (ej. hash de contraseña). Retorna el usuario creado
-     * con código HTTP 200 (no 201, dado uso de `ApiResponse::resource`).
+     * con código HTTP 201.
      *
      * @param  StoreUserRequest  $request  Request con reglas de validación (email único, etc.).
      * @return JsonResponse Usuario recién creado.
@@ -67,7 +72,10 @@ class UserController extends Controller implements HasMiddleware
         $this->accessControl->authorizeRoles($request->user(), $validated['roles'] ?? []);
         $user = $action->execute(new User, $validated);
 
-        return ApiResponse::resource(new UserResource($user->load(UserIndexDefinition::definition()['with'])));
+        return (new UserResource($user->load(UserIndexDefinition::definition()['with'])))->additional([
+            'success' => true,
+            'message' => 'User created successfully.',
+        ])->response()->setStatusCode(201);
     }
 
     /**
@@ -75,11 +83,14 @@ class UserController extends Controller implements HasMiddleware
      * Si el ID no existe Laravel generará automáticamente un 404 antes de entrar.
      *
      * @param  User  $user  Instancia obtenida por binding.
-     * @return JsonResponse Representación del recurso.
+     * @return UserResource Representación del recurso.
      */
-    public function show(User $user): JsonResponse
+    public function show(User $user): UserResource
     {
-        return ApiResponse::resource(new UserResource($user->load(UserIndexDefinition::definition()['with'])));
+        return (new UserResource($user->load(UserIndexDefinition::definition()['with'])))->additional([
+            'success' => true,
+            'message' => 'User retrieved successfully.',
+        ]);
     }
 
     /**
@@ -89,9 +100,9 @@ class UserController extends Controller implements HasMiddleware
      *
      * @param  UpdateUserRequest  $request  Datos validados para actualización.
      * @param  User  $user  Usuario objetivo.
-     * @return JsonResponse Usuario actualizado.
+     * @return UserResource Usuario actualizado.
      */
-    public function update(UpdateUserRequest $request, User $user, SaveUserAction $action): JsonResponse
+    public function update(UpdateUserRequest $request, User $user, SaveUserAction $action): UserResource
     {
         $validated = $request->validated();
         $this->accessControl->authorizeUser($request->user(), $user);
@@ -99,7 +110,10 @@ class UserController extends Controller implements HasMiddleware
         $this->accessControl->authorizeRoles($request->user(), $validated['roles'] ?? []);
         $action->execute($user, $validated);
 
-        return ApiResponse::resource(new UserResource($user->load(UserIndexDefinition::definition()['with'])));
+        return (new UserResource($user->load(UserIndexDefinition::definition()['with'])))->additional([
+            'success' => true,
+            'message' => 'User updated successfully.',
+        ]);
     }
 
     /**
@@ -108,26 +122,34 @@ class UserController extends Controller implements HasMiddleware
      * Eloquent (deleting/deleted) pueden dispararse para auditoría.
      *
      * @param  User  $user  Usuario a eliminar logicamente.
-     * @return JsonResponse Usuario eliminado (estado actual).
+     * @return UserResource Usuario eliminado (estado actual).
      */
-    public function destroy(Request $request, User $user): JsonResponse
+    public function destroy(Request $request, User $user): UserResource
     {
         $this->accessControl->authorizeUser($request->user(), $user);
         $user->delete();
 
-        return ApiResponse::resource(new UserResource($user->load(UserIndexDefinition::definition()['with'])));
+        return (new UserResource($user->load(UserIndexDefinition::definition()['with'])))->additional([
+            'success' => true,
+            'message' => 'User deleted successfully.',
+        ]);
     }
 
     /**
      * Lista registros eliminados con filtros y paginación SQL.
      *
-     * @return JsonResponse Página de recursos con metadatos.
+     * @return AnonymousResourceCollection Página de recursos con metadatos.
      */
-    public function indexDeleted(IndexUserRequest $request, IndexQueryApplier $index): JsonResponse
+    public function indexDeleted(IndexUserRequest $request, IndexQueryApplier $index): AnonymousResourceCollection
     {
         $users = User::onlyTrashed();
 
-        return ApiResponse::paginated($index->apply($users, $request->validated(), UserIndexDefinition::definition()), UserResource::class, $request);
+        $items = $index->apply($users, $request->validated(), UserIndexDefinition::definition());
+
+        return UserResource::collection($items)->withQuery($request->paginationQuery())->additional([
+            'success' => true,
+            'message' => 'User records retrieved successfully.',
+        ]);
     }
 
     /**
@@ -136,13 +158,16 @@ class UserController extends Controller implements HasMiddleware
      * el usuario ya estaba activo simplemente se devuelve sin cambios.
      *
      * @param  User  $user  Usuario a restaurar.
-     * @return JsonResponse Usuario restaurado.
+     * @return UserResource Usuario restaurado.
      */
-    public function restore(Request $request, User $user): JsonResponse
+    public function restore(Request $request, User $user): UserResource
     {
         $this->accessControl->authorizeUser($request->user(), $user);
         $user->restore();
 
-        return ApiResponse::resource(new UserResource($user->load(UserIndexDefinition::definition()['with'])));
+        return (new UserResource($user->load(UserIndexDefinition::definition()['with'])))->additional([
+            'success' => true,
+            'message' => 'User restored successfully.',
+        ]);
     }
 }

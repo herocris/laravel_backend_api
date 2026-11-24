@@ -30,9 +30,13 @@ class ShowDrugPresentationTest extends TestCase
 
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $this->drugPresentation->id,
-            'descripcion' => $this->drugPresentation->description,
-            'logo' => $this->drugPresentation->logo,
+            'success' => true,
+            'message' => 'Drug Presentation retrieved successfully.',
+            'data' => [
+                'identificador' => $this->drugPresentation->id,
+                'descripcion' => $this->drugPresentation->description,
+                'logo' => $this->drugPresentation->logo,
+            ],
         ]);
     }
 

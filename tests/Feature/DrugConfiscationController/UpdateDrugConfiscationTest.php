@@ -55,22 +55,26 @@ class UpdateDrugConfiscationTest extends TestCase
 
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $response->json('identificador'),
-            'peso' => $updateData['peso'],
-            'cantidad' => $updateData['cantidad'],
-            'decomiso' => [
-                'identificador' => $this->confiscation->id,
-                'observacion' => $this->confiscation->observation,
+            'success' => true,
+            'message' => 'Drug Confiscation updated successfully.',
+            'data' => [
+                'identificador' => $response->json('data.identificador'),
+                'peso' => $updateData['peso'],
+                'cantidad' => $updateData['cantidad'],
+                'decomiso' => [
+                    'identificador' => $this->confiscation->id,
+                    'observacion' => $this->confiscation->observation,
+                ],
+                'droga' => [
+                    'identificador' => $this->drug->id,
+                    'descripcion' => $this->drug->description,
+                ],
+                'presentacion' => [
+                    'identificador' => $this->drugPresentation->id,
+                    'descripcion' => $this->drugPresentation->description,
+                ],
+                'foto' => $response->json('data.foto'),
             ],
-            'droga' => [
-                'identificador' => $this->drug->id,
-                'descripcion' => $this->drug->description,
-            ],
-            'presentacion' => [
-                'identificador' => $this->drugPresentation->id,
-                'descripcion' => $this->drugPresentation->description,
-            ],
-            'foto' => $response->json('foto'),
         ]);
 
         $this->assertDatabaseHas('drug_confiscations', [

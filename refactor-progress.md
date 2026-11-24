@@ -1,9 +1,22 @@
 # Progreso del refactor
 
+## Unificación de respuestas con reports-manage-backend (2026-11-24)
+
+- Estado: `completado` localmente. Solicitud explícita de cambiar colecciones y objetos al patrón nativo de Resources de reports; autoriza el cambio de contrato anterior.
+- Inicio: árbol limpio en `refactor/01-base-referencia`; `.ai/rules` no existe. Leídas skills Laravel/testing y reglas aplicables; `search-docs` consultado mediante `boost:execute-tool` en Sail.
+- Contrato: objetos en `data`, colecciones con `data`, `links` y `meta`; `success` y `message` en ambos, HTTP 201 para creación. Se conserva el recurso devuelto al borrar/restaurar, con el nuevo envoltorio. Autenticación, errores, mapas, estadísticas y descargas conservan su contrato específico.
+- Enlaces de paginación: `IndexRequest::paginationQuery()` conserva consultas normalizadas e `include=` explícitamente vacío; la consulta SQL sigue en `IndexQueryApplier`.
+- Sail iniciado con puertos temporales 18081/15174. PHPUnit inspeccionado: SQLite `:memory:`, sin configuración cacheada; sin operaciones sobre datos reales.
+- Implementación: 12 controladores devuelven Resources/colecciones directamente con `additional()`; creaciones con `response()->setStatusCode(201)`. Retirados `ApiResponse::resource`, `paginated` y `transform` sin consumidores restantes. Conservados tests históricos adaptando su proxy al mecanismo nativo; pruebas de endpoints verifican el contrato real. Actualizados README, esquemas OpenAPI y JSON generado.
+- Verificación: primera ejecución focalizada 11 correctas y 3 expectativas antiguas; bloque de listados/armas 136 correctas y 3 expectativas de metadatos. Primera suite completa: 1.530 correctas, 27 fallos de expectativas, 18 omitidas; corregidos formatos, estados y lecturas de autenticación que conservan contrato propio.
+- Ejecución posterior de `vendor/bin/sail artisan test --compact --no-ansi`: 1.556 correctas / 8.596 aserciones y 18 omitidas por requerir MySQL; único fallo en OpenAPI por definición duplicada de ResourceResponse durante regeneración. Duplicado eliminado y JSON regenerado correctamente. Repetición focalizada final `vendor/bin/sail artisan test --compact --no-ansi tests/Feature/ApiDocumentationTest.php`: 1 correcta / 879 aserciones. Total de casos verificados tras las correcciones: 1.557 / 9.475; MySQL no repetido en esta tarea.
+- Cierre: `vendor/bin/sail bin pint --dirty --format agent` passed y `git diff --check` correcto. Revisados controladores, consulta de paginación, contratos, tests y OpenAPI; scripts temporales de edición retirados. Sin cambios de dependencias, commits, push ni despliegue. Próxima acción: revisión del diff y adaptación del cliente a `data`, `meta` y `links` antes de consumir esta versión.
+- Entrega solicitada posteriormente: un único commit local para implementación, tests, README, OpenAPI y esta bitácora. Estado y diff comprobados nuevamente; sin cambios ajenos ni archivos temporales. Se conserva la evidencia de pruebas anterior, sin repetirlas para crear el commit. Sin push ni despliegue.
+
 ## Estado para retomar
 
 - Última actualización: 2026-11-24, zona Europe/Madrid.
-- Trabajo actual: cambios acumulados confirmados mediante commits solicitados explícitamente. Verificación actual del conjunto: SQLite completo 1.557 / 9.431, con 18 casos de concurrencia omitidos por requerir MySQL; MySQL estadísticas/vistas/concurrencia 87 / 1.032. Los 16 pasos conservan su cierre local; despliegue remoto deshabilitado según D22.
+- Trabajo actual: unificación local de respuestas con reports completada; entrega mediante commit solicitada explícitamente. Verificación de esta tarea: 1.557 casos / 9.475 aserciones entre ejecución SQLite y repetición focalizada de OpenAPI, con 18 casos de concurrencia omitidos por requerir MySQL. La evidencia MySQL anterior permanece histórica; no se repitió en esta tarea. Los 16 pasos conservan su cierre local; despliegue remoto deshabilitado según D22.
 - Paso en curso: ninguno; concurrencia administrativa completada, incluida verificación real en MySQL aislado.
 - Siguiente paso: no hay otro paso del refactor que iniciar automáticamente; publicación e infraestructura siguen pendientes externos.
 - Próxima acción: aplicar la nueva migración al actualizar la instalación antes de usar las mutaciones administrativas; no se migraron datos reales en esta sesión. Infraestructura y publicación siguen pendientes externos.

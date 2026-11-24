@@ -134,7 +134,7 @@ Límites por minuto: login 5 por cuenta/IP y 30 por IP; registro 5 por IP; CSRF 
 Las rutas conservan `/api`, nombres singulares y mayúsculas existentes; no se ha añadido un prefijo de versión. Consultar [OpenAPI](storage/api-docs/api-docs.json), sus [fuentes](app/Docs) y el inventario de Artisan. Swagger UI se configura en `api/documentation`; volver a generar el JSON tras editar atributos. El servidor OpenAPI es relativo al origen actual, sin dominios publicados supuestos. Los navegadores administran la cookie HttpOnly; el botón Authorize no permite establecerla manualmente.
 
 - CRUD: `GET/POST /api/<recurso>`, `GET/PUT/PATCH/DELETE /api/<recurso>/{id}`, `GET /api/<recurso>/deleted`, `POST /api/<recurso>/restore/{id}`. Las actualizaciones conservan sus campos obligatorios, también con PATCH.
-- Altas, actualizaciones, bajas y restauraciones devuelven el objeto directamente con HTTP **200**, sin wrapper `data`. Los listados devuelven el paginator con `data`, `total`, `current_page`, `per_page`, enlaces y demás metadatos, también cuando están vacíos.
+- Altas, actualizaciones, bajas y restauraciones devuelven el objeto dentro de `data`, acompañado de `success: true` y `message`. Las altas usan HTTP **201**; el resto, **200**. Los listados usan Resources con `data`, `links`, `meta`, `success` y `message`, también cuando están vacíos. Adaptación del cliente: leer el objeto desde `data`, la paginación desde `meta.total`, `meta.current_page`, `meta.per_page`, etc., y navegar mediante `links.first`, `links.last`, `links.prev` y `links.next`. Autenticación, errores, mapas, estadísticas y descargas conservan sus contratos específicos.
 - Listados: `page>=1`, `per_page` entre 2 y 100 (10 por defecto), `sort_by` público permitido por `LIST_FIELDS`, `type=asc|desc` (desc si se indica orden sin dirección). Desempate por ID y, sin orden solicitado, ID ascendente. Filtros parciales por campos escalares públicos permitidos; `%` y `_` son literales. Objetos y arrays de relaciones no son filtros escalares.
 - Escrituras de negocio usan atributos españoles: decomiso `fecha`, `observacion`, `direccion`, `departamento`, `municipalidad`, `latitud`, `longitud`; detalle de droga `cantidad`, `peso`, `foto`, `decomiso`, `droga`, `presentacion`. En salida, las relaciones de detalle son objetos anidados. Los nombres internos (`amount`, `confiscation_id`, etc.) producen 422, también junto al nombre público. Campos desconocidos o de solo lectura no se persisten.
 - Cantidad: entero positivo hasta 2.147.483.647. Peso: gramos positivos con hasta dos decimales, almacenados en DOUBLE sin migrar ni redondear datos históricos. Coordenadas: latitud −90…90 y longitud −180…180. Las escrituras exigen asociaciones activas; las lecturas históricas admiten catálogos eliminados.
@@ -208,7 +208,7 @@ Mantener el cookie jar privado; no copiar tokens/contraseñas a capturas, incide
 | Analista: mapa con fechas de 2026 y `drugs=[1]` | 200, tres ubicaciones y solo detalles de droga |
 | Analista: gráfica trimestral con `drugs=[1]` | Q1/Q2/Q3 con 1/2/3; pie total 6 |
 | Analista: crear decomiso o consultar usuarios/auditoría | 403, sin escritura |
-| Operador: crear decomiso válido | 200, objeto creado y evento con actor operador |
+| Operador: crear decomiso válido | 201, objeto en data y evento con actor operador |
 | Operador: borrar o consultar auditoría | 403 |
 | Administrador: consultar auditoría ordenada por ID desc | Evento de creación con `id_usuario` del operador |
 

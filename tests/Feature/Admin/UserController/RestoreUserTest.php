@@ -38,11 +38,15 @@ class RestoreUserTest extends TestCase
         $response->assertOk();
 
         $response->assertExactJson([
-            'identificador' => $this->user->id,
-            'nombre' => $this->user->name,
-            'correo' => $this->user->email,
-            'roles' => [],
-            'permisos' => [],
+            'success' => true,
+            'message' => 'User restored successfully.',
+            'data' => [
+                'identificador' => $this->user->id,
+                'nombre' => $this->user->name,
+                'correo' => $this->user->email,
+                'roles' => [],
+                'permisos' => [],
+            ],
         ]);
 
         $this->assertDatabaseHas('users', [

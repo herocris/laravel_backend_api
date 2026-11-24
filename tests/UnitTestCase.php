@@ -24,7 +24,10 @@ class ApiResponserProxy
 {
     public function callShowOne(Model $instance, $code = 200): JsonResponse
     {
-        return ApiResponse::resource(new FakeResource($instance), $code);
+        return (new FakeResource($instance))->additional([
+            'success' => true,
+            'message' => 'Resource retrieved successfully.',
+        ])->response()->setStatusCode($code);
     }
 
     public function callShowAll(Builder $items, int $code = 200): JsonResponse
@@ -33,12 +36,15 @@ class ApiResponserProxy
         $parameters = Validator::validate(request()->query(), IndexRequest::rulesFor($fields));
         $paginator = (new IndexQueryApplier)->apply($items, $parameters, ['fields' => $fields]);
 
-        return ApiResponse::paginated($paginator, FakeResource::class, request(), $code);
+        return FakeResource::collection($paginator)->preserveQuery()->additional([
+            'success' => true,
+            'message' => 'Resources retrieved successfully.',
+        ])->response()->setStatusCode($code);
     }
 
     public function callTransformData(Collection $collection): Collection
     {
-        return ApiResponse::transform($collection, FakeResource::class, request());
+        return collect(FakeResource::collection($collection)->resolve(request()));
     }
 
     public function callSuccess($data, $code)

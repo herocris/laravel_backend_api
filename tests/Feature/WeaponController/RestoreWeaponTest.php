@@ -36,9 +36,13 @@ class RestoreWeaponTest extends TestCase
 
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $this->weapon->id,
-            'descripcion' => $this->weapon->description,
-            'logo' => $this->weapon->logo,
+            'success' => true,
+            'message' => 'Weapon restored successfully.',
+            'data' => [
+                'identificador' => $this->weapon->id,
+                'descripcion' => $this->weapon->description,
+                'logo' => $this->weapon->logo,
+            ],
         ]);
 
         $this->assertDatabaseHas('weapons', [

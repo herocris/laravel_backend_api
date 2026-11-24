@@ -11,11 +11,11 @@ use App\Http\Requests\Api\V1\WeaponConfiscation\UpdateWeaponConfiscationRequest;
 use App\Http\Resources\Api\V1\WeaponConfiscationResource;
 use App\Models\WeaponConfiscation;
 use App\Support\Cache\ConfiscationReadCache;
-use App\Support\Http\ApiResponse;
 use App\Support\Query\ConfiscationStatisticsQuery;
 use App\Support\Query\Definitions\WeaponConfiscationIndexDefinition;
 use App\Support\Query\IndexQueryApplier;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Storage;
@@ -42,26 +42,36 @@ class WeaponConfiscationController extends Controller implements HasMiddleware
     /**
      * Lista registros con filtros y paginación SQL.
      *
-     * @return JsonResponse Página de recursos con metadatos.
+     * @return AnonymousResourceCollection Página de recursos con metadatos.
      */
-    public function index(IndexWeaponConfiscationRequest $request, IndexQueryApplier $index): JsonResponse
+    public function index(IndexWeaponConfiscationRequest $request, IndexQueryApplier $index): AnonymousResourceCollection
     {
         $weaponConfiscations = WeaponConfiscation::query();
 
-        return ApiResponse::paginated($index->apply($weaponConfiscations, $request->validated(), WeaponConfiscationIndexDefinition::definition()), WeaponConfiscationResource::class, $request);
+        $items = $index->apply($weaponConfiscations, $request->validated(), WeaponConfiscationIndexDefinition::definition());
+
+        return WeaponConfiscationResource::collection($items)->withQuery($request->paginationQuery())->additional([
+            'success' => true,
+            'message' => 'Weapon Confiscation records retrieved successfully.',
+        ]);
     }
 
     /**
      * Lista registros filtrados por ID de decomiso padre.
      *
      * @param  int  $idConfiscation  ID del decomiso.
-     * @return JsonResponse Colección filtrada.
+     * @return AnonymousResourceCollection Colección filtrada.
      */
-    public function indexByConfiscation(IndexWeaponConfiscationRequest $request, int $idConfiscation, IndexQueryApplier $index): JsonResponse
+    public function indexByConfiscation(IndexWeaponConfiscationRequest $request, int $idConfiscation, IndexQueryApplier $index): AnonymousResourceCollection
     {
         $weaponConfiscations = WeaponConfiscation::where('confiscation_id', $idConfiscation);
 
-        return ApiResponse::paginated($index->apply($weaponConfiscations, $request->validated(), WeaponConfiscationIndexDefinition::definition()), WeaponConfiscationResource::class, $request);
+        $items = $index->apply($weaponConfiscations, $request->validated(), WeaponConfiscationIndexDefinition::definition());
+
+        return WeaponConfiscationResource::collection($items)->withQuery($request->paginationQuery())->additional([
+            'success' => true,
+            'message' => 'Weapon Confiscation records retrieved successfully.',
+        ]);
     }
 
     /**
@@ -75,18 +85,24 @@ class WeaponConfiscationController extends Controller implements HasMiddleware
         $validated = $request->validated();
         $weaponConfiscation = $images->execute(new WeaponConfiscation, $validated, 'photo', 'weaponConfiscation', 'evidence');
 
-        return ApiResponse::resource(new WeaponConfiscationResource($weaponConfiscation->load(WeaponConfiscationIndexDefinition::definition()['with'])));
+        return (new WeaponConfiscationResource($weaponConfiscation->load(WeaponConfiscationIndexDefinition::definition()['with'])))->additional([
+            'success' => true,
+            'message' => 'Weapon Confiscation created successfully.',
+        ])->response()->setStatusCode(201);
     }
 
     /**
      * Muestra un registro específico.
      *
      * @param  WeaponConfiscation  $weaponConfiscation  Instancia objetivo.
-     * @return JsonResponse Recurso solicitado.
+     * @return WeaponConfiscationResource Recurso solicitado.
      */
-    public function show(WeaponConfiscation $weaponConfiscation): JsonResponse
+    public function show(WeaponConfiscation $weaponConfiscation): WeaponConfiscationResource
     {
-        return ApiResponse::resource(new WeaponConfiscationResource($weaponConfiscation->load(WeaponConfiscationIndexDefinition::definition()['with'])));
+        return (new WeaponConfiscationResource($weaponConfiscation->load(WeaponConfiscationIndexDefinition::definition()['with'])))->additional([
+            'success' => true,
+            'message' => 'Weapon Confiscation retrieved successfully.',
+        ]);
     }
 
     public function photo(WeaponConfiscation $weaponConfiscation): StreamedResponse
@@ -108,52 +124,66 @@ class WeaponConfiscationController extends Controller implements HasMiddleware
      *
      * @param  UpdateWeaponConfiscationRequest  $request  Datos validados.
      * @param  WeaponConfiscation  $weaponConfiscation  Recurso objetivo.
-     * @return JsonResponse Recurso actualizado.
+     * @return WeaponConfiscationResource Recurso actualizado.
      */
-    public function update(UpdateWeaponConfiscationRequest $request, WeaponConfiscation $weaponConfiscation, PersistUploadedImageAction $images): JsonResponse
+    public function update(UpdateWeaponConfiscationRequest $request, WeaponConfiscation $weaponConfiscation, PersistUploadedImageAction $images): WeaponConfiscationResource
     {
         $validated = $request->validated();
         $images->execute($weaponConfiscation, $validated, 'photo', 'weaponConfiscation', 'evidence');
 
-        return ApiResponse::resource(new WeaponConfiscationResource($weaponConfiscation->load(WeaponConfiscationIndexDefinition::definition()['with'])));
+        return (new WeaponConfiscationResource($weaponConfiscation->load(WeaponConfiscationIndexDefinition::definition()['with'])))->additional([
+            'success' => true,
+            'message' => 'Weapon Confiscation updated successfully.',
+        ]);
     }
 
     /**
      * Soft delete del registro.
      *
      * @param  WeaponConfiscation  $weaponConfiscation  Recurso a eliminar.
-     * @return JsonResponse Recurso eliminado.
+     * @return WeaponConfiscationResource Recurso eliminado.
      */
-    public function destroy(WeaponConfiscation $weaponConfiscation): JsonResponse
+    public function destroy(WeaponConfiscation $weaponConfiscation): WeaponConfiscationResource
     {
         $weaponConfiscation->delete();
 
-        return ApiResponse::resource(new WeaponConfiscationResource($weaponConfiscation->load(WeaponConfiscationIndexDefinition::definition()['with'])));
+        return (new WeaponConfiscationResource($weaponConfiscation->load(WeaponConfiscationIndexDefinition::definition()['with'])))->additional([
+            'success' => true,
+            'message' => 'Weapon Confiscation deleted successfully.',
+        ]);
     }
 
     /**
      * Lista registros eliminados con filtros y paginación SQL.
      *
-     * @return JsonResponse Página de recursos con metadatos.
+     * @return AnonymousResourceCollection Página de recursos con metadatos.
      */
-    public function indexDeleted(IndexWeaponConfiscationRequest $request, IndexQueryApplier $index): JsonResponse
+    public function indexDeleted(IndexWeaponConfiscationRequest $request, IndexQueryApplier $index): AnonymousResourceCollection
     {
         $weaponConfiscations = WeaponConfiscation::onlyTrashed();
 
-        return ApiResponse::paginated($index->apply($weaponConfiscations, $request->validated(), WeaponConfiscationIndexDefinition::definition()), WeaponConfiscationResource::class, $request);
+        $items = $index->apply($weaponConfiscations, $request->validated(), WeaponConfiscationIndexDefinition::definition());
+
+        return WeaponConfiscationResource::collection($items)->withQuery($request->paginationQuery())->additional([
+            'success' => true,
+            'message' => 'Weapon Confiscation records retrieved successfully.',
+        ]);
     }
 
     /**
      * Restaura un registro eliminado.
      *
      * @param  WeaponConfiscation  $weaponConfiscation  Recurso a restaurar.
-     * @return JsonResponse Recurso restaurado.
+     * @return WeaponConfiscationResource Recurso restaurado.
      */
-    public function restore(WeaponConfiscation $weaponConfiscation): JsonResponse
+    public function restore(WeaponConfiscation $weaponConfiscation): WeaponConfiscationResource
     {
         $weaponConfiscation->restore();
 
-        return ApiResponse::resource(new WeaponConfiscationResource($weaponConfiscation->load(WeaponConfiscationIndexDefinition::definition()['with'])));
+        return (new WeaponConfiscationResource($weaponConfiscation->load(WeaponConfiscationIndexDefinition::definition()['with'])))->additional([
+            'success' => true,
+            'message' => 'Weapon Confiscation restored successfully.',
+        ]);
     }
 
     /**

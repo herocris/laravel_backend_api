@@ -281,7 +281,7 @@ class ConfiscationReadCacheTest extends StatisticsTestCase
         $this->putJson('/api/drugConfiscation/'.$item->id, [
             'cantidad' => 9, 'peso' => 2.75, 'decomiso' => $item->confiscation_id,
             'droga' => $drug->id, 'presentacion' => $item->drug_presentation_id,
-        ])->assertOk()->assertJsonPath('cantidad', 9);
+        ])->assertOk()->assertJsonPath('data.cantidad', 9);
         $this->assertDatabaseHas('drug_confiscations', ['id' => $item->id, 'amount' => 9, 'weight' => 2.75]);
         $this->read($url)->assertOk()->assertJsonPath('pieData.0.value', 9);
         $this->read($map)->assertOk()->assertJsonPath('mapItems.0.drug_confiscations.0.cantidad', 9)

@@ -30,9 +30,13 @@ class ShowAmmunitionTest extends TestCase
 
         $response->assertOk();
         $response->assertExactJson([
-            'identificador' => $this->ammunition->id,
-            'descripcion' => $this->ammunition->description,
-            'logo' => $this->ammunition->logo,
+            'success' => true,
+            'message' => 'Ammunition retrieved successfully.',
+            'data' => [
+                'identificador' => $this->ammunition->id,
+                'descripcion' => $this->ammunition->description,
+                'logo' => $this->ammunition->logo,
+            ],
         ]);
     }
 
