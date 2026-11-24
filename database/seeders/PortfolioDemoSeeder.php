@@ -11,6 +11,7 @@ use App\Models\DrugPresentation;
 use App\Models\User;
 use App\Models\Weapon;
 use App\Models\WeaponConfiscation;
+use App\Support\Authorization\AdministrativeTransaction;
 use DomainException;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +19,8 @@ use Illuminate\Support\Str;
 
 class PortfolioDemoSeeder extends Seeder
 {
+    public function __construct(private AdministrativeTransaction $transaction) {}
+
     public function run(): void
     {
         $connection = DB::connection();
@@ -32,7 +35,7 @@ class PortfolioDemoSeeder extends Seeder
             throw new DomainException('La demo exige SQLite aislada: portfolio-demo.sqlite en local o :memory: en testing; auditoría en la conexión por defecto.');
         }
 
-        $credentials = DB::transaction(function (): array {
+        $credentials = $this->transaction->run(function (): array {
             foreach (['users', 'roles', 'permissions', 'model_has_roles', 'model_has_permissions', 'role_has_permissions', 'confiscations', 'drugs', 'drug_presentations', 'weapons', 'ammunitions', 'drug_confiscations', 'weapon_confiscations', 'ammunition_confiscations', 'activity_log'] as $table) {
                 if (DB::table($table)->exists()) {
                     throw new DomainException('La demo requiere tablas vacías; no modifica ni reinicia datos existentes.');

@@ -45,6 +45,7 @@ class ShowRoleTest extends TestCase
     #[Test]
     public function show_404_to_inactive_role(): void
     {
+        $this->grantPermissions($this->admin, ['edit.posts']);
         $response = $this->deleteJson(route('role.destroy', ['role' => $this->role->id]));
         $response->assertOk();
         $response = $this->getJson(route('role.show', ['role' => $this->role->id]));

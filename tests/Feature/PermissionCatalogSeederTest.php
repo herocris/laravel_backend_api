@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
+use App\Support\Authorization\PermissionCatalog;
 use Database\Seeders\PermissionCatalogSeeder;
 use DomainException;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +20,7 @@ class PermissionCatalogSeederTest extends TestCase
         $this->seed(PermissionCatalogSeeder::class);
 
         $this->assertDatabaseCount('permissions', 48);
+        $this->assertSame(PermissionCatalog::names(), Permission::orderBy('id')->pluck('name')->all());
         $this->assertDatabaseCount('roles', 3);
         $this->assertDatabaseCount('users', 0);
         $this->assertSame(['api'], Permission::distinct()->pluck('guard_name')->all());

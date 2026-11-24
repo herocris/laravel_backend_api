@@ -73,6 +73,8 @@ No ejecutar `DatabaseSeeder`, `TestingSeeder`, `composer migrate:testing` ni `mi
 
 La API no necesita assets Node para este recorrido. `package.json` contiene herramientas de la portada; no hay lock JS que permita prometer un `npm ci` reproducible. MySQL, Redis, phpMyAdmin y Vite de Compose son servicios de desarrollo: esta configuración no es un despliegue de producción. Para detener los servicios sin borrar volúmenes: `vendor/bin/sail stop`.
 
+Las mutaciones administrativas de usuarios, roles y permisos comparten un mutex SQL en `authorization_locks`, dentro de la misma transacción que la autorización, los cambios y su auditoría. El bloqueo se obtiene antes de Gate, el binding y la validación; el actor y los permisos se consultan de nuevo sin reutilizar la caché compartida de Spatie. También participan las Actions, los seeders no destructivos y `authorization:assign-administrator`. Aplicar las migraciones antes de usar esta versión (`vendor/bin/sail artisan migrate --no-interaction`); si falta la fila de bloqueo, la operación falla sin escribir. Las lecturas no adquieren este mutex. Las escrituras de autorización añadidas fuera de estos puntos deben usar `AdministrativeTransaction` desde su primera lectura de autorización; SQL manual y seeders destructivos no son mecanismos de administración en servicio.
+
 ## Autenticación y permisos
 
 JWT permanece en el guard `api`; Sanctum está instalado pero no gobierna este flujo. Login, registro y refresh entregan el JWT en la cookie `token` HttpOnly. El JSON contiene `token_type`, `expires_in` (segundos), `user`, `roles` y `permissions`; no contiene `access_token`. La expiración de la cookie sigue `exp`. Refresh rota e invalida el JWT anterior; logout lo invalida y elimina la cookie.
@@ -82,7 +84,24 @@ JWT permanece en el guard `api`; Sanctum está instalado pero no gobierna este f
 3. Con cookie JWT, enviar las mismas cookies y CSRF en todas las escrituras, incluidos refresh y logout. En el navegador usar credenciales y el origen permitido por `CORS_ALLOWED_ORIGINS`.
 4. Los clientes con `Authorization: Bearer <JWT>` pueden consultar/escribir sin CSRF, excepto login y registro, que siempre inicializan sesión y lo exigen. El cliente debe obtener su JWT mediante un flujo autorizado; Swagger no lo extrae de un campo JSON inexistente.
 
-`GET /api/me` serializa el modelo con `id`, `name`, `email` y fechas; el CRUD administrativo de usuarios usa `identificador`, `nombre`, `correo`, `roles` y `permisos`. Contraseñas y `remember_token` se ocultan.
+`GET /api/me` devuelve HTTP 200 con este contrato exacto para cualquier usuario autenticado, sin exigir permisos administrativos:
+
+```json
+{
+  "user": {
+    "name": "Nombre",
+    "email": "usuario@example.com"
+  },
+  "roles": [],
+  "permissions": []
+}
+```
+
+`roles` contiene los nombres de los roles vigentes; `permissions`, los nombres de los permisos efectivos, tanto directos como heredados. Ambas listas eliminan duplicados y se serializan como arrays JSON incluso vacías; su orden no forma parte del contrato. Las relaciones se recargan desde la base de datos en cada consulta. Las asignaciones mediante las APIs de Spatie y las operaciones administrativas del proyecto se reflejan en la siguiente petición con el mismo JWT. Spatie invalida la caché de permisos al modificar roles/permisos mediante sus APIs; las asignaciones de usuario se mantienen en las relaciones de cada instancia. `/me` no cachea esta respuesta ni vacía la caché global.
+
+Admite cookie `token` HttpOnly o `Authorization: Bearer`; solo consulta y no emite cookies JWT, renueva, rota ni revoca tokens. No devuelve tokens, hashes, contraseñas, IDs ni fechas internas. Credenciales ausentes, inválidas, expiradas o revocadas conservan HTTP 401 con `{"error":"No autenticado","code":401}`. El frontend puede consultar la autorización después de un 403 sin llamar a `/refresh`.
+
+Cambio incompatible respecto al contrato anterior: `name` y `email` pasan a `user.name` y `user.email`; se retiran `id` y fechas y se añaden `roles` y `permissions`. Los consumidores del modelo directo deben adaptar esas lecturas; el frontend actual ya admite este formato. El CRUD administrativo de usuarios conserva `identificador`, `nombre`, `correo`, `roles` y `permisos`.
 
 Los módulos usan `auth` + `can:<permiso>` y la integración de Spatie con Gate. No hay privilegios universales por nombre de rol. Las reglas actuales son generales: no se han inventado propiedad por usuario, multitenencia ni aprobación de decomisos.
 
@@ -104,6 +123,9 @@ Recursos: `user`, `role`, `permission`, `drug`, `drugPresentation`, `weapon`, `a
 | administrador | 48: catálogo completo; recibe los permisos activos `api` al inicializar/sincronizar |
 
 Analista y operador no borran, administran usuarios/roles/permisos ni consultan auditoría. Las asignaciones administrativas usan IDs activos del guard `api`; omitir una lista conserva asignaciones, `[]` las revoca; `null`, duplicados, nombres, otro guard y eliminados se rechazan. Un permiso creado posteriormente no se concede por un bypass implícito.
+La delegación administrativa comprueba además los permisos efectivos actuales del actor (`api`), directos o heredados. No permite asignar IDs de permisos ni roles con capacidades que el actor no posee. Modificar, borrar o restaurar usuarios/roles exige cubrir todos sus privilegios, incluidos los dormidos por soft delete; se impide así tomar control de cuentas superiores. Se conservan IDs, nombres de campos, respuestas de éxito y listas omitidas/vacías; las operaciones fuera del alcance del actor devuelven 403 con `{"error": mensaje, "code": 403}`. No se añade un permiso de asignación ni un bypass por llamarse administrador.
+
+Los cambios de permisos también comprueban a sus usuarios y roles afectados. Renombrar un permiso asignado hacia una capacidad no poseída y restaurar un permiso eliminado que conserva asignaciones quedan prohibidos. Un permiso eliminado no forma parte de las capacidades efectivas del actor: recuperar esas asignaciones requiere una operación administrativa explícita fuera de este flujo; los permisos sin asignaciones siguen pudiendo restaurarse. El catálogo y las asignaciones existentes no se modifican como parte de esta adaptación.
 
 Límites por minuto: login 5 por cuenta/IP y 30 por IP; registro 5 por IP; CSRF 30 por IP; sesión 30 por usuario; API 60 por usuario; estadísticas/mapa 10 por usuario. El 429 conserva `Retry-After`.
 
@@ -218,6 +240,8 @@ demo_curl -b "$DEMO_JAR" "$DEMO_BASE/api/activity?tipo_de_evento=created&sort_by
 Los IDs 1 de los ejemplos corresponden exclusivamente a la demo recién creada. El recorrido altera solo la base sintética. No hay reset público ni endpoint privilegiado de demo. La protección frente a cambios abusivos consiste en mantenerla local y usar el analista para lectura; las cuentas de escritura quedan privadas. Una demo pública requiere otro alcance aprobado: destino, restricción de acceso, gestión de registro público, cuotas y reinicio aislado; no publicar estas cuentas ni esta configuración de desarrollo.
 
 ## Verificación y resultados
+
+La suite `phpunit.mysql.xml` incluye pruebas administrativas con dos procesos y conexiones independientes: revocaciones durante la espera, cambios de privilegios en objetivos/roles/permisos, bajas simultáneas y una delegación permitida. Solo se ejecutan en `refactor_statistics_test`; usan `migrate` y limpian sus propios fixtures, sin reiniciar esa base. Requieren las extensiones `pcntl` y `posix`, presentes en Sail.
 
 Antes de tests, comprobar SQLite `:memory:`, auditoría `null`, ausencia de config cacheada y de variables externas que sobrescriban PHPUnit. `tests/TestCase.php` usa `RefreshDatabase` sobre esa base efímera; no se ejecutan seeders destructivos.
 

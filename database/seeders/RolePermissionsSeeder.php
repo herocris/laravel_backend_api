@@ -4,17 +4,19 @@ namespace Database\Seeders;
 
 use App\Models\Permission;
 use App\Models\Role;
+use App\Support\Authorization\AdministrativeTransaction;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class RolePermissionsSeeder extends Seeder
 {
+    public function __construct(private AdministrativeTransaction $transaction) {}
+
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        DB::transaction(function (): void {
+        $this->transaction->run(function (): void {
             foreach ($this->permissionsByRole() as $roleName => $permissions) {
                 Role::findByName($roleName, 'api')->syncPermissions($permissions);
             }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\ApiCookieSession;
+use App\Http\Middleware\SerializeAdministrativeMutations;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Middleware\Authorize;
 use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
@@ -51,6 +52,7 @@ return Application::configure(basePath: dirname(__DIR__))
             ThrottleRequests::class,
             ThrottleRequestsWithRedis::class,
             AuthenticatesSessions::class,
+            SerializeAdministrativeMutations::class,
             Authorize::class,
             SubstituteBindings::class,
         ]);

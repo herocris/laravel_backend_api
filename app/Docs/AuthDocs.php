@@ -25,15 +25,14 @@ class AuthDocs
         new OA\Property(property: 'roles', type: 'array', items: new OA\Items(type: 'string'), example: ['analista']),
         new OA\Property(property: 'permissions', type: 'array', items: new OA\Items(type: 'string'), example: ['confiscation.view', 'map.view']),
     ], description: 'JWT solo en Set-Cookie: token HttpOnly; no access_token en JSON. Refresh rota y revoca el token anterior.')]
-    #[OA\Schema(schema: 'MeResponse', type: 'object', properties: [
-        new OA\Property(property: 'id', type: 'integer'),
-        new OA\Property(property: 'name', type: 'string'),
-        new OA\Property(property: 'email', type: 'string'),
-        new OA\Property(property: 'email_verified_at', type: 'string', nullable: true),
-        new OA\Property(property: 'created_at', type: 'string'),
-        new OA\Property(property: 'updated_at', type: 'string'),
-        new OA\Property(property: 'deleted_at', type: 'string', nullable: true),
-    ], description: 'Modelo User directo con atributos internos; password y remember_token ocultos. No usa el UserResource administrativo.')]
+    #[OA\Schema(schema: 'MeResponse', type: 'object', required: ['user', 'roles', 'permissions'], additionalProperties: false, properties: [
+        new OA\Property(property: 'user', type: 'object', required: ['name', 'email'], additionalProperties: false, properties: [
+            new OA\Property(property: 'name', type: 'string'),
+            new OA\Property(property: 'email', type: 'string', format: 'email'),
+        ]),
+        new OA\Property(property: 'roles', type: 'array', uniqueItems: true, items: new OA\Items(type: 'string'), example: []),
+        new OA\Property(property: 'permissions', type: 'array', uniqueItems: true, items: new OA\Items(type: 'string'), example: []),
+    ], description: 'Perfil y autorización vigentes consultados desde BD: roles y permisos efectivos directos o heredados, sin duplicados y siempre arrays. No emite, renueva, rota ni revoca JWT; no incluye tokens ni atributos internos. Disponible para cualquier usuario autenticado, sin permiso administrativo.')]
     #[OA\Schema(schema: 'LogoutResponse', type: 'object', properties: [
         new OA\Property(property: 'message', type: 'string', example: 'Logout successful'),
     ])]
@@ -96,7 +95,7 @@ class AuthDocs
         path: '/api/me',
         operationId: 'MeResponse_me',
         tags: ['MeResponse'],
-        summary: 'Consultar perfil autenticado',
+        summary: 'Consultar sesión y autorización efectiva sin rotar el JWT',
         security: [['bearerAuth' => []], ['authCookie' => []]],
         responses: [
             new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(ref: '#/components/schemas/MeResponse')),

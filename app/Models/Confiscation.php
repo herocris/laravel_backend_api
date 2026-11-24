@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Traits\Activitylog;
+use App\Models\Concerns\TracksActivity;
 use Database\Factories\DecomisoFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +12,7 @@ use Spatie\Activitylog\LogOptions;
 class Confiscation extends Model
 {
     /** @use HasFactory<DecomisoFactory> */
-    use Activitylog, HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, TracksActivity;
 
     protected $fillable = [
         'date',
@@ -26,7 +26,7 @@ class Confiscation extends Model
 
     /**
      * Invocando funcion RecordLog desde
-     * el trait Activitylog dentro de getActivitylogOptions
+     * el trait TracksActivity dentro de getActivitylogOptions
      * la cual tiene que forzosamente ser implementada en el modelo
      */
     public function getActivitylogOptions(): LogOptions

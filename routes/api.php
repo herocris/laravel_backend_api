@@ -1,18 +1,18 @@
 <?php
 
-use App\Http\Controllers\Admin\AuthController;
-use App\Http\Controllers\Admin\LogActivityController;
-use App\Http\Controllers\Admin\PermissionController;
-use App\Http\Controllers\Admin\RoleController;
-use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\AmmunitionConfiscationController;
-use App\Http\Controllers\AmmunitionController;
-use App\Http\Controllers\ConfiscationController;
-use App\Http\Controllers\DrugConfiscationController;
-use App\Http\Controllers\DrugController;
-use App\Http\Controllers\DrugPresentationController;
-use App\Http\Controllers\WeaponConfiscationController;
-use App\Http\Controllers\WeaponController;
+use App\Http\Controllers\Api\V1\ActivityLogController;
+use App\Http\Controllers\Api\V1\AmmunitionConfiscationController;
+use App\Http\Controllers\Api\V1\AmmunitionController;
+use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\ConfiscationController;
+use App\Http\Controllers\Api\V1\DrugConfiscationController;
+use App\Http\Controllers\Api\V1\DrugController;
+use App\Http\Controllers\Api\V1\DrugPresentationController;
+use App\Http\Controllers\Api\V1\PermissionController;
+use App\Http\Controllers\Api\V1\RoleController;
+use App\Http\Controllers\Api\V1\UserController;
+use App\Http\Controllers\Api\V1\WeaponConfiscationController;
+use App\Http\Controllers\Api\V1\WeaponController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -79,7 +79,7 @@ Route::middleware(['auth', 'throttle:api'])->group(function () {
     // Consulta de auditoría de todas las operaciones CRUD
     // === Logs de Actividad ===
     // Consulta de auditoría de todas las operaciones CRUD
-    Route::get('activity', LogActivityController::class)->name('activity.index');
+    Route::get('activity', ActivityLogController::class)->name('activity.index');
 });
 
 /*

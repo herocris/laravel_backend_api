@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Traits\Activitylog;
+use App\Models\Concerns\TracksActivity;
 use Database\Factories\ArmaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +13,7 @@ use Spatie\Activitylog\LogOptions;
 class Weapon extends Model
 {
     /** @use HasFactory<ArmaFactory> */
-    use Activitylog, HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, TracksActivity;
 
     protected $fillable = [
         'description',

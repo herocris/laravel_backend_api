@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-use App\Traits\Activitylog;
+use App\Models\Concerns\TracksActivity;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Arr;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Permission\Traits\HasRoles;
 use Tymon\JWTAuth\Contracts\JWTSubject;
@@ -16,7 +15,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 class User extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<UserFactory> */
-    use Activitylog, HasFactory, HasRoles, Notifiable, SoftDeletes;
+    use HasFactory, HasRoles, Notifiable, SoftDeletes, TracksActivity;
 
     /**
      * The attributes that are mass assignable.
@@ -38,30 +37,6 @@ class User extends Authenticatable implements JWTSubject
         'password',
         'remember_token',
     ];
-
-    /**
-     * Persiste datos administrativos ya autorizados y validados, sin depender de HTTP.
-     * Las asignaciones omitidas se conservan; una lista vacía las revoca.
-     *
-     * @param  array{name?: string, email?: string, password?: string, roles?: list<int|string>, permissions?: list<int|string>}  $data
-     */
-    public function saveWithAssignments(array $data): self
-    {
-        return $this->getConnection()->transaction(function () use ($data): self {
-            $this->fill(Arr::only($data, ['name', 'email', 'password']));
-            $this->save();
-
-            if (array_key_exists('roles', $data)) {
-                $this->syncRoles(array_map('intval', $data['roles']));
-            }
-
-            if (array_key_exists('permissions', $data)) {
-                $this->syncPermissions(array_map('intval', $data['permissions']));
-            }
-
-            return $this;
-        });
-    }
 
     /**
      * Get the attributes that should be cast.

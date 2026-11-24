@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Traits\Activitylog;
+use App\Models\Concerns\TracksActivity;
 use Database\Factories\AmmunitionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +13,7 @@ use Spatie\Activitylog\LogOptions;
 class Ammunition extends Model
 {
     /** @use HasFactory<AmmunitionFactory> */
-    use Activitylog, HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, TracksActivity;
 
     protected $fillable = [
         'description',
@@ -22,7 +22,7 @@ class Ammunition extends Model
 
     /**
      * Invocando funcion RecordLog desde
-     * el trait Activitylog dentro de getActivitylogOptions
+     * el trait TracksActivity dentro de getActivitylogOptions
      * la cual tiene que forzosamente ser implementada en el modelo
      */
     public function getActivitylogOptions(): LogOptions

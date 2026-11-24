@@ -33,6 +33,8 @@ class UpdateRoleTest extends TestCase
         $perm1 = Permission::factory()->create(['name' => 'perm.x']);
         $perm2 = Permission::factory()->create(['name' => 'perm.y']);
 
+        $this->admin->givePermissionTo([$perm1, $perm2]);
+
         $payload = [
             'nombre' => 'Administrator',
             'permisos' => [$perm1->id, $perm2->id],

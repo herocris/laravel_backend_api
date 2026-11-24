@@ -111,6 +111,7 @@ class HttpInputContractTest extends TestCase
         $actor = User::factory()->create();
         $this->grantPermissions($actor, ['user.create']);
         $permission = Permission::findOrCreate('drug.view', 'api');
+        $actor->givePermissionTo($permission);
 
         $response = $this->actingAs($actor, 'api')->postJson('/api/user', [
             'nombre' => 'Public User',

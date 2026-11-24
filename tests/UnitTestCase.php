@@ -4,55 +4,60 @@ declare(strict_types=1);
 
 namespace Tests;
 
-use App\Traits\Activitylog;
-use App\Traits\ApiResponser;
+use App\Http\Requests\Api\V1\IndexRequest;
+use App\Models\Concerns\TracksActivity;
+use App\Support\Http\ApiResponse;
+use App\Support\Query\IndexQueryApplier;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Validator;
 use Spatie\Activitylog\LogOptions;
 
 abstract class UnitTestCase extends BaseTestCase {}
 
-// Proxy para exponer métodos protegidos del trait ApiResponser
+// Adaptador de las pruebas históricas a las clases de consulta y respuesta.
 class ApiResponserProxy
 {
-    use ApiResponser;
-
     public function callShowOne(Model $instance, $code = 200): JsonResponse
     {
-        return $this->showOne(new FakeResource($instance), $code);
+        return ApiResponse::resource(new FakeResource($instance), $code);
     }
 
     public function callShowAll(Builder $items, int $code = 200): JsonResponse
     {
-        return $this->showAll($items, FakeResource::class, ['identificador' => 'id', 'nombre' => 'name'], $code);
+        $fields = ['identificador' => 'id', 'nombre' => 'name'];
+        $parameters = Validator::validate(request()->query(), IndexRequest::rulesFor($fields));
+        $paginator = (new IndexQueryApplier)->apply($items, $parameters, ['fields' => $fields]);
+
+        return ApiResponse::paginated($paginator, FakeResource::class, request(), $code);
     }
 
     public function callTransformData(Collection $collection): Collection
     {
-        return $this->transformData($collection, FakeResource::class);
+        return ApiResponse::transform($collection, FakeResource::class, request());
     }
 
     public function callSuccess($data, $code)
     {
-        return $this->successResponse($data, $code);
+        return ApiResponse::success($data, $code);
     }
 }
 
-// Proxy para exponer métodos protegidos del trait Activitylog
+// Proxy para exponer métodos protegidos del trait TracksActivity
 class ActivitylogProxy
 {
-    use Activitylog;
+    use TracksActivity;
 
     public function callRecordLog(array $fields, string $model): LogOptions
     {
         return $this->RecordLog($fields, $model);
     }
 
-    // Implementación requerida por el trait Activitylog / LogsActivity
+    // Implementación requerida por el trait TracksActivity / LogsActivity
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults();

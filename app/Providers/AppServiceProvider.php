@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Helpers\ConfiscationReadCache;
 use App\Models\Ammunition;
 use App\Models\AmmunitionConfiscation;
 use App\Models\Confiscation;
@@ -10,10 +9,19 @@ use App\Models\Drug;
 use App\Models\DrugConfiscation;
 use App\Models\Weapon;
 use App\Models\WeaponConfiscation;
+use App\Support\Auth\AuthenticationActivityLogger;
+use App\Support\Auth\EventfulJwtGuard;
+use App\Support\Cache\ConfiscationReadCache;
+use Illuminate\Auth\Events\Failed;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -28,10 +36,28 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(ConfiscationReadCache $cache): void
     {
+        Model::preventLazyLoading(! $this->app->isProduction());
+
+        Auth::extend('jwt', function (Application $app, string $name, array $config): EventfulJwtGuard {
+            $guard = new EventfulJwtGuard(
+                $app['tymon.jwt'],
+                $app['auth']->createUserProvider($config['provider']),
+                $app['request'],
+                $app->make(Dispatcher::class),
+                $name,
+            );
+            $app->refresh('request', $guard, 'setRequest');
+
+            return $guard;
+        });
+
+        Event::listen([Login::class, Logout::class, Failed::class], [AuthenticationActivityLogger::class, 'handle']);
         $this->app->make(CauserResolver::class)->resolveUsing(
-            fn (): ?Model => $this->app->bound('request')
-                ? Auth::guard(config('activitylog.default_auth_driver'))->user()
-                : null,
+            fn (Model|int|string|null $subject = null): ?Model => $subject instanceof Model
+                ? $subject
+                : ($this->app->bound('request')
+                    ? Auth::guard(config('activitylog.default_auth_driver'))->user()
+                    : null),
         );
 
         foreach ([Confiscation::class, Drug::class, Weapon::class, Ammunition::class,

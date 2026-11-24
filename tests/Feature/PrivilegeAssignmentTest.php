@@ -63,6 +63,7 @@ class PrivilegeAssignmentTest extends TestCase
         $this->grantPermissions($actor, [$resource.'.create']);
         $role = Role::factory()->create();
         $permission = Permission::factory()->create(['name' => 'drug.view']);
+        $actor->givePermissionTo($permission);
 
         $response = $this->postJson('/api/'.$resource, [
             'nombre' => 'Created', 'correo' => 'created@example.com', 'password' => 'password123',
@@ -94,6 +95,7 @@ class PrivilegeAssignmentTest extends TestCase
         $role = Role::factory()->create();
         $permission = Permission::factory()->create();
         $target->givePermissionTo($permission);
+        $actor->givePermissionTo($permission);
         if ($resource === 'user') {
             $target->assignRole($role);
         }
@@ -212,6 +214,7 @@ class PrivilegeAssignmentTest extends TestCase
         $target = $resource === 'user' ? User::factory()->create() : Role::factory()->create();
         $originalPermission = Permission::factory()->create();
         $newPermission = Permission::factory()->create();
+        $actor->givePermissionTo([$originalPermission, $newPermission]);
         $target->givePermissionTo($originalPermission);
         $originalRole = Role::factory()->create();
         if ($resource === 'user') {
@@ -265,6 +268,7 @@ class PrivilegeAssignmentTest extends TestCase
         $target = $resource === 'user' ? User::factory()->create() : Role::factory()->create();
         $oldPermission = Permission::factory()->create();
         $newPermission = Permission::factory()->create(['name' => 'drug.view']);
+        $actor->givePermissionTo([$oldPermission, $newPermission]);
         $target->givePermissionTo($oldPermission);
         $oldRole = Role::factory()->create();
         $newRole = Role::factory()->create();

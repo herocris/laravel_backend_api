@@ -22,6 +22,98 @@
                 "operationId": "Activitylog___invoke",
                 "parameters": [
                     {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "tipo_de_evento",
+                                    "descripcion",
+                                    "id_usuario",
+                                    "usuario",
+                                    "fecha",
+                                    "cambios"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "maxItems": 0,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "tipo_de_evento": {
+                                    "type": "string"
+                                },
+                                "descripcion": {
+                                    "type": "string"
+                                },
+                                "id_usuario": {
+                                    "type": "integer"
+                                },
+                                "usuario": {
+                                    "type": "string"
+                                },
+                                "fecha": {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                "fecha_desde": {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                "fecha_hasta": {
+                                    "type": "string",
+                                    "format": "date"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "required": false,
@@ -47,7 +139,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -163,6 +255,99 @@
                 "operationId": "AmmunitionConfiscation_index",
                 "parameters": [
                     {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "cantidad",
+                                    "foto"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "decomiso",
+                                    "municion"
+                                ]
+                            },
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "cantidad": {
+                                    "type": "integer"
+                                },
+                                "foto": {
+                                    "type": "string"
+                                },
+                                "decomiso": {
+                                    "type": "integer"
+                                },
+                                "decomiso_descripcion": {
+                                    "type": "string"
+                                },
+                                "municion": {
+                                    "type": "integer"
+                                },
+                                "municion_descripcion": {
+                                    "type": "string"
+                                },
+                                "fecha_desde": {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                "fecha_hasta": {
+                                    "type": "string",
+                                    "format": "date"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "required": false,
@@ -188,7 +373,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -404,6 +589,99 @@
                 "operationId": "AmmunitionConfiscation_indexDeleted",
                 "parameters": [
                     {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "cantidad",
+                                    "foto"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "decomiso",
+                                    "municion"
+                                ]
+                            },
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "cantidad": {
+                                    "type": "integer"
+                                },
+                                "foto": {
+                                    "type": "string"
+                                },
+                                "decomiso": {
+                                    "type": "integer"
+                                },
+                                "decomiso_descripcion": {
+                                    "type": "string"
+                                },
+                                "municion": {
+                                    "type": "integer"
+                                },
+                                "municion_descripcion": {
+                                    "type": "string"
+                                },
+                                "fecha_desde": {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                "fecha_hasta": {
+                                    "type": "string",
+                                    "format": "date"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "required": false,
@@ -429,7 +707,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -1072,6 +1350,99 @@
                         }
                     },
                     {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "cantidad",
+                                    "foto"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "decomiso",
+                                    "municion"
+                                ]
+                            },
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "cantidad": {
+                                    "type": "integer"
+                                },
+                                "foto": {
+                                    "type": "string"
+                                },
+                                "decomiso": {
+                                    "type": "integer"
+                                },
+                                "decomiso_descripcion": {
+                                    "type": "string"
+                                },
+                                "municion": {
+                                    "type": "integer"
+                                },
+                                "municion_descripcion": {
+                                    "type": "string"
+                                },
+                                "fecha_desde": {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                "fecha_hasta": {
+                                    "type": "string",
+                                    "format": "date"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "required": false,
@@ -1097,7 +1468,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -1446,6 +1817,76 @@
                 "operationId": "Ammunition_index",
                 "parameters": [
                     {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "descripcion",
+                                    "logo"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "maxItems": 0,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "descripcion": {
+                                    "type": "string"
+                                },
+                                "logo": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "required": false,
@@ -1471,7 +1912,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -1687,6 +2128,76 @@
                 "operationId": "Ammunition_indexDeleted",
                 "parameters": [
                     {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "descripcion",
+                                    "logo"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "maxItems": 0,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "descripcion": {
+                                    "type": "string"
+                                },
+                                "logo": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "required": false,
@@ -1712,7 +2223,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -2598,7 +3109,7 @@
                 "tags": [
                     "MeResponse"
                 ],
-                "summary": "Consultar perfil autenticado",
+                "summary": "Consultar sesión y autorización efectiva sin rotar el JWT",
                 "operationId": "MeResponse_me",
                 "responses": {
                     "200": {
@@ -2862,6 +3373,105 @@
                 "operationId": "Confiscation_index",
                 "parameters": [
                     {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "fecha",
+                                    "observacion",
+                                    "direccion",
+                                    "departamento",
+                                    "municipalidad",
+                                    "latitud",
+                                    "longitud"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "maxItems": 0,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "fecha": {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                "observacion": {
+                                    "type": "string"
+                                },
+                                "direccion": {
+                                    "type": "string"
+                                },
+                                "departamento": {
+                                    "type": "string"
+                                },
+                                "municipalidad": {
+                                    "type": "string"
+                                },
+                                "latitud": {
+                                    "type": "number"
+                                },
+                                "longitud": {
+                                    "type": "number"
+                                },
+                                "fecha_desde": {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                "fecha_hasta": {
+                                    "type": "string",
+                                    "format": "date"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "required": false,
@@ -2887,7 +3497,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -3103,6 +3713,105 @@
                 "operationId": "Confiscation_indexDeleted",
                 "parameters": [
                     {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "fecha",
+                                    "observacion",
+                                    "direccion",
+                                    "departamento",
+                                    "municipalidad",
+                                    "latitud",
+                                    "longitud"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "maxItems": 0,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "fecha": {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                "observacion": {
+                                    "type": "string"
+                                },
+                                "direccion": {
+                                    "type": "string"
+                                },
+                                "departamento": {
+                                    "type": "string"
+                                },
+                                "municipalidad": {
+                                    "type": "string"
+                                },
+                                "latitud": {
+                                    "type": "number"
+                                },
+                                "longitud": {
+                                    "type": "number"
+                                },
+                                "fecha_desde": {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                "fecha_hasta": {
+                                    "type": "string",
+                                    "format": "date"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "required": false,
@@ -3128,7 +3837,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -3893,6 +4602,110 @@
                 "operationId": "DrugConfiscation_index",
                 "parameters": [
                     {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "cantidad",
+                                    "peso",
+                                    "foto"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "decomiso",
+                                    "droga",
+                                    "presentacion"
+                                ]
+                            },
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "cantidad": {
+                                    "type": "integer"
+                                },
+                                "peso": {
+                                    "type": "number"
+                                },
+                                "foto": {
+                                    "type": "string"
+                                },
+                                "decomiso": {
+                                    "type": "integer"
+                                },
+                                "decomiso_descripcion": {
+                                    "type": "string"
+                                },
+                                "droga": {
+                                    "type": "integer"
+                                },
+                                "droga_descripcion": {
+                                    "type": "string"
+                                },
+                                "presentacion": {
+                                    "type": "integer"
+                                },
+                                "presentacion_descripcion": {
+                                    "type": "string"
+                                },
+                                "fecha_desde": {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                "fecha_hasta": {
+                                    "type": "string",
+                                    "format": "date"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "required": false,
@@ -3918,7 +4731,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -4134,6 +4947,110 @@
                 "operationId": "DrugConfiscation_indexDeleted",
                 "parameters": [
                     {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "cantidad",
+                                    "peso",
+                                    "foto"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "decomiso",
+                                    "droga",
+                                    "presentacion"
+                                ]
+                            },
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "cantidad": {
+                                    "type": "integer"
+                                },
+                                "peso": {
+                                    "type": "number"
+                                },
+                                "foto": {
+                                    "type": "string"
+                                },
+                                "decomiso": {
+                                    "type": "integer"
+                                },
+                                "decomiso_descripcion": {
+                                    "type": "string"
+                                },
+                                "droga": {
+                                    "type": "integer"
+                                },
+                                "droga_descripcion": {
+                                    "type": "string"
+                                },
+                                "presentacion": {
+                                    "type": "integer"
+                                },
+                                "presentacion_descripcion": {
+                                    "type": "string"
+                                },
+                                "fecha_desde": {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                "fecha_hasta": {
+                                    "type": "string",
+                                    "format": "date"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "required": false,
@@ -4159,7 +5076,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -4802,6 +5719,110 @@
                         }
                     },
                     {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "cantidad",
+                                    "peso",
+                                    "foto"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "decomiso",
+                                    "droga",
+                                    "presentacion"
+                                ]
+                            },
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "cantidad": {
+                                    "type": "integer"
+                                },
+                                "peso": {
+                                    "type": "number"
+                                },
+                                "foto": {
+                                    "type": "string"
+                                },
+                                "decomiso": {
+                                    "type": "integer"
+                                },
+                                "decomiso_descripcion": {
+                                    "type": "string"
+                                },
+                                "droga": {
+                                    "type": "integer"
+                                },
+                                "droga_descripcion": {
+                                    "type": "string"
+                                },
+                                "presentacion": {
+                                    "type": "integer"
+                                },
+                                "presentacion_descripcion": {
+                                    "type": "string"
+                                },
+                                "fecha_desde": {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                "fecha_hasta": {
+                                    "type": "string",
+                                    "format": "date"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "required": false,
@@ -4827,7 +5848,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -5176,6 +6197,76 @@
                 "operationId": "Drug_index",
                 "parameters": [
                     {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "descripcion",
+                                    "logo"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "maxItems": 0,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "descripcion": {
+                                    "type": "string"
+                                },
+                                "logo": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "required": false,
@@ -5201,7 +6292,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -5417,6 +6508,76 @@
                 "operationId": "Drug_indexDeleted",
                 "parameters": [
                     {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "descripcion",
+                                    "logo"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "maxItems": 0,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "descripcion": {
+                                    "type": "string"
+                                },
+                                "logo": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "required": false,
@@ -5442,7 +6603,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -6076,6 +7237,76 @@
                 "operationId": "DrugPresentation_index",
                 "parameters": [
                     {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "descripcion",
+                                    "logo"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "maxItems": 0,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "descripcion": {
+                                    "type": "string"
+                                },
+                                "logo": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "required": false,
@@ -6101,7 +7332,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -6317,6 +7548,76 @@
                 "operationId": "DrugPresentation_indexDeleted",
                 "parameters": [
                     {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "descripcion",
+                                    "logo"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "maxItems": 0,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "descripcion": {
+                                    "type": "string"
+                                },
+                                "logo": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "required": false,
@@ -6342,7 +7643,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -6972,9 +8273,75 @@
                     "Permission"
                 ],
                 "summary": "Listar registros",
-                "description": "Requiere permission.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.",
+                "description": "Requiere permission.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Las escrituras comprueban delegación: el actor solo puede asignar capacidades api que posee y gestionar objetivos cuyos privilegios cubre, incluidos los dormidos. Renombrar o restaurar permisos asignados no permite conceder capacidades no poseídas; se rechaza con 403. Se conservan IDs y contratos JSON. Para actualizar archivos, enviar POST multipart con _method=PUT.",
                 "operationId": "Permission_index",
                 "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "nombre"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "maxItems": 0,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "nombre": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
                     {
                         "name": "page",
                         "in": "query",
@@ -7001,7 +8368,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -7111,7 +8478,7 @@
                     "Permission"
                 ],
                 "summary": "Crear registro",
-                "description": "Requiere permission.create. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.",
+                "description": "Requiere permission.create. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Las escrituras comprueban delegación: el actor solo puede asignar capacidades api que posee y gestionar objetivos cuyos privilegios cubre, incluidos los dormidos. Renombrar o restaurar permisos asignados no permite conceder capacidades no poseídas; se rechaza con 403. Se conservan IDs y contratos JSON. Para actualizar archivos, enviar POST multipart con _method=PUT.",
                 "operationId": "Permission_store",
                 "requestBody": {
                     "required": true,
@@ -7213,9 +8580,75 @@
                     "Permission"
                 ],
                 "summary": "Listar eliminados",
-                "description": "Requiere permission.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.",
+                "description": "Requiere permission.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Las escrituras comprueban delegación: el actor solo puede asignar capacidades api que posee y gestionar objetivos cuyos privilegios cubre, incluidos los dormidos. Renombrar o restaurar permisos asignados no permite conceder capacidades no poseídas; se rechaza con 403. Se conservan IDs y contratos JSON. Para actualizar archivos, enviar POST multipart con _method=PUT.",
                 "operationId": "Permission_indexDeleted",
                 "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "nombre"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "maxItems": 0,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "nombre": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
                     {
                         "name": "page",
                         "in": "query",
@@ -7242,7 +8675,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -7354,7 +8787,7 @@
                     "Permission"
                 ],
                 "summary": "Consultar registro",
-                "description": "Requiere permission.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.",
+                "description": "Requiere permission.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Las escrituras comprueban delegación: el actor solo puede asignar capacidades api que posee y gestionar objetivos cuyos privilegios cubre, incluidos los dormidos. Renombrar o restaurar permisos asignados no permite conceder capacidades no poseídas; se rechaza con 403. Se conservan IDs y contratos JSON. Para actualizar archivos, enviar POST multipart con _method=PUT.",
                 "operationId": "Permission_show",
                 "parameters": [
                     {
@@ -7444,7 +8877,7 @@
                     "Permission"
                 ],
                 "summary": "Actualizar registro (PUT)",
-                "description": "Requiere permission.update. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.",
+                "description": "Requiere permission.update. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Las escrituras comprueban delegación: el actor solo puede asignar capacidades api que posee y gestionar objetivos cuyos privilegios cubre, incluidos los dormidos. Renombrar o restaurar permisos asignados no permite conceder capacidades no poseídas; se rechaza con 403. Se conservan IDs y contratos JSON. Para actualizar archivos, enviar POST multipart con _method=PUT.",
                 "operationId": "Permission_update",
                 "parameters": [
                     {
@@ -7555,7 +8988,7 @@
                     "Permission"
                 ],
                 "summary": "Eliminar lógicamente",
-                "description": "Requiere permission.delete. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.",
+                "description": "Requiere permission.delete. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Las escrituras comprueban delegación: el actor solo puede asignar capacidades api que posee y gestionar objetivos cuyos privilegios cubre, incluidos los dormidos. Renombrar o restaurar permisos asignados no permite conceder capacidades no poseídas; se rechaza con 403. Se conservan IDs y contratos JSON. Para actualizar archivos, enviar POST multipart con _method=PUT.",
                 "operationId": "Permission_destroy",
                 "parameters": [
                     {
@@ -7656,7 +9089,7 @@
                     "Permission"
                 ],
                 "summary": "Actualizar registro (PATCH)",
-                "description": "Requiere permission.update. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.",
+                "description": "Requiere permission.update. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Las escrituras comprueban delegación: el actor solo puede asignar capacidades api que posee y gestionar objetivos cuyos privilegios cubre, incluidos los dormidos. Renombrar o restaurar permisos asignados no permite conceder capacidades no poseídas; se rechaza con 403. Se conservan IDs y contratos JSON. Para actualizar archivos, enviar POST multipart con _method=PUT.",
                 "operationId": "Permission_patch",
                 "parameters": [
                     {
@@ -7769,7 +9202,7 @@
                     "Permission"
                 ],
                 "summary": "Restaurar registro",
-                "description": "Requiere permission.update. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.",
+                "description": "Requiere permission.update. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Las escrituras comprueban delegación: el actor solo puede asignar capacidades api que posee y gestionar objetivos cuyos privilegios cubre, incluidos los dormidos. Renombrar o restaurar permisos asignados no permite conceder capacidades no poseídas; se rechaza con 403. Se conservan IDs y contratos JSON. Para actualizar archivos, enviar POST multipart con _method=PUT.",
                 "operationId": "Permission_restore",
                 "parameters": [
                     {
@@ -7872,9 +9305,80 @@
                     "Role"
                 ],
                 "summary": "Listar registros",
-                "description": "Requiere role.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.",
+                "description": "Requiere role.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Las escrituras comprueban delegación: el actor solo puede asignar capacidades api que posee y gestionar objetivos cuyos privilegios cubre, incluidos los dormidos. Renombrar o restaurar permisos asignados no permite conceder capacidades no poseídas; se rechaza con 403. Se conservan IDs y contratos JSON. Para actualizar archivos, enviar POST multipart con _method=PUT.",
                 "operationId": "Role_index",
                 "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "nombre"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "permisos"
+                                ]
+                            },
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "nombre": {
+                                    "type": "string"
+                                },
+                                "permiso": {
+                                    "type": "integer"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
                     {
                         "name": "page",
                         "in": "query",
@@ -7901,7 +9405,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -8011,7 +9515,7 @@
                     "Role"
                 ],
                 "summary": "Crear registro",
-                "description": "Requiere role.create. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.",
+                "description": "Requiere role.create. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Las escrituras comprueban delegación: el actor solo puede asignar capacidades api que posee y gestionar objetivos cuyos privilegios cubre, incluidos los dormidos. Renombrar o restaurar permisos asignados no permite conceder capacidades no poseídas; se rechaza con 403. Se conservan IDs y contratos JSON. Para actualizar archivos, enviar POST multipart con _method=PUT.",
                 "operationId": "Role_store",
                 "requestBody": {
                     "required": true,
@@ -8113,9 +9617,80 @@
                     "Role"
                 ],
                 "summary": "Listar eliminados",
-                "description": "Requiere role.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.",
+                "description": "Requiere role.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Las escrituras comprueban delegación: el actor solo puede asignar capacidades api que posee y gestionar objetivos cuyos privilegios cubre, incluidos los dormidos. Renombrar o restaurar permisos asignados no permite conceder capacidades no poseídas; se rechaza con 403. Se conservan IDs y contratos JSON. Para actualizar archivos, enviar POST multipart con _method=PUT.",
                 "operationId": "Role_indexDeleted",
                 "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "nombre"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "permisos"
+                                ]
+                            },
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "nombre": {
+                                    "type": "string"
+                                },
+                                "permiso": {
+                                    "type": "integer"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
                     {
                         "name": "page",
                         "in": "query",
@@ -8142,7 +9717,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -8254,7 +9829,7 @@
                     "Role"
                 ],
                 "summary": "Consultar registro",
-                "description": "Requiere role.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.",
+                "description": "Requiere role.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Las escrituras comprueban delegación: el actor solo puede asignar capacidades api que posee y gestionar objetivos cuyos privilegios cubre, incluidos los dormidos. Renombrar o restaurar permisos asignados no permite conceder capacidades no poseídas; se rechaza con 403. Se conservan IDs y contratos JSON. Para actualizar archivos, enviar POST multipart con _method=PUT.",
                 "operationId": "Role_show",
                 "parameters": [
                     {
@@ -8344,7 +9919,7 @@
                     "Role"
                 ],
                 "summary": "Actualizar registro (PUT)",
-                "description": "Requiere role.update. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.",
+                "description": "Requiere role.update. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Las escrituras comprueban delegación: el actor solo puede asignar capacidades api que posee y gestionar objetivos cuyos privilegios cubre, incluidos los dormidos. Renombrar o restaurar permisos asignados no permite conceder capacidades no poseídas; se rechaza con 403. Se conservan IDs y contratos JSON. Para actualizar archivos, enviar POST multipart con _method=PUT.",
                 "operationId": "Role_update",
                 "parameters": [
                     {
@@ -8455,7 +10030,7 @@
                     "Role"
                 ],
                 "summary": "Eliminar lógicamente",
-                "description": "Requiere role.delete. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.",
+                "description": "Requiere role.delete. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Las escrituras comprueban delegación: el actor solo puede asignar capacidades api que posee y gestionar objetivos cuyos privilegios cubre, incluidos los dormidos. Renombrar o restaurar permisos asignados no permite conceder capacidades no poseídas; se rechaza con 403. Se conservan IDs y contratos JSON. Para actualizar archivos, enviar POST multipart con _method=PUT.",
                 "operationId": "Role_destroy",
                 "parameters": [
                     {
@@ -8556,7 +10131,7 @@
                     "Role"
                 ],
                 "summary": "Actualizar registro (PATCH)",
-                "description": "Requiere role.update. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.",
+                "description": "Requiere role.update. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Las escrituras comprueban delegación: el actor solo puede asignar capacidades api que posee y gestionar objetivos cuyos privilegios cubre, incluidos los dormidos. Renombrar o restaurar permisos asignados no permite conceder capacidades no poseídas; se rechaza con 403. Se conservan IDs y contratos JSON. Para actualizar archivos, enviar POST multipart con _method=PUT.",
                 "operationId": "Role_patch",
                 "parameters": [
                     {
@@ -8669,7 +10244,7 @@
                     "Role"
                 ],
                 "summary": "Restaurar registro",
-                "description": "Requiere role.update. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.",
+                "description": "Requiere role.update. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Las escrituras comprueban delegación: el actor solo puede asignar capacidades api que posee y gestionar objetivos cuyos privilegios cubre, incluidos los dormidos. Renombrar o restaurar permisos asignados no permite conceder capacidades no poseídas; se rechaza con 403. Se conservan IDs y contratos JSON. Para actualizar archivos, enviar POST multipart con _method=PUT.",
                 "operationId": "Role_restore",
                 "parameters": [
                     {
@@ -8772,9 +10347,88 @@
                     "User"
                 ],
                 "summary": "Listar registros",
-                "description": "Requiere user.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.",
+                "description": "Requiere user.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Las escrituras comprueban delegación: el actor solo puede asignar capacidades api que posee y gestionar objetivos cuyos privilegios cubre, incluidos los dormidos. Renombrar o restaurar permisos asignados no permite conceder capacidades no poseídas; se rechaza con 403. Se conservan IDs y contratos JSON. Para actualizar archivos, enviar POST multipart con _method=PUT.",
                 "operationId": "User_index",
                 "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "nombre",
+                                    "correo"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "permisos",
+                                    "roles"
+                                ]
+                            },
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "nombre": {
+                                    "type": "string"
+                                },
+                                "correo": {
+                                    "type": "string"
+                                },
+                                "permiso": {
+                                    "type": "integer"
+                                },
+                                "rol": {
+                                    "type": "integer"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
                     {
                         "name": "page",
                         "in": "query",
@@ -8801,7 +10455,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -8911,7 +10565,7 @@
                     "User"
                 ],
                 "summary": "Crear registro",
-                "description": "Requiere user.create. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.",
+                "description": "Requiere user.create. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Las escrituras comprueban delegación: el actor solo puede asignar capacidades api que posee y gestionar objetivos cuyos privilegios cubre, incluidos los dormidos. Renombrar o restaurar permisos asignados no permite conceder capacidades no poseídas; se rechaza con 403. Se conservan IDs y contratos JSON. Para actualizar archivos, enviar POST multipart con _method=PUT.",
                 "operationId": "User_store",
                 "requestBody": {
                     "required": true,
@@ -9013,9 +10667,88 @@
                     "User"
                 ],
                 "summary": "Listar eliminados",
-                "description": "Requiere user.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.",
+                "description": "Requiere user.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Las escrituras comprueban delegación: el actor solo puede asignar capacidades api que posee y gestionar objetivos cuyos privilegios cubre, incluidos los dormidos. Renombrar o restaurar permisos asignados no permite conceder capacidades no poseídas; se rechaza con 403. Se conservan IDs y contratos JSON. Para actualizar archivos, enviar POST multipart con _method=PUT.",
                 "operationId": "User_indexDeleted",
                 "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "nombre",
+                                    "correo"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "permisos",
+                                    "roles"
+                                ]
+                            },
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "nombre": {
+                                    "type": "string"
+                                },
+                                "correo": {
+                                    "type": "string"
+                                },
+                                "permiso": {
+                                    "type": "integer"
+                                },
+                                "rol": {
+                                    "type": "integer"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
                     {
                         "name": "page",
                         "in": "query",
@@ -9042,7 +10775,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -9154,7 +10887,7 @@
                     "User"
                 ],
                 "summary": "Consultar registro",
-                "description": "Requiere user.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.",
+                "description": "Requiere user.view. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Las escrituras comprueban delegación: el actor solo puede asignar capacidades api que posee y gestionar objetivos cuyos privilegios cubre, incluidos los dormidos. Renombrar o restaurar permisos asignados no permite conceder capacidades no poseídas; se rechaza con 403. Se conservan IDs y contratos JSON. Para actualizar archivos, enviar POST multipart con _method=PUT.",
                 "operationId": "User_show",
                 "parameters": [
                     {
@@ -9244,7 +10977,7 @@
                     "User"
                 ],
                 "summary": "Actualizar registro (PUT)",
-                "description": "Requiere user.update. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.",
+                "description": "Requiere user.update. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Las escrituras comprueban delegación: el actor solo puede asignar capacidades api que posee y gestionar objetivos cuyos privilegios cubre, incluidos los dormidos. Renombrar o restaurar permisos asignados no permite conceder capacidades no poseídas; se rechaza con 403. Se conservan IDs y contratos JSON. Para actualizar archivos, enviar POST multipart con _method=PUT.",
                 "operationId": "User_update",
                 "parameters": [
                     {
@@ -9355,7 +11088,7 @@
                     "User"
                 ],
                 "summary": "Eliminar lógicamente",
-                "description": "Requiere user.delete. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.",
+                "description": "Requiere user.delete. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Las escrituras comprueban delegación: el actor solo puede asignar capacidades api que posee y gestionar objetivos cuyos privilegios cubre, incluidos los dormidos. Renombrar o restaurar permisos asignados no permite conceder capacidades no poseídas; se rechaza con 403. Se conservan IDs y contratos JSON. Para actualizar archivos, enviar POST multipart con _method=PUT.",
                 "operationId": "User_destroy",
                 "parameters": [
                     {
@@ -9456,7 +11189,7 @@
                     "User"
                 ],
                 "summary": "Actualizar registro (PATCH)",
-                "description": "Requiere user.update. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.",
+                "description": "Requiere user.update. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Las escrituras comprueban delegación: el actor solo puede asignar capacidades api que posee y gestionar objetivos cuyos privilegios cubre, incluidos los dormidos. Renombrar o restaurar permisos asignados no permite conceder capacidades no poseídas; se rechaza con 403. Se conservan IDs y contratos JSON. Para actualizar archivos, enviar POST multipart con _method=PUT.",
                 "operationId": "User_patch",
                 "parameters": [
                     {
@@ -9569,7 +11302,7 @@
                     "User"
                 ],
                 "summary": "Restaurar registro",
-                "description": "Requiere user.update. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Para actualizar archivos, enviar POST multipart con _method=PUT.",
+                "description": "Requiere user.update. Cookie JWT: CSRF en escrituras; Bearer: sin CSRF. Ver README para los contratos y límites. Las escrituras comprueban delegación: el actor solo puede asignar capacidades api que posee y gestionar objetivos cuyos privilegios cubre, incluidos los dormidos. Renombrar o restaurar permisos asignados no permite conceder capacidades no poseídas; se rechaza con 403. Se conservan IDs y contratos JSON. Para actualizar archivos, enviar POST multipart con _method=PUT.",
                 "operationId": "User_restore",
                 "parameters": [
                     {
@@ -9676,6 +11409,99 @@
                 "operationId": "WeaponConfiscation_index",
                 "parameters": [
                     {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "cantidad",
+                                    "foto"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "arma",
+                                    "decomiso"
+                                ]
+                            },
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "cantidad": {
+                                    "type": "integer"
+                                },
+                                "foto": {
+                                    "type": "string"
+                                },
+                                "arma": {
+                                    "type": "integer"
+                                },
+                                "arma_descripcion": {
+                                    "type": "string"
+                                },
+                                "decomiso": {
+                                    "type": "integer"
+                                },
+                                "decomiso_descripcion": {
+                                    "type": "string"
+                                },
+                                "fecha_desde": {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                "fecha_hasta": {
+                                    "type": "string",
+                                    "format": "date"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "required": false,
@@ -9701,7 +11527,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -9917,6 +11743,99 @@
                 "operationId": "WeaponConfiscation_indexDeleted",
                 "parameters": [
                     {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "cantidad",
+                                    "foto"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "arma",
+                                    "decomiso"
+                                ]
+                            },
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "cantidad": {
+                                    "type": "integer"
+                                },
+                                "foto": {
+                                    "type": "string"
+                                },
+                                "arma": {
+                                    "type": "integer"
+                                },
+                                "arma_descripcion": {
+                                    "type": "string"
+                                },
+                                "decomiso": {
+                                    "type": "integer"
+                                },
+                                "decomiso_descripcion": {
+                                    "type": "string"
+                                },
+                                "fecha_desde": {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                "fecha_hasta": {
+                                    "type": "string",
+                                    "format": "date"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "required": false,
@@ -9942,7 +11861,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -10585,6 +12504,99 @@
                         }
                     },
                     {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "cantidad",
+                                    "foto"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "arma",
+                                    "decomiso"
+                                ]
+                            },
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "cantidad": {
+                                    "type": "integer"
+                                },
+                                "foto": {
+                                    "type": "string"
+                                },
+                                "arma": {
+                                    "type": "integer"
+                                },
+                                "arma_descripcion": {
+                                    "type": "string"
+                                },
+                                "decomiso": {
+                                    "type": "integer"
+                                },
+                                "decomiso_descripcion": {
+                                    "type": "string"
+                                },
+                                "fecha_desde": {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                "fecha_hasta": {
+                                    "type": "string",
+                                    "format": "date"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "required": false,
@@ -10610,7 +12622,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -10959,6 +12971,76 @@
                 "operationId": "Weapon_index",
                 "parameters": [
                     {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "descripcion",
+                                    "logo"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "maxItems": 0,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "descripcion": {
+                                    "type": "string"
+                                },
+                                "logo": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "required": false,
@@ -10984,7 +13066,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -11200,6 +13282,76 @@
                 "operationId": "Weapon_indexDeleted",
                 "parameters": [
                     {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Búsqueda parcial literal, sin distinguir mayúsculas, en textos y relaciones permitidos; se combina con los demás filtros.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Campos escalares públicos. CSV o fields[]. Siempre incluye identificador. Omitir conserva todos los campos.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "identificador",
+                                    "descripcion",
+                                    "logo"
+                                ]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Relaciones públicas. CSV o include[]. Omitir conserva las relaciones anteriores; include= las omite. No se admiten rutas anidadas.",
+                        "required": false,
+                        "style": "form",
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "maxItems": 0,
+                            "uniqueItems": true
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filtros tipados filter[campo]. Números e IDs usan igualdad exacta; textos usan coincidencia parcial literal; fechas YYYY-MM-DD y rangos inclusivos. Los filtros escalares antiguos conservan su comportamiento.",
+                        "required": false,
+                        "style": "deepObject",
+                        "explode": true,
+                        "schema": {
+                            "properties": {
+                                "identificador": {
+                                    "type": "integer"
+                                },
+                                "descripcion": {
+                                    "type": "string"
+                                },
+                                "logo": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object",
+                            "additionalProperties": false
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "required": false,
@@ -11225,7 +13377,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "description": "Campo público escalar permitido; ver LIST_FIELDS del controlador",
+                            "description": "Campo público escalar permitido; ver Support/Query/Definitions",
                             "type": "string"
                         }
                     },
@@ -12136,33 +14288,49 @@
                 "type": "object"
             },
             "MeResponse": {
-                "description": "Modelo User directo con atributos internos; password y remember_token ocultos. No usa el UserResource administrativo.",
+                "description": "Perfil y autorización vigentes consultados desde BD: roles y permisos efectivos directos o heredados, sin duplicados y siempre arrays. No emite, renueva, rota ni revoca JWT; no incluye tokens ni atributos internos. Disponible para cualquier usuario autenticado, sin permiso administrativo.",
+                "required": [
+                    "user",
+                    "roles",
+                    "permissions"
+                ],
                 "properties": {
-                    "id": {
-                        "type": "integer"
+                    "user": {
+                        "required": [
+                            "name",
+                            "email"
+                        ],
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "email": {
+                                "type": "string",
+                                "format": "email"
+                            }
+                        },
+                        "type": "object",
+                        "additionalProperties": false
                     },
-                    "name": {
-                        "type": "string"
+                    "roles": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [],
+                        "uniqueItems": true
                     },
-                    "email": {
-                        "type": "string"
-                    },
-                    "email_verified_at": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "created_at": {
-                        "type": "string"
-                    },
-                    "updated_at": {
-                        "type": "string"
-                    },
-                    "deleted_at": {
-                        "type": "string",
-                        "nullable": true
+                    "permissions": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [],
+                        "uniqueItems": true
                     }
                 },
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false
             },
             "LogoutResponse": {
                 "properties": {
@@ -12282,7 +14450,7 @@
                 "type": "object"
             },
             "Pagination": {
-                "description": "Paginador Laravel, también cuando data está vacío. Filtrado parcial literal por campos escalares de LIST_FIELDS; arrays y objetos no son filtros.",
+                "description": "Paginador Laravel, también cuando data está vacío. Filtros escalares antiguos parciales y literales. search, filter tipado, fields e include son optativos. Sin selección explícita se conservan campos y relaciones previos; identificador permanece y los metadatos no cambian.",
                 "required": [
                     "data",
                     "current_page",

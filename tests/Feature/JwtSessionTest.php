@@ -32,10 +32,10 @@ class JwtSessionTest extends TestCase
         $response = $this->login($user);
         $cookies = $this->cookies($response);
 
-        $this->request('GET', '/api/me', cookies: $cookies)->assertOk()->assertJsonPath('id', $user->id);
+        $this->request('GET', '/api/me', cookies: $cookies)->assertOk()->assertJsonPath('user.email', $user->email);
         $this->request('GET', '/api/me')->assertUnauthorized();
         $this->request('GET', '/api/me', headers: ['Authorization' => 'Bearer '.$cookies['token']])
-            ->assertOk()->assertJsonPath('id', $user->id)->assertCookieMissing(config('session.cookie'));
+            ->assertOk()->assertJsonPath('user.email', $user->email)->assertCookieMissing(config('session.cookie'));
     }
 
     public function test_cookie_and_json_expire_with_the_signed_jwt_and_environment_attributes(): void
@@ -171,7 +171,7 @@ class JwtSessionTest extends TestCase
 
         $response->assertOk()->assertJsonPath('roles', [])->assertJsonPath('permissions', []);
         $this->assertDatabaseHas('users', ['email' => 'new@example.test']);
-        $this->request('GET', '/api/me', cookies: $this->cookies($response))->assertOk()->assertJsonPath('email', 'new@example.test');
+        $this->request('GET', '/api/me', cookies: $this->cookies($response))->assertOk()->assertJsonPath('user.email', 'new@example.test');
     }
 
     public function test_bearer_mutation_uses_header_identity_without_cookie_csrf_or_session(): void
@@ -186,7 +186,7 @@ class JwtSessionTest extends TestCase
         $response->assertOk()->assertCookieMissing(config('session.cookie'));
         $this->assertDatabaseHas('activity_log', ['event' => 'logout', 'causer_id' => $bearerUser->id]);
         $this->request('GET', '/api/me', headers: ['Authorization' => 'Bearer '.$bearer])->assertUnauthorized();
-        $this->request('GET', '/api/me', cookies: $cookies)->assertOk()->assertJsonPath('id', $cookieUser->id);
+        $this->request('GET', '/api/me', cookies: $cookies)->assertOk()->assertJsonPath('user.email', $cookieUser->email);
         $this->request('GET', '/api/me', headers: ['Authorization' => 'Bearer invalid'], cookies: $cookies)->assertUnauthorized();
     }
 

@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Traits\Activitylog;
+use App\Models\Concerns\TracksActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
@@ -10,7 +10,7 @@ use Spatie\Permission\Models\Permission as SpatiePermission;
 
 class Permission extends SpatiePermission
 {
-    use Activitylog, HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, TracksActivity;
 
     public function getActivitylogOptions(): LogOptions
     {

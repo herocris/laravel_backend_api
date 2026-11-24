@@ -4,13 +4,16 @@ namespace Database\Seeders;
 
 use App\Models\Permission;
 use App\Models\Role;
+use App\Support\Authorization\AdministrativeTransaction;
+use App\Support\Authorization\PermissionCatalog;
 use DomainException;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Spatie\Permission\PermissionRegistrar;
 
 class PermissionCatalogSeeder extends Seeder
 {
+    public function __construct(private AdministrativeTransaction $transaction) {}
+
     /**
      * Run the database seeds.
      */
@@ -20,14 +23,8 @@ class PermissionCatalogSeeder extends Seeder
         $registrar->forgetCachedPermissions();
 
         try {
-            DB::transaction(function (): void {
-                foreach (['user', 'role', 'permission', 'drug', 'drugPresentation', 'weapon', 'ammunition', 'confiscation', 'drugConfiscation', 'weaponConfiscation', 'ammunitionConfiscation'] as $resource) {
-                    foreach (['view', 'create', 'update', 'delete'] as $action) {
-                        $this->createPermission($resource.'.'.$action);
-                    }
-                }
-
-                foreach (['dashboard.view', 'graph.view', 'map.view', 'activity.view'] as $permission) {
+            $this->transaction->run(function (): void {
+                foreach (PermissionCatalog::names() as $permission) {
                     $this->createPermission($permission);
                 }
 

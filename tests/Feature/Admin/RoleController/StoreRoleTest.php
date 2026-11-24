@@ -31,6 +31,8 @@ class StoreRoleTest extends TestCase
         $perm1 = Permission::factory()->create(['name' => 'perm.a']);
         $perm2 = Permission::factory()->create(['name' => 'perm.b']);
 
+        $this->admin->givePermissionTo([$perm1, $perm2]);
+
         $payload = [
             'nombre' => 'Supervisor',
             'permisos' => [$perm1->id, $perm2->id],

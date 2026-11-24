@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Traits\Activitylog;
+use App\Models\Concerns\TracksActivity;
 use Database\Factories\DrugConfiscationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,7 +14,7 @@ use Spatie\Activitylog\LogOptions;
 class DrugConfiscation extends Model
 {
     /** @use HasFactory<DrugConfiscationFactory> */
-    use Activitylog, HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, TracksActivity;
 
     protected $fillable = [
         'amount',

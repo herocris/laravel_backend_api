@@ -74,7 +74,7 @@ use OpenApi\Attributes as OA;
     new OA\Property(property: 'next_page_url', type: 'string', nullable: true),
     new OA\Property(property: 'prev_page_url', type: 'string', nullable: true),
     new OA\Property(property: 'links', type: 'array', items: new OA\Items(type: 'object')),
-], description: 'Paginador Laravel, también cuando data está vacío. Filtrado parcial literal por campos escalares de LIST_FIELDS; arrays y objetos no son filtros.')]
+], description: 'Paginador Laravel, también cuando data está vacío. Filtros escalares antiguos parciales y literales. search, filter tipado, fields e include son optativos. Sin selección explícita se conservan campos y relaciones previos; identificador permanece y los metadatos no cambian.')]
 #[OA\Schema(schema: 'GraphResponse', type: 'object', properties: [
     new OA\Property(property: 'lineBarData', type: 'array', items: new OA\Items(type: 'object'), description: 'Cada fila tiene name (período) y claves dinámicas de catálogo con cantidades enteras; homónimos incluyen (#ID).'),
     new OA\Property(property: 'pieData', type: 'array', items: new OA\Items(type: 'object', properties: [
