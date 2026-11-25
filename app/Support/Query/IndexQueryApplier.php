@@ -3,31 +3,269 @@
 namespace App\Support\Query;
 
 use Closure;
+use Illuminate\Container\Attributes\Config;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * Applies the full index pipeline—pagination, sorting, search, filters,
+ * field selection, includes, and soft-delete scoping—to an Eloquent query.
+ */
 class IndexQueryApplier
 {
+    /** @param array<string, mixed> $options */
+    public function __construct(#[Config('index_query')] private readonly array $options) {}
+
     /**
-     * @param  array<string, mixed>  $parameters  Validated list parameters.
-     * @param  array<string, mixed>  $definition
+     * Run the complete index pipeline and return a paginated result.
+     *
+     * @param  Builder  $query  The base Eloquent query builder.
+     * @param  array<string, mixed>  $validated  Validated query-string parameters.
+     * @param  array<string, mixed>  $config  Definition array from an `*IndexDefinition::definition()` call.
      */
-    public function apply(Builder $query, array $parameters, array $definition): LengthAwarePaginator
+    public function apply(Builder $query, array $validated, array $config = []): LengthAwarePaginator
     {
-        $fields = $definition['fields'];
+        $this->applyOnlyTrashed($query, (bool) ($validated['only_trashed'] ?? false));
+        $this->applyIncludes($query, $validated, $config);
+        $this->applyFields($query, $validated['fields'] ?? null, $config['selectable'] ?? $config['fields'] ?? []);
+        $this->applyTopLevelPartialMatchFilters($query, $validated, $config['fields'] ?? []);
+        $this->applySearch($query, (string) ($validated['search'] ?? ''), $config['searchable'] ?? []);
+        $this->applyFilters($query, $validated['filter'] ?? [], $config['filters'] ?? []);
+        $this->applySort($query, $validated, $config);
 
-        $this->applyIncludes($query, $parameters, $definition);
-        $this->applyFields($query, $parameters['fields'] ?? null, $definition['selectable'] ?? $fields);
-        $this->applyLegacyFilters($query, $parameters, $fields);
-        $this->applySearch($query, $parameters['search'] ?? '', $definition['searchable'] ?? []);
-        $this->applyTypedFilters($query, $parameters['filter'] ?? [], $definition['filters'] ?? []);
-        $this->applySort($query, $parameters, $fields);
+        return $this->paginate($query, $validated, $config);
+    }
 
-        return $this->paginate($query, $parameters);
+    /**
+     * Scope the query to soft-deleted records only when `only_trashed` is requested.
+     */
+    private function applyOnlyTrashed(Builder $query, bool $onlyTrashed): void
+    {
+        if ($onlyTrashed && $this->options['allow_only_trashed'] && $this->usesSoftDeletes($query)) {
+            $query->onlyTrashed();
+        }
+    }
+
+    /**
+     * @param  array{include?: list<string>}  $validated
+     * @param  array{includes?: list<string>|array<string, string>, include_loads?: array<string, list<string>>, with?: list<string>}  $config
+     */
+    private function applyIncludes(Builder $query, array $validated, array $config): void
+    {
+        if (! array_key_exists('include', $validated)) {
+            $query->with($config['with'] ?? []);
+
+            return;
+        }
+
+        $includeMap = $this->nameMap($config['includes'] ?? []);
+        $requested = array_values(array_intersect($validated['include'] ?? [], array_keys($includeMap)));
+        $loads = array_map(fn (string $name): string => $includeMap[$name], $requested);
+        foreach ($requested as $name) {
+            $loads = array_merge($loads, $config['include_loads'][$name] ?? []);
+        }
+
+        if ($loads !== []) {
+            $query->with(array_unique($loads));
+        }
+    }
+
+    /**
+     * Restrict the SELECT clause to whitelisted columns, always keeping the primary key.
+     *
+     * @param  list<string>|array<string, string>  $selectableFields
+     */
+    private function applyFields(Builder $query, mixed $rawFields, array $selectableFields): void
+    {
+        $requestedFields = is_array($rawFields) ? $rawFields : [];
+
+        if (empty($requestedFields) || empty($selectableFields)) {
+            return;
+        }
+
+        $fieldMap = $this->nameMap($selectableFields);
+        $requested = array_values(array_intersect($requestedFields, array_keys($fieldMap)));
+        $fields = array_map(fn (string $name): string => $fieldMap[$name], $requested);
+        $keyName = $query->getModel()->getKeyName();
+
+        if ($this->options['preserve_computed_fields']) {
+            $fields[] = $keyName;
+        } else {
+            array_unshift($fields, $keyName);
+        }
+
+        foreach (array_keys($query->getEagerLoads()) as $include) {
+            $relationName = explode('.', $include)[0];
+            $relation = $query->getModel()->{$relationName}();
+
+            if ($relation instanceof BelongsTo) {
+                $fields[] = $relation->getForeignKeyName();
+            }
+
+            if ($relation instanceof MorphTo) {
+                $fields[] = $relation->getMorphType();
+            }
+
+            if ($relation instanceof HasOneOrMany) {
+                $fields[] = $relation->getLocalKeyName();
+            }
+
+            if ($relation instanceof BelongsToMany) {
+                $fields[] = $relation->getParentKeyName();
+            }
+        }
+
+        $fields = array_unique($fields);
+        if ($this->options['qualify_columns']) {
+            $fields = array_map($query->qualifyColumn(...), $fields);
+        }
+
+        if ($this->options['preserve_computed_fields']) {
+            $query->getQuery()->columns = array_values(array_filter(
+                $query->getQuery()->columns ?? [],
+                fn (mixed $column): bool => ! is_string($column) || str_contains(strtolower($column), ' as '),
+            ));
+            $query->addSelect($fields);
+
+            return;
+        }
+
+        $query->select($fields);
+    }
+
+    /**
+     * @param  array<string, mixed>  $validated
+     * @param  list<string>|array<string, string>  $fields
+     */
+    private function applyTopLevelPartialMatchFilters(Builder $query, array $validated, array $fields): void
+    {
+        if (! $this->options['allow_legacy_filters']) {
+            return;
+        }
+
+        foreach ($this->nameMap($fields) as $field => $column) {
+            if (isset($validated[$field])) {
+                self::whereContains($query, $column, $validated[$field]);
+            }
+        }
+    }
+
+    /**
+     * @param  list<Closure|string>  $searchable
+     */
+    private function applySearch(Builder $query, string $searchTerm, array $searchable): void
+    {
+        $term = trim($searchTerm);
+
+        if ($term === '' || empty($searchable)) {
+            return;
+        }
+
+        $query->where(function (Builder $builder) use ($searchable, $term): void {
+            foreach ($searchable as $field) {
+                if ($field instanceof Closure) {
+                    $builder->orWhere(fn (Builder $part) => $field($part, $term));
+
+                    continue;
+                }
+
+                if ($this->options['literal_search']) {
+                    $builder->orWhere(fn (Builder $part) => self::whereContains($part, $field, $term));
+                } else {
+                    $builder->orWhere($field, 'like', '%'.$term.'%');
+                }
+            }
+        });
+    }
+
+    /**
+     * Apply per-field filters from the request against the definition's filter map.
+     *
+     * Each filter contains validation rules and either a column name (equality)
+     * or a closure that applies a complex query.
+     *
+     * @param  array<string, array{query: string|Closure, operator?: string}>  $filterMap
+     */
+    private function applyFilters(Builder $query, mixed $rawFilters, array $filterMap): void
+    {
+        $filters = is_array($rawFilters) ? $rawFilters : [];
+
+        if (empty($filters) || empty($filterMap)) {
+            return;
+        }
+
+        foreach ($filters as $key => $value) {
+            if ($value === null || $value === '' || ! array_key_exists($key, $filterMap)) {
+                continue;
+            }
+
+            $handler = $filterMap[$key]['query'];
+
+            if ($handler instanceof Closure) {
+                $handler($query, $value);
+            } elseif (($filterMap[$key]['operator'] ?? '=') === 'like') {
+                self::whereContains($query, $handler, $value);
+            } else {
+                $query->where($this->columnForQuery($query, $handler), $value);
+            }
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $validated
+     * @param  array<string, mixed>  $config
+     */
+    private function applySort(Builder $query, array $validated, array $config): void
+    {
+        $sort = $this->resolveSort(
+            $validated[$this->options['sort_parameter']] ?? null,
+            $this->nameMap($config[$this->options['sortable_definition_key']] ?? []),
+            $config['default_sort'] ?? $this->options['default_sort'],
+        );
+
+        $direction = (string) ($validated[$this->options['direction_parameter']] ?? $config['default_direction'] ?? 'desc');
+        $tieBreakDirection = $this->options['tie_break_direction'];
+
+        if ($sort !== null) {
+            $query->orderBy($this->columnForQuery($query, $sort), $direction);
+        }
+
+        if ($sort !== $query->getModel()->getKeyName() || $tieBreakDirection !== null) {
+            $query->orderBy($query->getModel()->getQualifiedKeyName(), $tieBreakDirection ?? $direction);
+        }
+    }
+
+    /**
+     * Resolve the sort column, falling back to the default if the requested
+     * column is not in the sortable whitelist.
+     *
+     * @param  array<string, string>  $sortable
+     */
+    private function resolveSort(mixed $rawSort, array $sortable, ?string $defaultSort): ?string
+    {
+        if (! is_string($rawSort)) {
+            return $defaultSort;
+        }
+
+        return $sortable === [] ? $rawSort : ($sortable[$rawSort] ?? $defaultSort);
+    }
+
+    /**
+     * @param  array{per_page?: int|string, page?: int|string}  $validated
+     * @param  array{default_per_page?: int}  $config
+     */
+    private function paginate(Builder $query, array $validated, array $config): LengthAwarePaginator
+    {
+        $perPage = (int) ($validated['per_page'] ?? $config['default_per_page'] ?? $this->options['default_per_page']);
+        $page = $this->options['use_validated_page'] ? (int) ($validated['page'] ?? 1) : null;
+        $paginator = $query->paginate($perPage, ['*'], 'page', $page);
+
+        return $this->options['append_query_string'] ? $paginator->withQueryString() : $paginator;
     }
 
     public static function whereContains(Builder $query, string $column, string $term): void
@@ -37,121 +275,25 @@ class IndexQueryApplier
         $query->whereRaw("LOWER({$qualifiedColumn}) LIKE ? ESCAPE '!'", ['%'.$value.'%']);
     }
 
-    /**
-     * @param  array{include?: list<string>}  $parameters
-     * @param  array{includes?: array<string, string>, with?: list<string>}  $definition
-     */
-    private function applyIncludes(Builder $query, array $parameters, array $definition): void
+    private function columnForQuery(Builder $query, string $column): string
     {
-        $includes = $definition['includes'] ?? [];
-        $loads = array_key_exists('include', $parameters)
-            ? array_map(fn (string $name): string => $includes[$name], $parameters['include'])
-            : ($definition['with'] ?? []);
-        $query->with($loads);
+        return $this->options['qualify_columns'] ? $query->qualifyColumn($column) : $column;
     }
 
     /**
-     * @param  list<string>|null  $requested
-     * @param  array<string, string>  $allowed
+     * @param  list<string>|array<string, string>  $names
+     * @return array<string, string>
      */
-    private function applyFields(Builder $query, ?array $requested, array $allowed): void
+    private function nameMap(array $names): array
     {
-        if ($requested === null) {
-            return;
-        }
-
-        $columns = [$query->getModel()->getKeyName()];
-        foreach ($requested as $field) {
-            $columns[] = $allowed[$field];
-        }
-
-        foreach (array_keys($query->getEagerLoads()) as $load) {
-            $relation = $query->getModel()->{explode('.', $load)[0]}();
-            if ($relation instanceof BelongsTo) {
-                $columns[] = $relation->getForeignKeyName();
-            }
-            if ($relation instanceof MorphTo) {
-                $columns[] = $relation->getMorphType();
-            }
-            if ($relation instanceof BelongsToMany) {
-                $columns[] = $relation->getParentKeyName();
-            }
-            if ($relation instanceof HasOneOrMany) {
-                $columns[] = $relation->getLocalKeyName();
-            }
-        }
-
-        $query->select(array_map($query->qualifyColumn(...), array_unique($columns)));
+        return array_is_list($names) ? array_combine($names, $names) : $names;
     }
 
     /**
-     * @param  array<string, mixed>  $parameters
-     * @param  array<string, string>  $fields
+     * Determine whether the query's model uses the SoftDeletes trait.
      */
-    private function applyLegacyFilters(Builder $query, array $parameters, array $fields): void
+    private function usesSoftDeletes(Builder $query): bool
     {
-        foreach ($fields as $field => $column) {
-            if (isset($parameters[$field])) {
-                self::whereContains($query, $column, $parameters[$field]);
-            }
-        }
-    }
-
-    /** @param list<Closure|string> $searchable */
-    private function applySearch(Builder $query, string $searchTerm, array $searchable): void
-    {
-        $term = trim($searchTerm);
-        if ($term === '' || $searchable === []) {
-            return;
-        }
-
-        $query->where(function (Builder $search) use ($searchable, $term): void {
-            foreach ($searchable as $column) {
-                $search->orWhere(function (Builder $part) use ($column, $term): void {
-                    if ($column instanceof Closure) {
-                        $column($part, $term);
-                    } else {
-                        self::whereContains($part, $column, $term);
-                    }
-                });
-            }
-        });
-    }
-
-    /**
-     * @param  array<string, mixed>  $filters
-     * @param  array<string, array{query: Closure|string, operator?: string}>  $filterMap
-     */
-    private function applyTypedFilters(Builder $query, array $filters, array $filterMap): void
-    {
-        foreach ($filters as $field => $value) {
-            $filter = $filterMap[$field];
-            if ($filter['query'] instanceof Closure) {
-                $filter['query']($query, $value);
-            } elseif (($filter['operator'] ?? '=') === 'like') {
-                self::whereContains($query, $filter['query'], $value);
-            } else {
-                $query->where($query->qualifyColumn($filter['query']), $value);
-            }
-        }
-    }
-
-    /**
-     * @param  array{sort_by?: string, type?: string}  $parameters
-     * @param  array<string, string>  $fields
-     */
-    private function applySort(Builder $query, array $parameters, array $fields): void
-    {
-        if (isset($parameters['sort_by'])) {
-            $query->orderBy($query->qualifyColumn($fields[$parameters['sort_by']]), $parameters['type'] ?? 'desc');
-        }
-
-        $query->orderBy($query->getModel()->getQualifiedKeyName());
-    }
-
-    /** @param array{per_page?: int|string, page?: int|string} $parameters */
-    private function paginate(Builder $query, array $parameters): LengthAwarePaginator
-    {
-        return $query->paginate((int) ($parameters['per_page'] ?? 10), ['*'], 'page', (int) ($parameters['page'] ?? 1));
+        return in_array(SoftDeletes::class, class_uses_recursive($query->getModel()), true);
     }
 }

@@ -1,5 +1,14 @@
 # Progreso del refactor
 
+## Servicio de listados común (2026-11-25)
+
+- Estado: `completado` localmente. Solicitud de igualar `IndexQueryApplier` entre ambos repositorios conservando el contrato de cada API. Inicio en `3c16a43` con árbol limpio. En reports ya estaban pendientes la extracción de la ordenación y paginación y el ajuste de su prueba de informes.
+- Consultado `search-docs` mediante Sail en ambos proyectos. Los appliers reciben opciones locales de `config/index_query.php` y usan las definiciones de cada recurso. Se conservan las rutas, Form Requests y Resources. Adaptado el proxy de pruebas para resolver el servicio desde el contenedor y añadida una regresión de comodines de búsqueda en reports.
+- La primera ejecución de laravel detectó un cambio en el orden de columnas del SELECT al solicitar campos. Corregida la extracción para conservar la clave primaria al inicio de la proyección de laravel y preservar las expresiones de reports.
+- Verificación final con Sail: laravel, `vendor/bin/sail bin phpunit --filter="ListingTest|Index.*Test|SearchByColumnTest|SortDataTest|PaginateTest|showAllTest" --no-progress`, 190 pruebas y 2.832 aserciones (SQLite en memoria). Reports, `vendor/bin/sail bin phpunit --filter=Index --no-progress`, 80 pruebas y 319 aserciones (MySQL de pruebas). Pint y `git diff --check` correctos en ambos. Comparación SHA-256 posterior a Pint confirma que las dos copias del applier son idénticas. Cambios locales listos para revisión.
+
+- Ajuste de nomenclatura posterior: renombrado `applyLegacyFilters()` a `applyTopLevelPartialMatchFilters()` en las dos copias. Pint y `git diff --check` correctos. Pruebas de listados repetidas con los mismos resultados, 190/2.832 en laravel y 80/319 en reports. Nueva comparación SHA-256 confirma la igualdad de ambos archivos.
+
 ## Organización de IndexQueryApplier (2026-11-25)
 
 - Estado: `completado` localmente. Refactor solicitado para organizar las etapas del listado como en reports-manage-backend. Inicio con árbol limpio en `refactor/01-base-referencia`, HEAD `2783c49`.

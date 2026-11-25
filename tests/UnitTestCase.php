@@ -34,7 +34,7 @@ class ApiResponserProxy
     {
         $fields = ['identificador' => 'id', 'nombre' => 'name'];
         $parameters = Validator::validate(request()->query(), IndexRequest::rulesFor($fields));
-        $paginator = (new IndexQueryApplier)->apply($items, $parameters, ['fields' => $fields]);
+        $paginator = app(IndexQueryApplier::class)->apply($items, $parameters, ['fields' => $fields]);
 
         return FakeResource::collection($paginator)->preserveQuery()->additional([
             'success' => true,
