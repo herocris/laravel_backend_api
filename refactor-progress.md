@@ -1,5 +1,13 @@
 # Progreso del refactor
 
+## Organización de IndexQueryApplier (2026-11-25)
+
+- Estado: `completado` localmente. Refactor solicitado para organizar las etapas del listado como en reports-manage-backend. Inicio con árbol limpio en `refactor/01-base-referencia`, HEAD `2783c49`.
+- Alcance: extraer métodos privados en `IndexQueryApplier` conservando el orden de ejecución, los parámetros y las consultas. Se mantiene `whereContains()` como método público porque las definiciones de listados lo usan.
+- Consultado `search-docs` en Sail. PHPUnit usa SQLite `:memory:` y se comprobó que no hay configuración cacheada.
+- `apply()` coordina la carga de relaciones, la selección de campos, los filtros clásicos, la búsqueda, los filtros tipados, la ordenación y la paginación. Se conservan los tests existentes que ejercitan el contrato.
+- Verificación: `vendor/bin/sail bin phpunit --no-progress --filter="ListingTest|Index.*Test|SearchByColumnTest|SortDataTest|PaginateTest|showAllTest"` pasó con 190 pruebas y 2.832 aserciones. También pasaron `vendor/bin/sail bin pint --dirty --format agent` y `git diff --check`. Cambios locales listos para revisión.
+
 ## Unificación de respuestas con reports-manage-backend (2026-11-24)
 
 - Estado: `completado` localmente. Solicitud explícita de cambiar colecciones y objetos al patrón nativo de Resources de reports; autoriza el cambio de contrato anterior.

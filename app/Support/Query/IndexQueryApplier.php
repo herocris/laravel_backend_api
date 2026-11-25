@@ -19,52 +19,15 @@ class IndexQueryApplier
     public function apply(Builder $query, array $parameters, array $definition): LengthAwarePaginator
     {
         $fields = $definition['fields'];
-        $includes = $definition['includes'] ?? [];
-        $loads = array_key_exists('include', $parameters)
-            ? array_map(fn (string $name): string => $includes[$name], $parameters['include'])
-            : ($definition['with'] ?? []);
-        $query->with($loads);
-        $this->selectFields($query, $parameters['fields'] ?? null, $definition['selectable'] ?? $fields);
 
-        foreach ($fields as $field => $column) {
-            if (isset($parameters[$field])) {
-                self::whereContains($query, $column, $parameters[$field]);
-            }
-        }
+        $this->applyIncludes($query, $parameters, $definition);
+        $this->applyFields($query, $parameters['fields'] ?? null, $definition['selectable'] ?? $fields);
+        $this->applyLegacyFilters($query, $parameters, $fields);
+        $this->applySearch($query, $parameters['search'] ?? '', $definition['searchable'] ?? []);
+        $this->applyTypedFilters($query, $parameters['filter'] ?? [], $definition['filters'] ?? []);
+        $this->applySort($query, $parameters, $fields);
 
-        $term = trim($parameters['search'] ?? '');
-        if ($term !== '' && ! empty($definition['searchable'])) {
-            $query->where(function (Builder $search) use ($definition, $term): void {
-                foreach ($definition['searchable'] as $column) {
-                    $search->orWhere(function (Builder $part) use ($column, $term): void {
-                        if ($column instanceof Closure) {
-                            $column($part, $term);
-                        } else {
-                            self::whereContains($part, $column, $term);
-                        }
-                    });
-                }
-            });
-        }
-
-        foreach ($parameters['filter'] ?? [] as $field => $value) {
-            $filter = $definition['filters'][$field];
-            if ($filter['query'] instanceof Closure) {
-                $filter['query']($query, $value);
-            } elseif (($filter['operator'] ?? '=') === 'like') {
-                self::whereContains($query, $filter['query'], $value);
-            } else {
-                $query->where($query->qualifyColumn($filter['query']), $value);
-            }
-        }
-
-        if (isset($parameters['sort_by'])) {
-            $query->orderBy($query->qualifyColumn($fields[$parameters['sort_by']]), $parameters['type'] ?? 'desc');
-        }
-
-        $query->orderBy($query->getModel()->getQualifiedKeyName());
-
-        return $query->paginate((int) ($parameters['per_page'] ?? 10), ['*'], 'page', (int) ($parameters['page'] ?? 1));
+        return $this->paginate($query, $parameters);
     }
 
     public static function whereContains(Builder $query, string $column, string $term): void
@@ -75,10 +38,23 @@ class IndexQueryApplier
     }
 
     /**
+     * @param  array{include?: list<string>}  $parameters
+     * @param  array{includes?: array<string, string>, with?: list<string>}  $definition
+     */
+    private function applyIncludes(Builder $query, array $parameters, array $definition): void
+    {
+        $includes = $definition['includes'] ?? [];
+        $loads = array_key_exists('include', $parameters)
+            ? array_map(fn (string $name): string => $includes[$name], $parameters['include'])
+            : ($definition['with'] ?? []);
+        $query->with($loads);
+    }
+
+    /**
      * @param  list<string>|null  $requested
      * @param  array<string, string>  $allowed
      */
-    private function selectFields(Builder $query, ?array $requested, array $allowed): void
+    private function applyFields(Builder $query, ?array $requested, array $allowed): void
     {
         if ($requested === null) {
             return;
@@ -106,5 +82,76 @@ class IndexQueryApplier
         }
 
         $query->select(array_map($query->qualifyColumn(...), array_unique($columns)));
+    }
+
+    /**
+     * @param  array<string, mixed>  $parameters
+     * @param  array<string, string>  $fields
+     */
+    private function applyLegacyFilters(Builder $query, array $parameters, array $fields): void
+    {
+        foreach ($fields as $field => $column) {
+            if (isset($parameters[$field])) {
+                self::whereContains($query, $column, $parameters[$field]);
+            }
+        }
+    }
+
+    /** @param list<Closure|string> $searchable */
+    private function applySearch(Builder $query, string $searchTerm, array $searchable): void
+    {
+        $term = trim($searchTerm);
+        if ($term === '' || $searchable === []) {
+            return;
+        }
+
+        $query->where(function (Builder $search) use ($searchable, $term): void {
+            foreach ($searchable as $column) {
+                $search->orWhere(function (Builder $part) use ($column, $term): void {
+                    if ($column instanceof Closure) {
+                        $column($part, $term);
+                    } else {
+                        self::whereContains($part, $column, $term);
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * @param  array<string, mixed>  $filters
+     * @param  array<string, array{query: Closure|string, operator?: string}>  $filterMap
+     */
+    private function applyTypedFilters(Builder $query, array $filters, array $filterMap): void
+    {
+        foreach ($filters as $field => $value) {
+            $filter = $filterMap[$field];
+            if ($filter['query'] instanceof Closure) {
+                $filter['query']($query, $value);
+            } elseif (($filter['operator'] ?? '=') === 'like') {
+                self::whereContains($query, $filter['query'], $value);
+            } else {
+                $query->where($query->qualifyColumn($filter['query']), $value);
+            }
+        }
+    }
+
+    /**
+     * @param  array{sort_by?: string, type?: string}  $parameters
+     * @param  array<string, string>  $fields
+     */
+    private function applySort(Builder $query, array $parameters, array $fields): void
+    {
+        if (isset($parameters['sort_by'])) {
+            $query->orderBy($query->qualifyColumn($fields[$parameters['sort_by']]), $parameters['type'] ?? 'desc');
+        }
+
+        $query->orderBy($query->getModel()->getQualifiedKeyName());
+    }
+
+    /** @param array{per_page?: int|string, page?: int|string} $parameters */
+    private function paginate(Builder $query, array $parameters): LengthAwarePaginator
+    {
+        return $query->paginate((int) ($parameters['per_page'] ?? 10), ['*'], 'page', (int) ($parameters['page'] ?? 1));
     }
 }
